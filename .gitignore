@@ -1,8 +1,10 @@
+.gitignore
 *.py[cod]
 *.swp
 *~
 # Remove IDE files
 .idea/
-
 .vscode/
-
+.project
+.pydevproject
+.settings
