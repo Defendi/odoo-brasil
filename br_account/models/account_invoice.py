@@ -111,6 +111,11 @@ class AccountInvoice(models.Model):
         domain="[('fiscal_document_id', '=', product_document_id),\
         ('company_id','=',company_id)]", readonly=True,
         states={'draft': [('readonly', False)]})
+
+    product_document_nr = fields.Integer(
+        string=u'Número Doc', readonly=True, 
+        states={'draft': [('readonly', False)]})
+
     product_document_id = fields.Many2one(
         'br_account.fiscal.document', string='Documento produtos',
         readonly=True, states={'draft': [('readonly', False)]})
@@ -118,6 +123,9 @@ class AccountInvoice(models.Model):
         'br_account.document.serie', string=u'Série serviços',
         domain="[('fiscal_document_id', '=', service_document_id),\
         ('company_id','=',company_id)]", readonly=True,
+        states={'draft': [('readonly', False)]})
+    service_document_nr = fields.Integer(
+        string=u'Número Doc', readonly=True, 
         states={'draft': [('readonly', False)]})
     service_document_id = fields.Many2one(
         'br_account.fiscal.document', string='Documento serviços',
