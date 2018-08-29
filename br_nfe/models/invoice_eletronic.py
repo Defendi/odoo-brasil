@@ -909,7 +909,10 @@ class InvoiceEletronic(models.Model):
 
         self.xml_to_send = base64.encodestring(
             xml_enviar.encode('utf-8'))
-        self.xml_to_send_name = 'nfse-enviar-%s.xml' % self.numero
+        if self.model == '55':
+            self.xml_to_send_name = 'nfe-enviar-%s.xml' % self.numero
+        else:
+            self.xml_to_send_name = 'nfce-enviar-%s.xml' % self.numero            
 
     @api.multi
     def action_send_eletronic_invoice(self):
