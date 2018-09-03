@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_br_nfce_invoice_eletronic_form" model="ir.ui.view">
+        <field name="name">view.br_nfce.invoice.eletronic.form</field>
+        <field name="model">invoice.eletronic</field>
+        <field name="inherit_id" ref="br_account_einvoice.br_account_invoice_eletronic_form"/>
+        <field name="arch" type="xml">
+            <div name="alertas" position="before">
+                <field name="ambiente_nfe" invisible="1" />
+                <div class="alert alert-danger" role="alert" style="margin-bottom:0px;"
+                    attrs="{'invisible': ['|', ('ambiente_nfe', '==', '1'), ('model', '!=', '65')]}">
+                    A NFCe está em ambiente de homologação
+                </div>
+            </div>
+            <field name="partner_id" position="after">
+            	<field name="cnpj_cpf" attrs="{'invisible': [('model', '!=', '65')]}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_br_nfce_nfe_invoice_eletronic_form" model="ir.ui.view">
+        <field name="name">view.br_nfce.br_nfe.invoice.eletronic.form</field>
+        <field name="model">invoice.eletronic</field>
+        <field name="inherit_id" ref="br_nfe.view_br_nfe_invoice_eletronic_form"/>
+        <field name="arch" type="xml">
+        	<field name="fiscal_document_related_ids" position="after">
+        		<separator string="QR Code" colspan="4" attrs="{'invisible': [('model', '!=', '65')]}"/>
+        		<field name="qrcode" nolabel="1" attrs="{'invisible': [('model', '!=', '65')]}"/>
+        	</field>
+        </field>
+    </record>
+
+</odoo>
