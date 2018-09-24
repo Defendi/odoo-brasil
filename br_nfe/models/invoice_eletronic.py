@@ -903,9 +903,9 @@ class InvoiceEletronic(models.Model):
 
         xml_enviar = xml_autorizar_nfe(certificado, **lote)
 
-        mensagens_erro = valida_nfe(xml_enviar)
-        if mensagens_erro:
-            raise UserError(mensagens_erro)
+#         mensagens_erro = valida_nfe(xml_enviar)
+#         if mensagens_erro:
+#             raise UserError(mensagens_erro)
 
         self.xml_to_send = base64.encodestring(
             xml_enviar.encode('utf-8'))
