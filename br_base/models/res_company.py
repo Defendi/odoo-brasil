@@ -83,20 +83,21 @@ class ResCompany(models.Model):
     @api.one
     def _compute_expiry_date(self):
         try:
-            pfx = base64.decodestring(
-                self.with_context(bin_size=False).nfe_a1_file)
-            pfx = crypto.load_pkcs12(pfx, self.nfe_a1_password)
-            cert = pfx.get_certificate()
-            end = datetime.strptime(
-                cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
-            subj = cert.get_subject()
-            self.cert_expire_date = end
-            if datetime.now() < end:
-                self.cert_state = 'valid'
-            else:
-                self.cert_state = 'expired'
-            self.cert_information = "%s\n%s\n%s\n%s" % (
-                subj.CN, subj.L, subj.O, subj.OU)
+            if self.with_context(bin_size=False).nfe_a1_file:
+                pfx = base64.decodestring(
+                    self.with_context(bin_size=False).nfe_a1_file)
+                pfx = crypto.load_pkcs12(pfx, self.nfe_a1_password)
+                cert = pfx.get_certificate()
+                end = datetime.strptime(
+                    cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
+                subj = cert.get_subject()
+                self.cert_expire_date = end
+                if datetime.now() < end:
+                    self.cert_state = 'valid'
+                else:
+                    self.cert_state = 'expired'
+                self.cert_information = "%s\n%s\n%s\n%s" % (
+                    subj.CN, subj.L, subj.O, subj.OU)
         except crypto.Error:
             self.cert_state = 'invalid_password'
         except:
