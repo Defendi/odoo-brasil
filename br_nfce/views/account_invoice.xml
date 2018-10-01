@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_br_account_nfceinvoice_form" model="ir.ui.view">
+        <field name="name">br_account_nfceinvoice_form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="br_account.view_br_account_invoice_form"/>
+        <field name="arch" type="xml">
+            <div class="alert alert-info" position="after">
+                <div class="alert alert-danger" role="alert" style="margin-bottom:0px;"
+                    attrs="{'invisible': ['|', ('ambiente_nfe', '==', '1'), ('invoice_model', '!=', '65')]}">
+                    A NFC-e está em ambiente de homologação
+                </div>
+                <div class="alert alert-success" role="alert" style="margin-bottom:0px;" attrs="{'invisible': ['|', ('invoice_model', '!=', '65'),('sending_nfe', '==', False)]}">
+                    Sua <b>NFC-e de número <field name="nfe_number" class="oe_inline"/></b> está na fila de envio.
+                    <button name="action_view_edocs" type="object" class="label label-primary"
+                        context="{ 'search_default_invoice_id': id }" string="Visualizar Fila">
+                    </button>
+                    ou
+                    <button name="action_view_edocs" type="object" class="label label-primary"
+                        context="{ 'search_default_invoice_id': id }" string="Enviar Agora">
+                    </button>
+                </div>
+                <div class="alert alert-danger" role="alert" style="margin-bottom:0px;" attrs="{'invisible': ['|', ('invoice_model', '!=', '65'),('nfe_exception', '==', False)]}">
+                    Ocorreu um erro com a <b>NCF-e de número <field name="nfe_exception_number" class="oe_inline"/>. </b>
+                    <button name="action_view_edocs" type="object" class="label label-primary"
+                        context="{ 'search_default_invoice_id': id }" string="Visualizar NFe">
+                    </button>
+                    <br/>
+                    <field name="nfe_status" />
+                </div>
+            </div>
+        	<field name="fiscal_position_id" position="after">
+        		<field name="ind_final" invisible="1"/>
+				<field name="cnpj_cpf" attrs="{'invisible': [('ind_final','=','0')]}"/>        		
+				<field name="nome" attrs="{'invisible': [('ind_final','=','0')]}"/>        		
+				<field name="email" attrs="{'invisible': [('ind_final','=','0')]}"/>        		
+        	</field>
+        </field>
+    </record>
+
+</odoo>

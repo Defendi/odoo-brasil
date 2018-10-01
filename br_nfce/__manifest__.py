@@ -25,7 +25,9 @@
         ],
     },
     'data': [
+        'views/account_invoice.xml',
         'views/invoice_eletronic.xml',
+        'views/res_company.xml',
     ],
     'installable': True,
     'application': True,
