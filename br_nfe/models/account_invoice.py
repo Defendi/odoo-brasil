@@ -82,9 +82,19 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self)._prepare_edoc_vals(
             inv, inv_lines, serie_id)
 
+        # Não pegar outro número da série se já existir
+        if serie_id.fiscal_type == "product" and inv.product_document_nr > 0:
+            res['numero'] = inv.product_document_nr
+        elif serie_id.fiscal_type == "service" and inv.service_document_nr > 0:
+            res['numero'] = inv.service_document_nr
+        
         # Feito para evitar que o número seja incrementado duas vezes
         if 'numero' not in res:
             numero_nfe = self.action_number(serie_id)
+            if serie_id.fiscal_type == "product":
+                inv.product_document_nr = numero_nfe
+            elif serie_id.fiscal_type == "service":
+                inv.service_document_nr = numero_nfe
         else:
             numero_nfe = res['numero']
 
