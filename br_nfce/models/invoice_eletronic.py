@@ -86,11 +86,14 @@ class InvoiceEletronic(models.Model):
     @api.multi
     def action_post_validate(self):
         super(InvoiceEletronic, self).action_post_validate()
-
-        xml = base64.decodestring(self.xml_to_send)
-        xml = etree.fromstring(xml)
-        qrcode = xml.find(".//{http://www.portalfiscal.inf.br/nfe}qrCode")
-        self.qrcode = qrcode.text
+        if self.model == '65':
+            xml = base64.decodestring(self.xml_to_send)
+            xml = etree.fromstring(xml)
+            qrcode = xml.find(".//{http://www.portalfiscal.inf.br/nfe}qrCode")
+            if qrcode != None:
+                self.qrcode = qrcode.text
+            else:
+                self.qrcode = "Não encontrado o QRCode no XML"
         
         
                

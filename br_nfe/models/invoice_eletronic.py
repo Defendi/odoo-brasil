@@ -939,7 +939,12 @@ class InvoiceEletronic(models.Model):
             estado=self.company_id.state_id.ibge_code,
             ambiente=1 if self.ambiente == 'producao' else 2,
             modelo=self.model)
-        retorno = resposta['object'].getchildren()[0]
+        retorno = resposta['object'].getchildren()[0] if resposta['object'] else None
+        if not retorno:
+            self.write({'state': 'done', 'codigo_retorno': 'ERRO',
+                        'mensagem_retorno': resposta['received_xml']})
+            return
+            
         if retorno.cStat == 103:
             obj = {
                 'estado': self.company_id.partner_id.state_id.ibge_code,
