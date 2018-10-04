@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import re
-# import io
+import io
 import base64
 import logging
-# import pytz
+#import pytz
 from lxml import etree
-# from datetime import datetime
+from datetime import datetime, timedelta
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-# from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTFT
-# from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 
 _logger = logging.getLogger(__name__)
 
-# try:
+try:
 #     from pytrustnfe.nfe import autorizar_nfe
 #     from pytrustnfe.nfe import xml_autorizar_nfe
 #     from pytrustnfe.nfe import retorno_autorizar_nfe
@@ -23,10 +22,10 @@ _logger = logging.getLogger(__name__)
 #     from pytrustnfe.certificado import Certificado
 #     from pytrustnfe.utils import ChaveNFe, gerar_chave, gerar_nfeproc, \
 #         gerar_nfeproc_cancel
-#     from pytrustnfe.nfe.danfe import danfe
+    from pytrustnfe.nfe.danfce import danfce
 #     from pytrustnfe.xml.validate import valida_nfe
-# except ImportError:
-#     _logger.info('Cannot import pytrustnfe', exc_info=True)
+except ImportError:
+    _logger.info('Cannot import pytrustnfe', exc_info=True)
 
 STATE = {'edit': [('readonly', False)]}
 
@@ -94,8 +93,67 @@ class InvoiceEletronic(models.Model):
                 self.qrcode = qrcode.text
             else:
                 self.qrcode = "Não encontrado o QRCode no XML"
-        
-        
-               
+
+    @api.multi
+    def send_email_nfe(self):
+        if self.model not in ('65'):
+            super(InvoiceEletronic, self).send_email_nfe()
+        else:
+            if not self.email:
+                raise UserError('Esse documento não possue email cadastrado.')
+            mail = self.env.user.company_id.nfe_email_template
+            if not mail:
+                raise UserError('Modelo de email padrão não configurado')
+            atts = self._find_attachment_ids_email()
+            values = {
+                "attachment_ids": atts + mail.attachment_ids.ids,
+                "email_to": self.email,
+                "partner_ids": False,
+            }
+            mail.send_mail(self.invoice_id.id, email_values=values, force_send=True)
+            self.email_sent = True
+            
+    def _find_attachment_ids_email(self):
+        atts = super(InvoiceEletronic, self)._find_attachment_ids_email()
+        if self.model not in ('65'):
+            return atts
+
+        attachment_obj = self.env['ir.attachment']
+        nfe_xml = base64.decodestring(self.nfe_processada)
+        logo = base64.decodestring(self.invoice_id.company_id.logo)
+
+        tmpLogo = io.BytesIO()
+        tmpLogo.write(logo)
+        tmpLogo.seek(0)
+
+        xml_element = etree.fromstring(nfe_xml)
+        oDanfe = danfce(list_xml=[xml_element], logo=tmpLogo)
+
+        tmpDanfe = io.BytesIO()
+        oDanfe.writeto_pdf(tmpDanfe)
+
+        if danfce:
+            danfe_id = attachment_obj.create(dict(
+                name="Danfce-%08d.pdf" % self.numero,
+                datas_fname="Danfce-%08d.pdf" % self.numero,
+                datas=base64.b64encode(tmpDanfe.getvalue()),
+                mimetype='application/pdf',
+                res_model='account.invoice',
+                res_id=self.invoice_id.id,
+            ))
+            atts.append(danfe_id.id)
+        return atts
+
+    @api.multi
+    def cron_send_nfce(self):
+        pass
+#         inv_obj = self.env['invoice.eletronic']
+#         nfecs = inv_obj.search([('state', '=', 'done'),('model','=','65'),('email_sent','=',False),('email','!=',False)])
+#         for item in nfecs:
+#             try:
+#                 item.send_email_nfe()
+#             except Exception as e:
+#                 item.log_exception(e)
+#                 item.notify_user()
 
         
