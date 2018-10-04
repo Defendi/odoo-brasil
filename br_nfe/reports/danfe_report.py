@@ -64,12 +64,10 @@ class IrActionsReport(models.Model):
         timezone = pytz.timezone(self.env.context.get('tz')) or pytz.utc
 
         xml_element = etree.fromstring(nfe_xml)
+        if nfe.model == '55':
+            oDanfe = danfe(list_xml=[xml_element], logo=tmpLogo,cce_xml=cce_xml_element, timezone=timezone)
         if nfe.model == '65':
-            oDanfe = danfce(
-                list_xml=[xml_element], logo=tmpLogo, timezone=timezone)
-        else:
-            oDanfe = danfe(list_xml=[xml_element], logo=tmpLogo,
-                           cce_xml=cce_xml_element, timezone=timezone)
+            oDanfe = danfce(list_xml=[xml_element], logo=tmpLogo)
 
         tmpDanfe = BytesIO()
         oDanfe.writeto_pdf(tmpDanfe)
