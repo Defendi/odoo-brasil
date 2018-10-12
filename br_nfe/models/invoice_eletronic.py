@@ -795,7 +795,7 @@ class InvoiceEletronic(models.Model):
             modelo=self.model)
         retorno = resposta['object'].getchildren()[0] if resposta['object'] else None
         if not retorno:
-            self.write({'state': 'done', 'codigo_retorno': 'ERRO',
+            self.write({'state': 'error', 'codigo_retorno': 'ERRO',
                         'mensagem_retorno': resposta['received_xml']})
             return
             

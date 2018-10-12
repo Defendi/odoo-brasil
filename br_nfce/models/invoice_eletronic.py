@@ -100,7 +100,7 @@ class InvoiceEletronic(models.Model):
             super(InvoiceEletronic, self).send_email_nfe()
         else:
             if not self.email:
-                raise UserError('Esse documento não possue email cadastrado.')
+                raise UserError('Esse documento não possui e-mail cadastrado.')
             mail = self.env.user.company_id.nfe_email_template
             if not mail:
                 raise UserError('Modelo de email padrão não configurado')
