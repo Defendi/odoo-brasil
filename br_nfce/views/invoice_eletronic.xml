@@ -28,6 +28,10 @@
 					</group>
 				</page>
 			</xpath>
+            <button name="action_cancel_document" position="after">
+                <button name="action_issue_contingency" type="object" string="Emitir Contigência" attrs="{'invisible': ['|', ('state', '=', 'done'), ('model', 'not in', ('65'))]}">
+                </button>
+            </button>
         </field>
     </record>
 
