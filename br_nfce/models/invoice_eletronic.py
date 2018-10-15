@@ -9,6 +9,7 @@ from lxml import etree
 from datetime import datetime, timedelta
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTFT
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 
 _logger = logging.getLogger(__name__)
@@ -75,12 +76,29 @@ class InvoiceEletronic(models.Model):
             res['dest'] = dest
         
             if self.ambiente == 'homologacao':
-                res['ide']['xJust'] = 'NFC-e emitida em ambiente de homologacao - sem valor fiscal'
                 res['dest']['xNome'] = 'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
                  
-        
+        if int(self.tipo_emissao) != 1:
+            dt_contigencia = datetime.strptime(self.data_fatura, DTFT)
+            res['ide']['xJust'] = 'Serviço fora do ar ou inacessivel'
+            res['ide']['dhCont'] = dt_contigencia.strftime('%Y-%m-%dT%H:%M:%S-00:00')
+            res['ide']['dhSaiEnt'] = dt_contigencia.strftime('%Y-%m-%dT%H:%M:%S-00:00')
+            res['ide']['dhEmi'] = dt_contigencia.strftime('%Y-%m-%dT%H:%M:%S-00:00')
+
         return res
 
+    @api.multi
+    def action_issue_contingency(self):
+        for nfce in self:
+            if nfce.model == '65':
+                nfce.write({
+                    'state': 'draft',
+                    'tipo_emissao': '9',
+                    'xml_to_send_name': False,
+                    'xml_to_send': False,
+                    'qrcode': False,
+                })
+                nfce.action_post_validate()
 
     @api.multi
     def action_post_validate(self):

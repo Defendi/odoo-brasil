@@ -818,6 +818,18 @@ class InvoiceEletronic(models.Model):
                 if retorno.cStat != 105:
                     break
 
+        if retorno.cStat == 108:
+            self.codigo_retorno = retorno.cStat
+            self.mensagem_retorno = retorno.xMotivo
+            self.write({
+                'state': 'draft',
+                'tipo_emissao': '9',
+                'xml_to_send_name': False,
+                'xml_to_send': False,
+                'qrcode': False,
+            })
+            self.action_post_validate()
+            
         if retorno.cStat != 104:
             self.codigo_retorno = retorno.cStat
             self.mensagem_retorno = retorno.xMotivo
