@@ -71,6 +71,7 @@ class InvoiceEletronic(models.Model):
         [('55', u'55 - NFe'),
          ('65', u'65 - NFCe'),
          ('001', u'NFS-e - Nota Fiscal Paulistana'),
+         ('004', u'NFS-e - Provedor BETHA'),
          ('002', u'NFS-e - Provedor GINFES'),
          ('008', u'NFS-e - Provedor SIMPLISS'),
          ('009', u'NFS-e - Provedor SUSESU'),

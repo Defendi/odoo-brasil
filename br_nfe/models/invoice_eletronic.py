@@ -938,7 +938,7 @@ class InvoiceEletronic(models.Model):
             certificado, xml=xml_to_send,
             estado=self.company_id.state_id.ibge_code,
             ambiente=1 if self.ambiente == 'producao' else 2,
-            modelo=self.model)
+            modelo=self.model)#,err108=True)
         retorno = resposta['object'].getchildren()[0] if resposta['object'] else None
         if not retorno:
             self.write({'state': 'error', 'codigo_retorno': 'ERRO',
