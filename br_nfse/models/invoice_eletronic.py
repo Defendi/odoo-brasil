@@ -24,3 +24,10 @@ class InvoiceEletronic(models.Model):
             if not self.company_id.inscr_mun:
                 errors.append(u'Inscrição municipal obrigatória')
         return errors
+
+class InvoiceEletronicItem(models.Model):
+    _inherit = 'invoice.eletronic.item'
+
+    country_id = fields.Many2one('res.country', string=u'País retenção', ondelete='restrict')
+    state_id = fields.Many2one("res.country.state", string='UF retenção', ondelete='restrict')
+    city_id = fields.Many2one('res.state.city', u'Município retenção', ondelete='restrict')

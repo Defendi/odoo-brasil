@@ -56,3 +56,19 @@ class AccountInvoiceLine(models.Model):
     numero_nfse = fields.Char(string="Número NFS-e",
                               help="""Número da NFS-e na qual o item foi
                               transmitido eletrônicamente.""")
+
+    country_id = fields.Many2one('res.country', string=u'País retenção', ondelete='restrict')
+    state_id = fields.Many2one("res.country.state", string='UF retenção', ondelete='restrict')
+    city_id = fields.Many2one('res.state.city', u'Município retenção', ondelete='restrict')
+
+    @api.onchange('issqn_tipo')
+    def _onchange_issqn_tipo(self):
+        if self.issqn_tipo in ('R','S'):
+            self.country_id = self.invoice_id.partner_id.country_id
+            self.state_id = self.invoice_id.partner_id.state_id
+            self.city_id = self.invoice_id.partner_id.city_id
+        else:
+            self.country_id = self.invoice_id.company_id.country_id
+            self.state_id = self.invoice_id.company_id.state_id
+            self.city_id = self.invoice_id.company_id.city_id
+    
