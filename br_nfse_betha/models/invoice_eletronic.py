@@ -32,34 +32,28 @@ STATE = {'edit': [('readonly', False)]}
 class InvoiceEletronicItem(models.Model):
     _inherit = 'invoice.eletronic.item'
 
-    codigo_tributacao_municipio = fields.Char(
-        string=u"Cód. Tribut. Munic.", size=20, readonly=True,
-        help="Código de Tributação no Munípio", states=STATE)
-
 
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
-    @api.depends('valor_retencao_pis', 'valor_retencao_cofins',
-                 'valor_retencao_irrf', 'valor_retencao_inss',
-                 'valor_retencao_csll')
-    def _compute_total_retencoes(self):
-        for item in self:
-            total = item.valor_retencao_pis + item.valor_retencao_cofins + \
-                item.valor_retencao_irrf + item.valor_retencao_inss + \
-                item.valor_retencao_csll
-            item.retencoes_federais = total
+    enforce_iss_betha = fields.Selection(
+        [('1', u"1 - Exigível"),
+         ('2', u"2 - Não incidência"),
+         ('3', u"3 - Isenção"),
+         ('4', u"4 - Exportação"),
+         ('5', u"5 - Imunidade"),
+         ('6', u"6 - Suspensa por Decisão Judicial"),
+         ('7', u"7 - Suspensa por Processo Admin."),
+        ], u"ISS Exigibilidade", default='1', readonly=True, states=STATE)
 
-    retencoes_federais = fields.Monetary(
-        string="Retenções Federais", compute=_compute_total_retencoes)
 
     @api.multi
     def _hook_validation(self):
         errors = super(InvoiceEletronic, self)._hook_validation()
-        if self.model == '002':
+        if self.model == '004':
             issqn_codigo = ''
-            if not self.company_id.inscr_mun:
-                errors.append(u'Inscrição municipal obrigatória')
+#             if not self.company_id.inscr_mun:
+#                 errors.append(u'Inscrição municipal obrigatória')
             if not self.company_id.cnae_main_id.code:
                 errors.append(u'CNAE Principal da empresa obrigatório')
             for eletr in self.eletronic_item_ids:
