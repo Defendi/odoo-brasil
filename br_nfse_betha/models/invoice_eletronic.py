@@ -76,40 +76,36 @@ class InvoiceEletronic(models.Model):
     @api.multi
     def _prepare_eletronic_invoice_values(self):
         res = super(InvoiceEletronic, self)._prepare_eletronic_invoice_values()
-        if self.model == '002':
+        if self.model == '004':
             tz = pytz.timezone(self.env.user.partner_id.tz) or pytz.utc
             dt_emissao = datetime.strptime(self.data_emissao, DTFT)
             dt_emissao = pytz.utc.localize(dt_emissao).astimezone(tz)
-            dt_emissao = dt_emissao.strftime('%Y-%m-%dT%H:%M:%S')
+            dt_emissao = dt_emissao.strftime('%Y-%m-%d')
+            dt_competencia = dt_emissao
 
             partner = self.commercial_partner_id
             city_tomador = partner.city_id
             tomador = {
                 'tipo_cpfcnpj': 2 if partner.is_company else 1,
-                'cnpj_cpf': re.sub('[^0-9]', '',
-                                   partner.cnpj_cpf or ''),
+                'cnpj_cpf': re.sub('[^0-9]', '', partner.cnpj_cpf or ''),
                 'razao_social': partner.legal_name or partner.name,
                 'logradouro': partner.street or '',
                 'numero': partner.number or '',
                 'complemento': partner.street2 or '',
                 'bairro': partner.district or 'Sem Bairro',
-                'cidade': '%s%s' % (city_tomador.state_id.ibge_code,
-                                    city_tomador.ibge_code),
+                'cidade': '%s%s' % (city_tomador.state_id.ibge_code, city_tomador.ibge_code),
                 'uf': partner.state_id.code,
                 'cep': re.sub('[^0-9]', '', partner.zip),
                 'telefone': re.sub('[^0-9]', '', partner.phone or ''),
-                'inscricao_municipal': re.sub(
-                    '[^0-9]', '', partner.inscr_mun or ''),
+                'inscricao_municipal': re.sub('[^0-9]', '', partner.inscr_mun or ''),
                 'email': self.partner_id.email or partner.email or '',
             }
             city_prestador = self.company_id.partner_id.city_id
+            pais_prestador = self.company_id.partner_id.country_id
             prestador = {
-                'cnpj': re.sub(
-                    '[^0-9]', '', self.company_id.partner_id.cnpj_cpf or ''),
-                'inscricao_municipal': re.sub(
-                    '[^0-9]', '', self.company_id.partner_id.inscr_mun or ''),
-                'cidade': '%s%s' % (city_prestador.state_id.ibge_code,
-                                    city_prestador.ibge_code),
+                'cnpj': re.sub('[^0-9]', '', self.company_id.partner_id.cnpj_cpf or ''),
+                'inscricao_municipal': re.sub('[^0-9]', '', self.company_id.partner_id.inscr_mun or ''),
+                'cidade': '%s%s' % (city_prestador.state_id.ibge_code,city_prestador.ibge_code),
                 'cnae': re.sub('[^0-9]', '', self.company_id.cnae_main_id.code)
             }
 
@@ -121,28 +117,32 @@ class InvoiceEletronic(models.Model):
                 itens_servico.append({
                     'descricao': item.name,
                     'quantidade': str("%.2f" % item.quantidade),
-                    'valor_unitario': str("%.2f" % item.preco_unitario)
+                    'valor_unitario': str("%.2f" % item.preco_unitario),
+                    'valor_iss_retido': 1 if item.issqn_valor_retencao > 0.0 else 2,
                 })
                 codigo_servico = re.sub('[^0-9]', '', item.issqn_codigo)
+                codigo_tributacao_municipio = item.product_id.service_type_id.codigo_tributacao_municipio
+                codigo_municipio_recolhimento = '%s%s' % (item.state_id.ibge_code,item.city_id.ibge_code)
 
             rps = {
                 'numero': self.numero,
                 'serie': self.serie.code or '',
                 'tipo_rps': '1',
                 'data_emissao': dt_emissao,
+                'data_competencia': dt_competencia,
                 'natureza_operacao': '1',  # Tributada no municipio
                 'regime_tributacao': '2',  # Estimativa
-                'optante_simples':  # 1 - Sim, 2 - Não
-                '2' if self.company_id.fiscal_type == '3' else '1',
+                'optante_simples': '2' if self.company_id.fiscal_type == '3' else '1', # 1 - Sim, 2 - Não
                 'incentivador_cultural': '2',  # 2 - Não
                 'status': '1',  # 1 - Normal
-                'valor_servico': str("%.2f" % self.valor_final),
-                'valor_deducao': '0',
+                'valor_servico': str("%.2f" % self.valor_bruto),
+                'valor_deducao': '0.00',
                 'valor_pis': str("%.2f" % self.valor_retencao_pis),
                 'valor_cofins': str("%.2f" % self.valor_retencao_cofins),
                 'valor_inss': str("%.2f" % self.valor_retencao_inss),
                 'valor_ir': str("%.2f" % self.valor_retencao_irrf),
                 'valor_csll': str("%.2f" % self.valor_retencao_csll),
+                'outras_retencoes': str("%.2f" % self.valor_retencao_outras),
                 'iss_retido': '1' if self.valor_retencao_issqn > 0 else '2',
                 'valor_iss':  str("%.2f" % self.valor_issqn),
                 'valor_iss_retido': str("%.2f" % self.valor_retencao_issqn),
