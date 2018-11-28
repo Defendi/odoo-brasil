@@ -28,8 +28,8 @@ class Itau240(Cnab240):
     def _prepare_segmento(self, line):
         vals = super(Itau240, self)._prepare_segmento(line)
         dv = self.dv_nosso_numero(
-            line.payment_mode_id.bank_account_id.bra_number,
-            line.payment_mode_id.bank_account_id.acc_number,
+            line.src_bank_account_id.bra_number,
+            line.src_bank_account_id.acc_number,
             line.payment_mode_id.boleto_carteira,
             line.nosso_numero
         )
@@ -42,7 +42,7 @@ class Itau240(Cnab240):
         vals['cedente_dv_ag_cc'] = int(vals['cedente_dv_ag_cc'])
         vals['codigo_multa'] = int(vals['codigo_multa'])
         vals['data_multa'] = str(vals['data_multa']).zfill(8)
-        vals['juros_multa'] = str(vals['juros_multa'])
+        vals['juros_multa'] = vals['juros_multa']
         return vals
 
     def dv_nosso_numero(self, agencia, conta, carteira, nosso_numero):
