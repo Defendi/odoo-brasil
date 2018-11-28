@@ -24,4 +24,17 @@
         </field>
     </record>
 
+    <record id="view_br_nfse_invoice_eletronic_item_form" model="ir.ui.view">
+        <field name="name">br_nfse.invoice.eletronic.item.form</field>
+        <field name="model">invoice.eletronic.item</field>
+        <field name="inherit_id" ref="br_account_einvoice.invoice_eletronic_item_form" />
+        <field name="arch" type="xml">
+            <field name="issqn_valor_retencao" position="after">
+        		<field name="country_id" options="{'no_create': True, 'no_create_edit': True}"/>	
+        		<field name="state_id" domain="[('country_id','=',country_id)]" options="{'no_create': True, 'no_create_edit': True}"/>	
+        		<field name="city_id" domain="[('state_id','=',state_id)]" options="{'no_create': True, 'no_create_edit': True}"/>	
+            </field>
+        </field>
+    </record>
+
 </odoo>
