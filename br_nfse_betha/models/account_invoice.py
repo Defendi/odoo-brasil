@@ -9,12 +9,10 @@ class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
     def _return_pdf_invoice(self, doc):
-        if doc.model == '004':  # Ginfes
+        if doc.model == '004':  # Betha
             return {'warning': {'title': _("Ops!"), 'message': 'Não implementado'}} 
         return super(AccountInvoice, self)._return_pdf_invoice(doc)
 
     def _prepare_edoc_item_vals(self, line):
         res = super(AccountInvoice, self)._prepare_edoc_item_vals(line)
-        res['codigo_tributacao_municipio'] = \
-            line.service_type_id.codigo_tributacao_municipio
         return res
