@@ -785,6 +785,15 @@ class InvoiceEletronicItem(models.Model):
     inss_valor_retencao = fields.Monetary(
         string=u'Valor Retenção', digits=dp.get_precision('Account'),
         readonly=True, states=STATE)
+    outras_base_calculo = fields.Monetary(
+        string=u'Base de Cálculo', digits=dp.get_precision('Account'),
+        readonly=True, states=STATE)
+    outras_aliquota = fields.Float(
+        string=u'Alíquota', digits=dp.get_precision('Account'),
+        readonly=True, states=STATE)
+    outras_valor_retencao = fields.Monetary(
+        string=u'Valor Retenção', digits=dp.get_precision('Account'),
+        readonly=True, states=STATE)
 
     account_invoice_line_id = fields.Many2one(
         string="Account Invoice Line",

@@ -326,7 +326,7 @@ class AccountTax(models.Model):
 
     def _compute_retention(self, price_base):
         retention_tax = self.filtered(
-            lambda x: x.domain in ('csll', 'irrf', 'inss'))
+            lambda x: x.domain in ('csll', 'irrf', 'inss', 'outros'))
         if not retention_tax:
             return []
         taxes = []

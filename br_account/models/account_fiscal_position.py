@@ -127,6 +127,9 @@ class AccountFiscalPosition(models.Model):
     inss_tax_rule_ids = fields.One2many(
         'account.fiscal.position.tax.rule', 'fiscal_position_id',
         string=u"Regras INSS", domain=[('domain', '=', 'inss')], copy=True)
+    outros_tax_rule_ids = fields.One2many(
+        'account.fiscal.position.tax.rule', 'fiscal_position_id',
+        string=u"Outras Retenções", domain=[('domain', '=', 'outros')])
     fiscal_type = fields.Selection([('saida', 'Saída'),
                                     ('entrada', 'Entrada'),
                                     ('import', 'Entrada Importação')],
@@ -213,7 +216,7 @@ class AccountFiscalPosition(models.Model):
         to_state = partner.state_id
 
         taxes = ('icms', 'simples', 'ipi', 'pis', 'cofins',
-                 'issqn', 'ii', 'irrf', 'csll', 'inss')
+                 'issqn', 'ii', 'irrf', 'csll', 'inss', 'outros')
         res = {}
         for tax in taxes:
             vals = self._filter_rules(
