@@ -55,7 +55,7 @@ class AccountInvoiceLine(models.Model):
                  'tax_icms_id', 'tax_icms_st_id', 'tax_icms_inter_id',
                  'tax_icms_intra_id', 'tax_icms_fcp_id', 'tax_ipi_id',
                  'tax_pis_id', 'tax_cofins_id', 'tax_ii_id', 'tax_issqn_id',
-                 'tax_csll_id', 'tax_irrf_id', 'tax_inss_id',
+                 'tax_csll_id', 'tax_irrf_id', 'tax_inss_id', 'tax_outros_id',
                  'incluir_ipi_base', 'tem_difal', 'icms_aliquota_reducao_base',
                  'ipi_reducao_bc', 'icms_st_aliquota_mva',
                  'icms_st_aliquota_reducao_base', 'icms_aliquota_credito',
@@ -110,6 +110,8 @@ class AccountInvoiceLine(models.Model):
                  if x['id'] == self.tax_irrf_id.id]) if taxes else []
         inss = ([x for x in taxes['taxes']
                  if x['id'] == self.tax_inss_id.id]) if taxes else []
+        outros = ([x for x in taxes['taxes']
+                if x['id'] == self.tax_outros_id.id]) if taxes else []
 
         price_subtotal_signed = taxes['total_excluded'] if taxes else subtotal
         if self.invoice_id.currency_id and self.invoice_id.currency_id != \
@@ -166,6 +168,8 @@ class AccountInvoiceLine(models.Model):
             'inss_valor': sum([x['amount'] for x in inss]),
             'irrf_base_calculo': sum([x['base'] for x in irrf]),
             'irrf_valor': sum([x['amount'] for x in irrf]),
+            'outros_base_calculo': sum([x['base'] for x in outros]),
+            'outros_valor': sum([x['amount'] for x in outros]),
         })
 
     @api.multi
@@ -490,6 +494,17 @@ class AccountInvoiceLine(models.Model):
         u'Perc INSS', required=True, digits=dp.get_precision('Account'),
         default=0.00)
 
+    # =========================================================================
+    # Impostos de serviço - Outras retenções
+    # =========================================================================
+    outros_rule_id = fields.Many2one('account.fiscal.position.tax.rule', 'Regra')
+    tax_outros_id = fields.Many2one('account.tax', string=u"Alíquota Outras Ret.", domain=[('domain', '=', 'outros')])
+    outros_base_calculo = fields.Float('Base Outras Ret.', required=True, digits=dp.get_precision('Account'),
+                                       default=0.00, compute='_compute_price', store=True)
+    outros_valor = fields.Float('Valor Outras Ret.', required=True, digits=dp.get_precision('Account'),
+                                 default=0.00, compute='_compute_price', store=True)
+    outros_aliquota = fields.Float('Perc INSS', required=True, digits=dp.get_precision('Account'), default=0.00)
+
     informacao_adicional = fields.Text(string=u"Informações Adicionais")
 
     def _update_tax_from_ncm(self):
@@ -572,7 +587,8 @@ class AccountInvoiceLine(models.Model):
             self.tax_icms_intra_id | self.tax_icms_fcp_id | \
             self.tax_ipi_id | self.tax_pis_id | \
             self.tax_cofins_id | self.tax_issqn_id | self.tax_ii_id | \
-            self.tax_csll_id | self.tax_irrf_id | self.tax_inss_id
+            self.tax_csll_id | self.tax_irrf_id | self.tax_inss_id | \
+            self.tax_outros_id
 
     @api.onchange('tax_icms_id')
     def _onchange_tax_icms_id(self):

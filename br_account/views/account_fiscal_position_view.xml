@@ -186,6 +186,9 @@
                     <group name="inss_rules" string="Regras de INSS">
                         <field nolabel="1" name="inss_tax_rule_ids" context="{'default_fiscal_position_id': id, 'default_domain': 'inss'}" />
                     </group>
+                    <group name="other_rules" string="Regras Outras Retenções">
+                        <field nolabel="1" name="outros_tax_rule_ids" context="{'default_fiscal_position_id': id, 'default_domain': 'outros'}" />
+                    </group>
                     <group name="csll_rules" string="Regras de CSLL">
                         <field nolabel="1" name="csll_tax_rule_ids" context="{'default_fiscal_position_id': id, 'default_domain': 'csll'}" />
                     </group>

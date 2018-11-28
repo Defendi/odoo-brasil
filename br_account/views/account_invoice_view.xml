@@ -461,6 +461,13 @@
                                     <field name="inss_aliquota" invisible="1" />
                                     <field name="inss_valor"/>
                                 </group>
+                                <group string="Outras Retenções">
+                                    <field name="outros_rule_id" />
+                                    <field name="outros_base_calculo"/>
+                                    <field name="tax_outros_id"/>
+                                    <field name="outros_aliquota" invisible="1" />
+                                    <field name="outros_valor"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>

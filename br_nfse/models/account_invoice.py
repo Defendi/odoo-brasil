@@ -37,6 +37,12 @@ class AccountInvoice(models.Model):
             res['numero'] = serie_id.internal_sequence_id.next_by_id()
         return res
 
+    def _prepare_edoc_item_vals(self, line):
+        res = super(AccountInvoice, self)._prepare_edoc_item_vals(line)
+        res['country_id'] = line.country_id.id
+        res['state_id'] = line.state_id.id
+        res['city_id'] = line.city_id.id
+        return res
 
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
