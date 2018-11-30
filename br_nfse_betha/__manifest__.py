@@ -19,8 +19,8 @@
         'br_nfse',
     ],
     'data': [
-        #'views/br_account_service.xml',
-        #'reports/danfse_ginfes.xml',
+        'views/br_account_service.xml',
+        'views/invoice_eletronic.xml',
     ],
     'installable': True,
     'application': True,

@@ -43,6 +43,8 @@ class AccountInvoice(models.Model):
         self.irrf_value = sum(abs(l.irrf_valor) for l in lines)
         self.inss_base = sum(l.inss_base_calculo for l in lines)
         self.inss_value = sum(abs(l.inss_valor) for l in lines)
+        self.outros_base = sum(l.outros_base_calculo for l in lines)
+        self.outros_value = sum(abs(l.outros_valor) for l in lines)
 
         # Retenções
         self.issqn_retention = sum(
@@ -57,6 +59,8 @@ class AccountInvoice(models.Model):
             abs(l.irrf_valor) if l.irrf_valor < 0 else 0.0 for l in lines)
         self.inss_retention = sum(
             abs(l.inss_valor) if l.inss_valor < 0 else 0.0 for l in lines)
+        self.outros_retention = sum(
+            abs(l.outros_valor) if l.outros_valor < 0 else 0.0 for l in lines)
 
         self.total_bruto = sum(l.valor_bruto for l in lines)
         self.total_desconto = sum(l.valor_desconto for l in lines)
@@ -241,6 +245,15 @@ class AccountInvoice(models.Model):
         digits=dp.get_precision('Account'), compute='_compute_amount')
     inss_retention = fields.Float(
         string='INSS Retido', store=True,
+        digits=dp.get_precision('Account'), compute='_compute_amount')
+    outros_base = fields.Float(
+        string=u'Base Outras Retenções', store=True,
+        digits=dp.get_precision('Account'), compute='_compute_amount')
+    outros_value = fields.Float(
+        string=u'Valor Outras Retenções', store=True,
+        digits=dp.get_precision('Account'), compute='_compute_amount')
+    outros_retention = fields.Float(
+        string='Outras Retido', store=True,
         digits=dp.get_precision('Account'), compute='_compute_amount')
     total_tributos_federais = fields.Float(
         string='Total de Tributos Federais',

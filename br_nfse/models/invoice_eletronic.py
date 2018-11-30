@@ -11,6 +11,7 @@ STATE = {'edit': [('readonly', False)]}
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
+    state = fields.Selection(selection_add=[('waiting', 'Esperando')])
     nfse_eletronic = fields.Boolean('Emite NFS-e?', readonly=True)
     verify_code = fields.Char(
         string=u'Código Autorização', size=20, readonly=True, states=STATE)

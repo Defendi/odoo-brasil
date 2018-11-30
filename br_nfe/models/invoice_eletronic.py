@@ -28,7 +28,7 @@ try:
         gerar_nfeproc_cancel
     from pytrustnfe.nfe.danfe import danfe
     from pytrustnfe.xml.validate import valida_nfe
-    from pytrustnfe.urls import url_qrcode
+    #from pytrustnfe.urls import url_qrcode
 except ImportError:
     _logger.error('Cannot import pytrustnfe', exc_info=True)
 
