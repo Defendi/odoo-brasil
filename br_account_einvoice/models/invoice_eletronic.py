@@ -16,6 +16,7 @@ from odoo.addons.br_account.models.cst import CST_IPI
 from odoo.addons.br_account.models.cst import CST_PIS_COFINS
 from odoo.addons.br_account.models.cst import ORIGEM_PROD
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
+from numpy import byte
 
 _logger = logging.getLogger(__name__)
 
@@ -191,6 +192,11 @@ class InvoiceEletronic(models.Model):
     valor_retencao_inss = fields.Monetary(
         string=u"Retenção INSS", help=u"Retenção Previdência Social",
         readonly=True, states=STATE)
+    valor_bc_outras_ret = fields.Monetary(
+        string=u"Base de Cálculo Outras Ret.", readonly=True, states=STATE)
+    valor_retencao_outras = fields.Monetary(
+        string=u"Outras Retenções", help=u"Outras retenções na Fonte",
+        readonly=True, states=STATE)
 
     currency_id = fields.Many2one(
         'res.currency', related='company_id.currency_id',
@@ -220,6 +226,8 @@ class InvoiceEletronic(models.Model):
     def _create_attachment(self, prefix, event, data):
         file_name = '%s-%s.xml' % (
             prefix, datetime.now().strftime('%Y-%m-%d-%H-%M'))
+        if isinstance(data, bytes):
+            data = data.decode("utf-8")
         self.env['ir.attachment'].create(
             {
                 'name': file_name,

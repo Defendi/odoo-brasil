@@ -219,6 +219,8 @@ class AccountInvoice(models.Model):
             'valor_retencao_csll': invoice.csll_retention,
             'valor_bc_inss': invoice.inss_base,
             'valor_retencao_inss': invoice.inss_retention,
+            'valor_bc_outras_ret': invoice.outros_base,
+            'valor_retencao_outras': invoice.outros_retention,
         }
 
         total_produtos = total_servicos = 0.0
