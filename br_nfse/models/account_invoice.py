@@ -12,7 +12,10 @@ class AccountInvoice(models.Model):
         for inv in self:
             numeros = inv.invoice_eletronic_ids.mapped('numero_nfse')
             numeros = [n for n in numeros if n]
-            inv.numero_nfse = ','.join(numeros)
+            if len(numeros) > 0:
+                inv.numero_nfse = ','.join(numeros)
+            else:
+                inv.numero_nfse = False
 
     ambiente_nfse = fields.Selection(
         string="Ambiente NFe", related="company_id.tipo_ambiente_nfse",
