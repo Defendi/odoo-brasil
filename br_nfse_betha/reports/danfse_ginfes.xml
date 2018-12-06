@@ -9,7 +9,7 @@
         file="br_nfse_ginfes.main_template_br_nfse_danfe_ginfes"
         name="br_nfse_ginfes.main_template_br_nfse_danfe_ginfes" />
 
-      <record id="paperformat_br_nfse_danfse" model="report.paperformat">
+      <record id="paperformat_br_nfse_danfse" model="web.paperformat">
           <field name="name">Danfe Ginfes</field>
           <field name="default" eval="True" />
           <field name="orientation">Portrait</field>
