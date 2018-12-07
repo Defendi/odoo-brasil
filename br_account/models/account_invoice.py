@@ -99,6 +99,10 @@ class AccountInvoice(models.Model):
         self.payable_move_line_ids = self.env['account.move.line'].browse(
             list(set(payable_lines)))
 
+    date_invoice = fields.Date(string='Invoice Date',
+        readonly=True, states={'draft': [('readonly', False)]}, index=True, required=True,
+        help="Keep empty to use the current date", copy=False, default=fields.Date.context_today)
+
     total_tax = fields.Float(
         string='Impostos ( + )', readonly=True, compute='_compute_amount',
         digits=dp.get_precision('Account'), store=True)
@@ -110,6 +114,20 @@ class AccountInvoice(models.Model):
     payable_move_line_ids = fields.Many2many(
         'account.move.line', string='Payable Move Lines',
         compute='_compute_payables')
+
+    issuer = fields.Selection(
+        [('0', 'Terceiros'), ('1', u'Emissão própria')], 'Emitente',
+        default='1', readonly=True, states={'draft': [('readonly', False)]})
+    
+    vendor_number = fields.Char(
+        u'Número NF Entrada', size=18, readonly=True,
+        states={'draft': [('readonly', False)]},
+        help=u"Número da Nota Fiscal do Fornecedor")
+    
+    vendor_serie = fields.Char(
+        u'Série NF Entrada', size=12, readonly=True,
+        states={'draft': [('readonly', False)]},
+        help=u"Série do número da Nota Fiscal do Fornecedor")
 
     product_serie_id = fields.Many2one(
         'br_account.document.serie', string=u'Série produtos',
@@ -124,17 +142,29 @@ class AccountInvoice(models.Model):
     product_document_id = fields.Many2one(
         'br_account.fiscal.document', string='Documento produtos',
         readonly=True, states={'draft': [('readonly', False)]})
+    
+    product_is_eletronic = fields.Boolean(
+        related='product_document_id.electronic', type='boolean',
+        store=True, string=u'NF/CT Eletrônico', readonly=True)
+
     service_serie_id = fields.Many2one(
         'br_account.document.serie', string=u'Série serviços',
         domain="[('fiscal_document_id', '=', service_document_id),\
         ('company_id','=',company_id)]", readonly=True,
         states={'draft': [('readonly', False)]})
+    
     service_document_nr = fields.Integer(
         string=u'Número Doc', readonly=True, 
         states={'draft': [('readonly', False)]})
+    
     service_document_id = fields.Many2one(
         'br_account.fiscal.document', string='Documento serviços',
         readonly=True, states={'draft': [('readonly', False)]})
+
+    service_is_eletronic = fields.Boolean(
+        related='product_document_id.electronic', type='boolean',
+        store=True, string=u'NFS Eletrônico', readonly=True)
+
     fiscal_document_related_ids = fields.One2many(
         'br_account.document.related', 'invoice_id',
         'Documento Fiscal Relacionado', readonly=True,
@@ -275,6 +305,33 @@ class AccountInvoice(models.Model):
         store=True,
         digits=dp.get_precision('Account'),
         compute='_compute_amount')
+
+    @api.onchange('type')
+    def _onchange_type(self):
+        if self.type in ('out_invoice','in_refund','out_refund'):
+            self.issuer = '1'
+        else:
+            self.issuer = '0'
+
+    @api.onchange('product_document_id')
+    def _onchange_product_document_id(self):
+        series = self.env['br_account.document.serie'].search(
+            [('fiscal_document_id', '=', self.product_document_id.id),
+             ('active','=', True)], limit=1, order='code')
+        self.product_serie_id = series and series[0].id or False
+
+    @api.onchange('service_document_id')
+    def _onchange_service_document_id(self):
+        series = self.env['br_account.document.serie'].search(
+            [('fiscal_document_id', '=', self.service_document_id.id),
+             ('active','=', True)], limit=1, order='code')
+        self.service_serie_id = series and series[0].id or False
+
+    @api.onchange('issuer')
+    def _onchange_issuer(self):
+        if self.issuer == '0' and self.type in (u'in_invoice', u'in_refund'):
+            self.fiscal_document_id = None
+            self.document_serie_id = None
 
     @api.onchange('fiscal_position_id')
     def _onchange_br_account_fiscal_position_id(self):
