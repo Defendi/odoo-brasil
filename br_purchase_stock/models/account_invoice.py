@@ -18,7 +18,7 @@ class AccountInvoice(models.Model):
         return res
 
     total_despesas_aduana = fields.Float(
-        string='Despesas Aduaneiras', digits=dp.get_precision('Account'),
+        string='Desp. Aduaneiras ( + )', digits=dp.get_precision('Account'),
         compute="_compute_amount")
 
     @api.one
