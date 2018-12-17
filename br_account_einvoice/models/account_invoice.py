@@ -267,8 +267,9 @@ class AccountInvoice(models.Model):
                     eletronic = self.env['invoice.eletronic'].create(edoc_vals)
                     eletronic.validate_invoice()
                     eletronic.action_post_validate()
+        self.env.cr.commit()
         return res
-
+    
     @api.multi
     def action_cancel(self):
         res = super(AccountInvoice, self).action_cancel()

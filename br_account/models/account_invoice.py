@@ -136,7 +136,8 @@ class AccountInvoice(models.Model):
 
     product_document_nr = fields.Integer(
         string=u'Número Doc', readonly=True, 
-        states={'draft': [('readonly', False)]})
+        states={'draft': [('readonly', False)]},
+        copy=False, default=0)
 
     product_document_id = fields.Many2one(
         'br_account.fiscal.document', string='Documento produtos',
@@ -154,7 +155,8 @@ class AccountInvoice(models.Model):
     
     service_document_nr = fields.Integer(
         string=u'Número Doc', readonly=True, 
-        states={'draft': [('readonly', False)]})
+        states={'draft': [('readonly', False)]},
+        copy=False, default=0)
     
     service_document_id = fields.Many2one(
         'br_account.fiscal.document', string='Documento serviços',
@@ -378,16 +380,24 @@ class AccountInvoice(models.Model):
             taxes_dict = tax_ids.compute_all(
                 price, self.currency_id, line.quantity,
                 product=line.product_id, partner=self.partner_id)
+            
             for tax in line.invoice_line_tax_ids:
-                tax_dict = next(
-                    x for x in taxes_dict['taxes'] if x['id'] == tax.id)
-                if tax.price_include and (not tax.account_id or
-                                          not tax.deduced_account_id):
+                tax_dict = next(x for x in taxes_dict['taxes'] if x['id'] == tax.id)
+                
+                if not tax.price_include and tax.account_id:
+                    if tax_dict['amount'] > 0.0:
+                        res[contador]['price'] += tax_dict['amount']
+                    if tax_dict['amount'] < 0.0 and tax.deduced_account_id:
+                        res[contador]['price'] += tax_dict['amount'] 
+                        
+                    
+                if tax.price_include and (not tax.account_id or not tax.deduced_account_id):
                     if tax_dict['amount'] > 0.0:  # Negativo é retido
                         res[contador]['price'] -= tax_dict['amount']
 
             contador += 1
         return res
+
 
     @api.multi
     def finalize_invoice_move_lines(self, move_lines):
