@@ -19,7 +19,7 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self).\
             finalize_invoice_move_lines(move_lines)
 
-        for invoice_line in res:
-            line = invoice_line[2]
-            line['payment_mode_id'] = self.payment_mode_id.id
+#         for invoice_line in res:
+#             line = invoice_line[2]
+#             line['payment_mode_id'] = self.payment_mode_id.id
         return res
