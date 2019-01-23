@@ -358,7 +358,7 @@
                                 <group>
                                     <field name="l10n_br_issqn_deduction" />
                                     <field name="issqn_base_calculo"/>
-                                    <field name="tax_issqn_id" />
+                                    <field name="tax_issqn_id" string="Taxa INSS"/>
                                     <field name="issqn_aliquota" invisible="1" />
                                     <field name="issqn_valor"/>
                                 </group>
