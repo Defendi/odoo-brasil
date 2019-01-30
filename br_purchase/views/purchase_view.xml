@@ -6,6 +6,12 @@
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_form" />
         <field name="arch" type="xml">
+			<xpath expr="//button[@name='print_quotation']" position="after">
+            	<button name="print_ordem" string="Imprimir OC" type="object" states="purchase" class="oe_highlight" groups="base.group_user"/>
+			</xpath>        	
+        	<field name="date_order" position="after">
+        		<field name="deadline_order" attrs="{'invisible': [('state', 'not in', ('draft', 'sent', 'to aprove'))]}"/>
+        	</field>
             <field name="fiscal_position_id" position="attributes">
                 <attribute name="domain">['|', ('fiscal_type', '=', 'import'), '|', ('fiscal_type', '=', 'entrada'), ('fiscal_type', '=', None)]</attribute>
             </field>

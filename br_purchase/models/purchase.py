@@ -4,6 +4,11 @@
 from odoo import models, fields, api
 from odoo.addons import decimal_precision as dp
 
+READONLY_STATES = {
+    'purchase': [('readonly', True)],
+    'done': [('readonly', True)],
+    'cancel': [('readonly', True)],
+}
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
@@ -34,6 +39,8 @@ class PurchaseOrder(models.Model):
             res['journal_id'] = self.fiscal_position_id.journal_id.id
         return res
 
+    deadline_order = fields.Date('Data Final Cotação', states=READONLY_STATES, index=True, copy=False)
+
     total_bruto = fields.Float(
         string='Total Bruto ( = )', readonly=True, compute='_amount_all',
         digits=dp.get_precision('Account'), store=True)
@@ -58,6 +65,10 @@ class PurchaseOrder(models.Model):
         if not self.fiscal_position_id:
             fpos = self.partner_id.property_purchase_fiscal_position_id
             self.fiscal_position_id = fpos.id
+
+    @api.multi
+    def print_ordem(self):
+        return self.env.ref('purchase.action_report_purchase_order').report_action(self)
 
 
 class PurchaseOrderLine(models.Model):
@@ -100,6 +111,7 @@ class PurchaseOrderLine(models.Model):
                 'price_subtotal': taxes['total_excluded'],
                 'valor_bruto': valor_bruto,
                 'valor_desconto': desconto,
+                'valor_liquido': valor_bruto - desconto,
             })
 
     fiscal_position_type = fields.Selection(
@@ -145,7 +157,10 @@ class PurchaseOrderLine(models.Model):
     valor_bruto = fields.Float(
         compute='_compute_amount', string='Vlr. Bruto', store=True,
         digits=dp.get_precision('Sale Price'))
-
+    valor_liquido  = fields.Float(
+        compute='_compute_amount', string='Vlr. Bruto', store=False,
+        digits=dp.get_precision('Sale Price'))
+    
     def _update_tax_from_ncm(self):
         if self.product_id:
             ncm = self.product_id.fiscal_classification_id
