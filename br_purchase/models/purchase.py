@@ -1,8 +1,11 @@
 # © 2016 Danimar Ribeiro, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import datetime
+
 from odoo import models, fields, api
 from odoo.addons import decimal_precision as dp
+from numpy import integer
 
 READONLY_STATES = {
     'purchase': [('readonly', True)],
@@ -39,7 +42,13 @@ class PurchaseOrder(models.Model):
             res['journal_id'] = self.fiscal_position_id.journal_id.id
         return res
 
-    deadline_order = fields.Date('Data Final Cotação', states=READONLY_STATES, index=True, copy=False)
+    def _get_deadline_order(self):
+        tm = self.env['res.config.settings'].search([],limit=1,order="id desc")
+        if tm.days_lock_deadline:
+            days = tm.days_lock_deadline
+        return fields.date.today()+datetime.timedelta(days)
+
+    deadline_order = fields.Date('Data Final Cotação', states=READONLY_STATES, index=True, copy=False, default=_get_deadline_order, required=True)
     tipo_frete = fields.Selection([('0',u"Emitente"),('1',u"Destinatário"),('2',u"Terceiros"),('9',u"Outros")],string=u"Frete",required=True,default='1',states=READONLY_STATES)
     transportadora_id = fields.Many2one('res.partner',string=u"Transportador",states=READONLY_STATES)
     prazo_entrega = fields.Integer(string=u"Prazo Entrega", default=0,states=READONLY_STATES)

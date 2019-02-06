@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.br_purchase</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="25"/>
+        <field name="inherit_id" ref="purchase.res_config_settings_view_form_purchase"/>
+        <field name="arch" type="xml">
+        	<xpath expr="//div[@data-string='Purchase']/div" position="after">
+                <h2>Cotação</h2>
+                <div class="row mt16 o_settings_container" id="ordem_settings">
+	                <div class="col-xs-12 col-md-6 o_setting_box">
+	                    <div class="o_setting_left_pane"/>
+	                    <div class="o_setting_right_pane">
+	                        <label string='Prazo de Vencimento Cotação'/>
+	                        <div class="text-muted">
+	                            Dias máximos para o fornecedor devolver a cotação de preços.
+	                        </div>
+	                        <div class="content-group">
+	                            <div class="row mt16">
+									<label for="days_lock_deadline" class="col-md-3 o_light_label"/>
+									<field name="days_lock_deadline"/>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+                </div>
+	        </xpath>
+        </field>
+    </record>
+
+</odoo>
