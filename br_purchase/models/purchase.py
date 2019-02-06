@@ -41,6 +41,12 @@ class PurchaseOrder(models.Model):
         return res
 
     deadline_order = fields.Date('Data Final Cotação', states=READONLY_STATES, index=True, copy=False)
+    tipo_frete = fields.Selection([('0',u"Emitente"),('1',u"Destinatário"),('2',u"Terceiros"),('9',u"Outros")],string=u"Frete",required=True,default='1',states=READONLY_STATES)
+    transportadora_id = fields.Many2one('res.partner',string=u"Transportador",states=READONLY_STATES)
+    prazo_entrega = fields.Integer(string=u"Prazo Entrega", default=0,states=READONLY_STATES)
+    vol_especie = fields.Char(string=u"Espécie Volumes",states=READONLY_STATES)
+    volumes_total = fields.Integer(string=u"Volumes", default=0,states=READONLY_STATES)
+    peso_liquido = fields.Float(string=u"Peso Liquido", default=0.0, digits=(12,3),states=READONLY_STATES)
 
     total_bruto = fields.Float(
         string='Total Bruto ( = )', readonly=True, compute='_amount_all',
