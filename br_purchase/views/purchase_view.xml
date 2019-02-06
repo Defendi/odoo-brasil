@@ -76,6 +76,24 @@
 
                 <field name="total_tax" widget='monetary' options="{'currency_field': 'currency_id'}" />
             </field>
+            <xpath expr="//page[1]" position="after">
+            	<page string="Frete">
+	                <group>
+	                    <group>
+	                    	<field name="tipo_frete"/>
+	                    	<field name="transportadora_id"/>
+	                    </group>
+	                </group>
+	                <group>
+	                	<group>
+	                    	<field name="prazo_entrega"/>
+	                    	<field name="vol_especie"/>
+	                    	<field name="volumes_total"/>
+	                    	<field name="peso_liquido"/>
+	                	</group>
+	                </group>
+            	</page>
+            </xpath>
         </field>
     </record>
 
