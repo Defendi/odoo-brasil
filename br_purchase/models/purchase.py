@@ -44,6 +44,7 @@ class PurchaseOrder(models.Model):
 
     def _get_deadline_order(self):
         tm = self.env['res.config.settings'].search([],limit=1,order="id desc")
+        days = 0
         if tm.days_lock_deadline:
             days = tm.days_lock_deadline
         return fields.date.today()+datetime.timedelta(days)
