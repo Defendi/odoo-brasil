@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+	
+		<record id="view_move_tree_receipt_picking_inherit" model="ir.ui.view">
+            <field name="name">stock.move.tree2.inherit</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_tree_receipt_picking"/>
+            <field name="arch" type="xml">
+                <data>
+                
+					<xpath expr="//field[@name='product_id']" position="after">
+                    	<field name="category_id"/>
+                    	<field name="account_analytic_id"/>                                                                                        
+                    </xpath>
+                                       
+                    <xpath expr="//field[@name='product_uom']" position="after">                      
+                        <field name="price_unit"/> 
+                        <field name="total" sum="Total"/>                                                                     
+                    </xpath>                  
+                    
+                </data>
+            </field>
+        </record>
+        
+        <!-- Pesquisa -->
+		<record id='view_move_search_inherit' model='ir.ui.view'> 
+            <field name="name">stock.move.search.inherit</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_search"/>
+            <field name="arch" type="xml">            
+               	<data>  
+               	                
+					<xpath expr="//filter[@name='groupby_date']" position="after">						
+						<filter string="Categoria" context="{'group_by':'category_id'}" name="group_category"/>
+						<filter string="Centro de Custos" context="{'group_by':'account_analytic_id'}" name="group_analytic"/>	
+					</xpath>
+							   
+                </data>                
+            </field>
+        </record>
+        			
+	</data>
+</odoo>

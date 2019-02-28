@@ -8,13 +8,16 @@
     'license': 'AGPL-3',
     'author': 'Trustcode',
     'website': 'http://www.trustcode.com.br',
-    'version': '11.0.1.0.0',
+    'version': '11.0.1.1.0',
     'depends': [
-        'br_purchase', 'br_stock_account'
+        'stock',
+        'br_purchase', 
+        'br_stock_account'
     ],
     'data': [
         'views/purchase_stock_view.xml',
         'views/account_invoice.xml',
+        'views/stock_move_view.xml',
     ],
     'auto_install': True,
 }
