@@ -100,7 +100,7 @@ class AccountVoucher(models.Model):
             tag_ids = []
             for ln in line2:
                 tag_ids += ln.analytic_tag_ids.ids  
-            line.analytic_tag_ids = [(6, False, [tag_ids])] if tag_ids else []
+            line.analytic_tag_ids = [(6, False, tag_ids)] if tag_ids else []
 
         return line_total
 
