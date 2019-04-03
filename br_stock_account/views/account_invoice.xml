@@ -110,9 +110,6 @@
                 <field name="outras_despesas" attrs="{'invisible': [('product_type', '=', 'service')]}" />
                 <field name="price_total" string="(=) Total" attrs="{'invisible': [('product_type', '=', 'service')]}" />
             </field>
-            <field name="cfop_id" position="attributes">
-            	<attribute name="invisible">[('product_type', '=', 'product')]</attribute>
-            </field>
         </field>
     </record>
 

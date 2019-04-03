@@ -146,7 +146,12 @@ class AccountTax(models.Model):
         if not icms_tax:
             return []
         vals = self._tax_vals(icms_tax)
+        vals['operacao'] = 0.00
         base_icms = self.calc_icms_base(price_base, ipi_value)
+        diferimento_icms = False
+        if "icms_aliquota_diferimento" in self.env.context:
+            diferimento_icms = self.env.context['icms_aliquota_diferimento']
+
         if 'icms_base_calculo_manual' in self.env.context and\
                 self.env.context['icms_base_calculo_manual'] > 0:
             vals['amount'] = icms_tax._compute_amount(
@@ -155,6 +160,10 @@ class AccountTax(models.Model):
         else:
             vals['amount'] = icms_tax._compute_amount(base_icms, 1.0)
             vals['base'] = base_icms
+        if diferimento_icms and diferimento_icms > 0.0:
+            vals['operacao'] = vals['amount']
+            vals['amount'] *= 1 - (diferimento_icms / 100.0)
+        
         return [vals]
 
     def calc_icms_base(self, price_base, ipi_value):

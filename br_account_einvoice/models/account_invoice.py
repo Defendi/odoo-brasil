@@ -7,7 +7,6 @@ from random import SystemRandom
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
-
 TYPE2EDOC = {
     'out_invoice': 'saida',        # Customer Invoice
     'in_invoice': 'entrada',          # Vendor Bill
@@ -119,6 +118,10 @@ class AccountInvoice(models.Model):
             'icms_aliquota_reducao_base': line.icms_aliquota_reducao_base,
             'icms_base_calculo': line.icms_base_calculo,
             'icms_valor': line.icms_valor,
+            # - ICMS Diferido
+            'icms_valor_diferido': line.icms_valor_diferido,
+            'icms_aliquota_diferimento': line.icms_aliquota_diferimento,
+            'icms_valor_diferido_dif': line.icms_valor_diferido - line.icms_valor,
             # - ICMS ST -
             'icms_st_aliquota': line.icms_st_aliquota,
             'icms_st_aliquota_mva': line.icms_st_aliquota_mva,

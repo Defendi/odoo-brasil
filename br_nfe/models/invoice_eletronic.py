@@ -405,6 +405,9 @@ class InvoiceEletronic(models.Model):
                     'pRedBC': "%.02f" % item.icms_aliquota_reducao_base,
                     'pICMS': "%.02f" % item.icms_aliquota,
                     'vICMS': "%.02f" % item.icms_valor,
+                    'vICMSDif': "%.02f" % item.icms_valor_diferido_dif,
+                    'vICMSOp': "%.02f" % item.icms_valor_diferido,
+                    'pDif': "%.02f" % item.icms_aliquota_diferimento,
                     'modBCST': item.icms_st_tipo_base,
                     'pMVAST': "%.02f" % item.icms_st_aliquota_mva,
                     'pRedBCST': "%.02f" % item.icms_st_aliquota_reducao_base,
@@ -444,7 +447,7 @@ class InvoiceEletronic(models.Model):
 
         tz = timezone(self.env.user.tz)
         dt_emissao = datetime.now(tz).replace(microsecond=0).isoformat()
-
+        paramObj = self.env['ir.config_parameter']
         ide = {
             'cUF': self.company_id.state_id.ibge_code,
             'cNF': "%08d" % self.numero_controle,
@@ -465,7 +468,8 @@ class InvoiceEletronic(models.Model):
             'finNFe': self.finalidade_emissao,
             'indFinal': self.ind_final or '1',
             'indPres': self.ind_pres or '1',
-            'procEmi': 0
+            'procEmi': 0,
+            'softEmi': paramObj.get_param('NFe.softEmi'),
         }
         # Documentos Relacionados
         documentos = []
@@ -743,32 +747,41 @@ class InvoiceEletronic(models.Model):
             'infCpl': self.informacoes_complementares or '',
             'infAdFisco': self.informacoes_legais or '',
         }
+        cnpjtec = paramObj.get_param('NFe.infRespTec.cnpj')
+        if cnpjtec:
+            cnpjtec = re.sub('[^0-9]', '', cnpjtec)
+        infRespTec = {
+            'CNPJ': cnpjtec or '',
+            'xContato': paramObj.get_param('NFe.infRespTec.xContato') or '',
+            'email': paramObj.get_param('NFe.infRespTec.email') or '',
+            'fone': paramObj.get_param('NFe.infRespTec.fone') or '',
+        }
         compras = {
             'xNEmp': self.nota_empenho or '',
             'xPed': self.pedido_compra or '',
             'xCont': self.contrato_compra or '',
         }
 
-        responsavel_tecnico = self.company_id.responsavel_tecnico_id
-        infRespTec = {}
-
-        if responsavel_tecnico:
-            if len(responsavel_tecnico.child_ids) == 0:
-                raise UserError(
-                    "Adicione um contato para o responsável técnico!")
-
-            cnpj = re.sub(
-                '[^0-9]', '', responsavel_tecnico.cnpj_cpf)
-            fone = re.sub(
-                '[^0-9]', '', responsavel_tecnico.phone)
-            infRespTec = {
-                'CNPJ': cnpj or '',
-                'xContato': responsavel_tecnico.child_ids[0].name or '',
-                'email': responsavel_tecnico.email or '',
-                'fone': fone or '',
-                'idCSRT': self.company_id.id_token_csrt or '',
-                'hashCSRT': self._get_hash_csrt() or '',
-            }
+#         responsavel_tecnico = self.company_id.responsavel_tecnico_id
+#         infRespTec = {}
+# 
+#         if responsavel_tecnico:
+#             if len(responsavel_tecnico.child_ids) == 0:
+#                 raise UserError(
+#                     "Adicione um contato para o responsável técnico!")
+# 
+#             cnpj = re.sub(
+#                 '[^0-9]', '', responsavel_tecnico.cnpj_cpf)
+#             fone = re.sub(
+#                 '[^0-9]', '', responsavel_tecnico.phone)
+#             infRespTec = {
+#                 'CNPJ': cnpj or '',
+#                 'xContato': responsavel_tecnico.child_ids[0].name or '',
+#                 'email': responsavel_tecnico.email or '',
+#                 'fone': fone or '',
+#                 'idCSRT': self.company_id.id_token_csrt or '',
+#                 'hashCSRT': self._get_hash_csrt() or '',
+#             }
 
         vals = {
             'Id': '',
@@ -781,9 +794,9 @@ class InvoiceEletronic(models.Model):
             'pag': [pag],
             'transp': transp,
             'infAdic': infAdic,
+            'infRespTec': infRespTec,
             'exporta': exporta,
             'compra': compras,
-            'infRespTec': infRespTec,
         }
         if self.valor_servicos > 0.0:
             vals.update({
