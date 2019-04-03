@@ -3,10 +3,12 @@
 # © 2016 Danimar Ribeiro, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons import decimal_precision as dp
 
+_logger = logging.getLogger(__name__)
 
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
@@ -383,6 +385,7 @@ class AccountInvoice(models.Model):
                 product=line.product_id, partner=self.partner_id)
             
             for tax in line.invoice_line_tax_ids:
+                _logger.info(str(tax))
                 tax_dict = next(x for x in taxes_dict['taxes'] if x['id'] == tax.id)
                 
                 if not tax.price_include and tax.account_id:

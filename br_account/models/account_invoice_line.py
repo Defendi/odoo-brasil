@@ -3,6 +3,7 @@
 # © 2016 Danimar Ribeiro, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import logging
 
 from odoo import api, fields, models
 from odoo.addons import decimal_precision as dp
@@ -13,6 +14,7 @@ from odoo.addons.br_account.models.cst import CST_PIS_COFINS
 from odoo.addons.br_account.models.cst import ORIGEM_PROD
 from odoo.addons.br_account.models.res_company import COMPANY_FISCAL_TYPE
 
+_logger = logging.getLogger(__name__)
 
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
@@ -29,8 +31,8 @@ class AccountInvoiceLine(models.Model):
             'incluir_ipi_base': self.incluir_ipi_base,
             'icms_st_aliquota_mva': self.icms_st_aliquota_mva,
             'icms_aliquota_reducao_base': self.icms_aliquota_reducao_base,
-            'icms_st_aliquota_reducao_base':
-            self.icms_st_aliquota_reducao_base,
+            'icms_st_aliquota_reducao_base': self.icms_st_aliquota_reducao_base,
+            'icms_aliquota_diferimento': self.icms_aliquota_diferimento,
             'icms_st_aliquota_deducao': self.icms_st_aliquota_deducao,
             'icms_st_base_calculo_manual': self.icms_st_base_calculo_manual,
             'ipi_reducao_bc': self.ipi_reducao_bc,
@@ -57,7 +59,7 @@ class AccountInvoiceLine(models.Model):
                  'tax_pis_id', 'tax_cofins_id', 'tax_ii_id', 'tax_issqn_id',
                  'tax_csll_id', 'tax_irrf_id', 'tax_inss_id', 'tax_outros_id',
                  'incluir_ipi_base', 'tem_difal', 'icms_aliquota_reducao_base',
-                 'ipi_reducao_bc', 'icms_st_aliquota_mva',
+                 'ipi_reducao_bc', 'icms_st_aliquota_mva', 'icms_aliquota_diferimento',
                  'icms_st_aliquota_reducao_base', 'icms_aliquota_credito',
                  'icms_st_aliquota_deducao', 'icms_st_base_calculo_manual',
                  'icms_base_calculo_manual', 'ipi_base_calculo_manual',
@@ -67,7 +69,7 @@ class AccountInvoiceLine(models.Model):
     def _compute_price(self):
         currency = self.invoice_id and self.invoice_id.currency_id or None
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
-
+ 
         valor_bruto = self.price_unit * self.quantity
         desconto = valor_bruto * self.discount / 100.0
         subtotal = valor_bruto - desconto
@@ -75,13 +77,13 @@ class AccountInvoiceLine(models.Model):
         self._update_invoice_line_ids()
         if self.invoice_line_tax_ids:
             ctx = self._prepare_tax_context()
-
+ 
             tax_ids = self.invoice_line_tax_ids.with_context(**ctx)
-
+ 
             taxes = tax_ids.compute_all(
                 price, currency, self.quantity, product=self.product_id,
                 partner=self.invoice_id.partner_id)
-
+ 
         icms = ([x for x in taxes['taxes']
                  if x['id'] == self.tax_icms_id.id]) if taxes else []
         icmsst = ([x for x in taxes['taxes']
@@ -112,14 +114,14 @@ class AccountInvoiceLine(models.Model):
                  if x['id'] == self.tax_inss_id.id]) if taxes else []
         outros = ([x for x in taxes['taxes']
                 if x['id'] == self.tax_outros_id.id]) if taxes else []
-
+ 
         price_subtotal_signed = taxes['total_excluded'] if taxes else subtotal
         if self.invoice_id.currency_id and self.invoice_id.currency_id != \
            self.invoice_id.company_id.currency_id:
             price_subtotal_signed = self.invoice_id.currency_id.compute(
                 price_subtotal_signed, self.invoice_id.company_id.currency_id)
         sign = self.invoice_id.type in ['in_refund', 'out_refund'] and -1 or 1
-
+ 
         if self.icms_aliquota_credito:
             # Calcular o valor da base_icms para o calculo de
             # credito de ICMS
@@ -127,12 +129,12 @@ class AccountInvoiceLine(models.Model):
             valor_frete = ctx.get('valor_frete', 0.0)
             valor_seguro = ctx.get('valor_seguro', 0.0)
             outras_despesas = ctx.get('outras_despesas', 0.0)
-
+ 
             base_icms_credito = subtotal + valor_frete \
                 + valor_seguro + outras_despesas
         else:
             base_icms_credito = 0.0
-
+ 
         price_subtotal_signed = price_subtotal_signed * sign
         self.update({
             'price_total': taxes['total_included'] if taxes else subtotal,
@@ -144,6 +146,7 @@ class AccountInvoiceLine(models.Model):
             'valor_desconto': desconto,
             'icms_base_calculo': sum([x['base'] for x in icms]),
             'icms_valor': sum([x['amount'] for x in icms]),
+            'icms_valor_diferido': sum([x['operacao'] for x in icms]),
             'icms_st_base_calculo': sum([x['base'] for x in icmsst]),
             'icms_st_valor': sum([x['amount'] for x in icmsst]),
             'icms_bc_uf_dest': sum([x['base'] for x in icms_inter]),
@@ -170,6 +173,7 @@ class AccountInvoiceLine(models.Model):
             'irrf_valor': sum([x['amount'] for x in irrf]),
             'outros_base_calculo': sum([x['base'] for x in outros]),
             'outros_valor': sum([x['amount'] for x in outros]),
+            'icms_valor_diferido_dif': self.icms_valor_diferido - self.icms_valor,
         })
 
     @api.multi
@@ -250,6 +254,17 @@ class AccountInvoiceLine(models.Model):
         default=0.00)
     icms_base_calculo_manual = fields.Float(
         'Base ICMS Manual', digits=dp.get_precision('Account'), default=0.00)
+
+    # =========================================================================
+    # ICMS Diferido
+    # =========================================================================
+
+    icms_aliquota_diferimento = fields.Float(u"% Diferimento")
+    icms_valor_diferido = fields.Float(
+        'Valor ICMS diferido', required=True, compute='_compute_price', store=True,
+        digits=dp.get_precision('Account'), default=0.00)
+    icms_valor_diferido_dif = fields.Float(u'Valor diferenca ICMS diferido', compute='_compute_price',store=True,
+        digits=dp.get_precision('Account'), default=0.00)
 
     # =========================================================================
     # ICMS Substituição
@@ -661,3 +676,18 @@ class AccountInvoiceLine(models.Model):
         if self.tax_inss_id:
             self.inss_aliquota = self.tax_inss_id.amount
         self._update_invoice_line_ids()
+
+    @api.model
+    def create(self, vals):
+        if vals.get('tax_icms_id',False):
+            tax = self.env['account.tax'].search([('id','=',vals['tax_icms_id'])])
+            vals['icms_aliquota'] = tax.amount
+        return super(AccountInvoiceLine, self).create(vals)
+
+    @api.multi
+    def write(self, vals):
+        for line in self:
+            if line.tax_icms_id:
+                vals['icms_aliquota'] = line.tax_icms_id.amount
+        result = super(AccountInvoiceLine, self).write(vals)
+        return result

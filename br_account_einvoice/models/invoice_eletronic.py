@@ -54,7 +54,8 @@ class InvoiceEletronic(models.Model):
          ('008', u'NFS-e - Provedor SIMPLISS'),
          ('009', u'NFS-e - Provedor SUSESU'),
          ('010', u'NFS-e Imperial - Petrópolis'),
-         ('012', u'NFS-e - Florianópolis')],
+         ('012', u'NFS-e - Florianópolis'),
+         ('203', u'NFS-e - Itajaí')],
         string=u'Modelo', readonly=True, states=STATE)
     serie = fields.Many2one(
         'br_account.document.serie', string=u'Série',
@@ -649,6 +650,9 @@ class InvoiceEletronicItem(models.Model):
         readonly=True, states=STATE)
     icms_valor_diferido = fields.Monetary(
         string=u'Valor Diferido', digits=dp.get_precision('Account'),
+        readonly=True, states=STATE)
+    icms_valor_diferido_dif = fields.Monetary(
+        string=u'Diferença Diferimento', digits=dp.get_precision('Account'),
         readonly=True, states=STATE)
 
     icms_motivo_desoneracao = fields.Char(

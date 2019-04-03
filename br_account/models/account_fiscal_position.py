@@ -51,6 +51,7 @@ class AccountFiscalPositionTaxRule(models.Model):
     tax_icms_st_id = fields.Many2one('account.tax', string=u"ICMS ST",
                                      domain=[('domain', '=', 'icmsst')])
     icms_aliquota_credito = fields.Float(string=u"% Crédito de ICMS")
+    icms_aliquota_diferimento = fields.Float(u"% Diferimento")
     incluir_ipi_base = fields.Boolean(string=u"Incl. IPI na base ICMS")
     reducao_icms = fields.Float(string=u"Redução de base")
     reducao_icms_st = fields.Float(string=u"Redução de base ST")
@@ -183,6 +184,8 @@ class AccountFiscalPosition(models.Model):
                 'icms_cst_normal': rules[0].cst_icms,
                 'icms_aliquota_reducao_base': rules[0].reducao_icms,
                 'incluir_ipi_base': rules[0].incluir_ipi_base,
+                # ICMS Dif
+                'icms_aliquota_diferimento': rules[0].icms_aliquota_diferimento,
                 # ICMS ST
                 'tax_icms_st_id': rules[0].tax_icms_st_id,
                 'icms_st_aliquota_mva': rules[0].aliquota_mva,
