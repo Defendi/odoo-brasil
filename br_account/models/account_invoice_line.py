@@ -677,12 +677,37 @@ class AccountInvoiceLine(models.Model):
             self.inss_aliquota = self.tax_inss_id.amount
         self._update_invoice_line_ids()
 
+    def _mount_tax_ids(self):
+        res = []
+        self._set_taxes()
+        other_taxes = self.invoice_line_tax_ids.filtered(lambda x: not x.domain)
+        for tax in other_taxes:
+            res.append(tax.id)
+        if self.tax_icms_id: res.append(self.tax_icms_id.id)
+        if self.tax_icms_st_id: res.append(self.tax_icms_st_id.id)
+        if self.tax_icms_inter_id: res.append(self.tax_icms_inter_id.id)
+        if self.tax_icms_intra_id: res.append(self.tax_icms_intra_id.id)
+        if self.tax_icms_fcp_id: res.append(self.tax_icms_fcp_id.id)
+        if self.tax_ipi_id: res.append(self.tax_ipi_id.id)
+        if self.tax_pis_id: res.append(self.tax_pis_id.id)
+        if self.tax_cofins_id: res.append(self.tax_cofins_id.id)
+        if self.tax_issqn_id: res.append(self.tax_issqn_id.id)
+        if self.tax_ii_id: res.append(self.tax_ii_id.id)
+        if self.tax_csll_id: res.append(self.tax_csll_id.id)
+        if self.tax_irrf_id: res.append(self.tax_irrf_id.id)
+        if self.tax_inss_id: res.append(self.tax_inss_id.id)
+        if self.tax_outros_id: res.append(self.tax_outros_id.id)
+        return res
+            
+
     @api.model
     def create(self, vals):
         if vals.get('tax_icms_id',False):
             tax = self.env['account.tax'].search([('id','=',vals['tax_icms_id'])])
             vals['icms_aliquota'] = tax.amount
-        return super(AccountInvoiceLine, self).create(vals)
+        res = super(AccountInvoiceLine, self).create(vals)
+        res. _update_invoice_line_ids()
+        return res
 
     @api.multi
     def write(self, vals):
