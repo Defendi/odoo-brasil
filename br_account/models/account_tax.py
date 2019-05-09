@@ -119,6 +119,7 @@ class AccountTax(models.Model):
         vals = self._tax_vals(ipi_tax)
         base_tax = self.calc_ipi_base(price_base)
 
+        vals['amount'] = round(ipi_tax._compute_amount(base_tax, 1.0),2)
         if 'ipi_base_calculo_manual' in self.env.context and\
                 self.env.context['ipi_base_calculo_manual'] > 0:
             vals['base'] = self.env.context['ipi_base_calculo_manual']
@@ -163,6 +164,8 @@ class AccountTax(models.Model):
         if diferimento_icms and diferimento_icms > 0.0:
             vals['operacao'] = vals['amount']
             vals['amount'] *= 1 - (diferimento_icms / 100.0)
+
+        vals['amount'] = round(vals['amount'],2)
         
         return [vals]
 
@@ -226,7 +229,7 @@ class AccountTax(models.Model):
         else:
             icmsst = round(
                 (base_icmsst * (icmsst_tax.amount / 100.0)) - icms_value, 2)
-        vals['amount'] = icmsst if icmsst >= 0.0 else 0.0
+        vals['amount'] = round(icmsst,2) if icmsst >= 0.0 else 0.0
         vals['base'] = base_icmsst
         return [vals]
 
@@ -307,6 +310,7 @@ class AccountTax(models.Model):
                 else:
                     vals['amount'] = tax._compute_amount(price_base, 1.0)
                     vals['base'] = price_base
+            vals['amount'] = round(vals['amount'],2)
             taxes.append(vals)
         return taxes
 
@@ -318,7 +322,7 @@ class AccountTax(models.Model):
         if "ii_base_calculo" in self.env.context and \
                 self.env.context['ii_base_calculo'] > 0:
             price_base = self.env.context["ii_base_calculo"]
-        vals['amount'] = ii_tax._compute_amount(price_base, 1.0)
+        vals['amount'] = round(ii_tax._compute_amount(price_base, 1.0),2)
         vals['base'] = price_base
         return [vals]
 
@@ -329,7 +333,7 @@ class AccountTax(models.Model):
         issqn_deduction = self.env.context.get('l10n_br_issqn_deduction', 0.0)
         price_base *= (1 - (issqn_deduction / 100.0))
         vals = self._tax_vals(issqn_tax)
-        vals['amount'] = issqn_tax._compute_amount(price_base, 1.0)
+        vals['amount'] = round(issqn_tax._compute_amount(price_base, 1.0),2)
         vals['base'] = price_base
         return [vals]
 
@@ -341,7 +345,7 @@ class AccountTax(models.Model):
         taxes = []
         for tax in retention_tax:
             vals = self._tax_vals(tax)
-            vals['amount'] = tax._compute_amount(price_base, 1.0)
+            vals['amount'] = round(tax._compute_amount(price_base, 1.0),2)
             vals['base'] = price_base
             taxes.append(vals)
         return taxes
@@ -351,7 +355,7 @@ class AccountTax(models.Model):
         if not others:
             return []
         vals = self._tax_vals(others)
-        vals['amount'] = others._compute_amount(price_base, 1.0)
+        vals['amount'] = round(others._compute_amount(price_base, 1.0),2)
         vals['base'] = price_base
         return [vals]
 
