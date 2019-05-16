@@ -45,6 +45,7 @@
         <field name="arch" type="xml">
             <field name="price_subtotal" position="after">
                 <field name="item_pedido_compra" />
+                <field name="nr_pedido_compra" />
                 <field name="state"/>
             </field>
         </field>

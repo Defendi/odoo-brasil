@@ -177,6 +177,8 @@ class AccountInvoice(models.Model):
             'inss_aliquota': abs(line.inss_aliquota),
             'inss_valor_retencao':
             abs(line.inss_valor) if line.inss_valor < 0 else 0,
+            'item_pedido_compra': line.item_pedido_compra, 
+            'nr_pedido_compra': line.nr_pedido_compra, 
         }
         return vals
 
@@ -304,4 +306,7 @@ class AccountInvoiceLine(models.Model):
     )
 
     item_pedido_compra = fields.Char(
-        string=u'Item do pedido de compra do cliente')
+        string=u'Item Ped.Compra')
+
+    nr_pedido_compra   = fields.Char(
+        string=u'Número Ped.Compra')

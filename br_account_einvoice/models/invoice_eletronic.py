@@ -559,10 +559,10 @@ class InvoiceEletronicItem(models.Model):
     preco_unitario = fields.Monetary(
         string=u'Preço Unitário', digits=dp.get_precision('Account'),
         readonly=True, states=STATE)
-
     item_pedido_compra = fields.Char(
-        string=u'Item do pedido de compra do cliente')
-
+        string=u'Item PDC',help="Número do Item do Pedido de Compra do seu Cliente.")
+    nr_pedido_compra   = fields.Char(
+        string=u'Número PDC',help="Número do Pedido de Compra do seu Cliente.")
     frete = fields.Monetary(
         string=u'Frete', digits=dp.get_precision('Account'),
         readonly=True, states=STATE)

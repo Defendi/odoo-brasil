@@ -312,8 +312,8 @@ class InvoiceEletronic(models.Model):
             'indTot': item.indicador_total,
             'cfop': item.cfop,
             'CEST': re.sub('[^0-9]', '', item.cest or ''),
-            'nItemPed': item.item_pedido_compra if item.item_pedido_compra
-            else '',
+            'nItemPed': item.item_pedido_compra if item.item_pedido_compra else '',
+            'xPed': item.nr_pedido_compra if item.nr_pedido_compra else '', 
         }
         di_vals = []
         for di in item.import_declaration_ids:
