@@ -6,7 +6,6 @@ import datetime
 
 from odoo import models, fields, api
 from odoo.addons import decimal_precision as dp
-from numpy import integer
 
 READONLY_STATES = {
     'purchase': [('readonly', True)],
@@ -81,6 +80,11 @@ class PurchaseOrder(models.Model):
     def print_ordem(self):
         return self.env.ref('purchase.action_report_purchase_order').report_action(self)
 
+    @api.onchange('partner_id')
+    def onchange_partner_fpos(self):
+        if not self.fiscal_position_id:
+            fpos = self.partner_id.property_purchase_fiscal_position_id
+            self.fiscal_position_id = fpos.id
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
