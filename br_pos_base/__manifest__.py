@@ -18,10 +18,11 @@
         'br_zip',
     ],
     'data': [
+        'views/pos_order_view.xml',
         'views/pos_templates.xml',
     ],
     "qweb": [
         'static/src/xml/pos.xml',
     ],
-    'auto_install': True,
+    'auto_install': False,
 }

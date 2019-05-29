@@ -108,5 +108,9 @@ odoo.define('br_pos_base.screens', function(require){
         },
     });
 
+    let PaymentScreenWidget = clientScreen.PaymentScreenWidget.include({
+    	
+    });
+    
     return ClientListScreenWidget;
 });
