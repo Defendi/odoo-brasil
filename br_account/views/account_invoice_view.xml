@@ -105,7 +105,12 @@
             <field name="amount_tax" position="before">
                 <field name="total_bruto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                 <field name="total_desconto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                <field name="total_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/></field>
+                <field name="total_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+            </field>
+            <field name="move_name" position="attributes">
+            	<attribute name="invisible">0</attribute>
+            	<attribute name="groups">account.group_account_manager</attribute>
+            </field>
         </field>
     </record>
     <record id="view_br_account_invoice_cancel_form" model="ir.ui.view">
