@@ -747,16 +747,15 @@ class InvoiceEletronic(models.Model):
             'infCpl': self.informacoes_complementares or '',
             'infAdFisco': self.informacoes_legais or '',
         }
-        if self.ambiente == 'homologacao':
-            cnpjtec = paramObj.get_param('NFe.infRespTec.cnpj')
-            if cnpjtec:
-                cnpjtec = re.sub('[^0-9]', '', cnpjtec)
-            infRespTec = {
-                'CNPJ': cnpjtec or '',
-                'xContato': paramObj.get_param('NFe.infRespTec.xContato') or '',
-                'email': paramObj.get_param('NFe.infRespTec.email') or '',
-                'fone': paramObj.get_param('NFe.infRespTec.fone') or '',
-            }
+        cnpjtec = paramObj.get_param('NFe.infRespTec.cnpj')
+        if cnpjtec:
+            cnpjtec = re.sub('[^0-9]', '', cnpjtec)
+        infRespTec = {
+            'CNPJ': cnpjtec or '',
+            'xContato': paramObj.get_param('NFe.infRespTec.xContato') or '',
+            'email': paramObj.get_param('NFe.infRespTec.email') or '',
+            'fone': paramObj.get_param('NFe.infRespTec.fone') or '',
+        }
         compras = {
             'xNEmp': self.nota_empenho or '',
             'xPed': self.pedido_compra or '',
@@ -797,9 +796,8 @@ class InvoiceEletronic(models.Model):
             'infAdic': infAdic,
             'exporta': exporta,
             'compra': compras,
+            'infRespTec': infRespTec,
         }
-        if self.ambiente == 'homologacao':
-            vals['infRespTec'] = infRespTec
 
         if self.valor_servicos > 0.0:
             vals.update({
