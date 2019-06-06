@@ -8,7 +8,9 @@ from odoo import fields, models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    CSC_ident = fields.Char(string="Identificador CSC")
+    id_token_csc = fields.Char(string="Identificador do CSC")
+    csc = fields.Char(string=u'Código de Segurança do Contribuinte')
+    nfe_sinc = fields.Boolean(string="Aceita envio síncrono")
 
     danfe_model = fields.Selection([('central', 'Modelo QR Code Centralizado'),
                                     ('lateral', 'Modelo QR Code na lateral')],

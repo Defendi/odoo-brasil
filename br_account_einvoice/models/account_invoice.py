@@ -2,6 +2,7 @@
 # © 2016 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import pytz
 from datetime import datetime
 from random import SystemRandom
 
@@ -193,6 +194,7 @@ class AccountInvoice(models.Model):
             'state': 'draft',
             'tipo_operacao': TYPE2EDOC[invoice.type],
             'numero_controle': num_controle,
+            #'data_emissao': datetime.now(pytz.timezone('America/Sao_Paulo')),
             'data_emissao': datetime.now(),
             'data_agendada': invoice.date_invoice,
             'data_fatura': datetime.now(),

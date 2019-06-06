@@ -9,7 +9,7 @@ import logging
 import pytz
 import hashlib
 from lxml import etree
-from datetime import datetime
+from datetime import timezone, datetime, timedelta
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTFT
@@ -28,7 +28,7 @@ try:
         gerar_nfeproc_cancel
     from pytrustnfe.nfe.danfe import danfe
     from pytrustnfe.xml.validate import valida_nfe
-    #from pytrustnfe.urls import url_qrcode
+    from pytrustnfe.urls import url_qrcode
 except ImportError:
     _logger.error('Cannot import pytrustnfe', exc_info=True)
 
@@ -444,7 +444,11 @@ class InvoiceEletronic(models.Model):
 
         paramObj = self.env['ir.config_parameter']
 
+        local_tz = pytz.timezone('America/Sao_Paulo')
+        
         dt_emissao = datetime.strptime(self.data_emissao, DTFT)
+        dt_emissao = dt_emissao.replace(tzinfo=timezone.utc).astimezone(local_tz)
+        dt_emissao = local_tz.normalize(dt_emissao)
 
         ide = {
             'cUF': self.company_id.state_id.ibge_code,
@@ -453,8 +457,8 @@ class InvoiceEletronic(models.Model):
             'mod': self.model,
             'serie': self.serie.code,
             'nNF': self.numero,
-            'dhEmi': dt_emissao.strftime('%Y-%m-%dT%H:%M:%S-00:00'),
-            'dhSaiEnt': dt_emissao.strftime('%Y-%m-%dT%H:%M:%S-00:00'),
+            'dhEmi': dt_emissao.strftime('%Y-%m-%dT%H:%M:%S-03:00'),
+            'dhSaiEnt': dt_emissao.strftime('%Y-%m-%dT%H:%M:%S-03:00'),
             'tpNF': '0' if self.tipo_operacao == 'entrada' else '1',
             'idDest': self.ind_dest or 1,
             'cMunFG': "%s%s" % (self.company_id.state_id.ibge_code,
@@ -784,27 +788,27 @@ class InvoiceEletronic(models.Model):
             pag['tPag'] = '01' if pag['tPag'] == '90' else pag['tPag']
             pag['vPag'] = "%.02f" % self.valor_final
 
-        if self.model == '65':
-            vals['pag'][0]['tPag'] = self.metodo_pagamento
-            vals['pag'][0]['vPag'] = "%.02f" % self.valor_pago
-            vals['pag'][0]['vTroco'] = "%.02f" % self.troco or '0.00'
-
-            chave_nfe = self.chave_nfe
-            ambiente = 1 if self.ambiente == 'producao' else 2
-            estado = self.company_id.state_id.ibge_code
-
-            cid_token = int(self.company_id.id_token_csc)
-            csc = self.company_id.csc
-
-            c_hash_QR_code = "{0}|2|{1}|{2}{3}".format(
-                chave_nfe, ambiente, int(cid_token), csc)
-            c_hash_QR_code = hashlib.sha1(c_hash_QR_code.encode()).hexdigest()
-
-            QR_code_url = "p={0}|2|{1}|{2}|{3}".format(
-                chave_nfe, ambiente, int(cid_token), c_hash_QR_code)
-            qr_code_server = url_qrcode(estado, ambiente)
-            vals['qrCode'] = qr_code_server + QR_code_url
-            vals['urlChave'] = qr_code_server
+#         if self.model == '65':
+#             vals['pag'][0]['tPag'] = self.metodo_pagamento
+#             vals['pag'][0]['vPag'] = "%.02f" % self.valor_pago
+#             vals['pag'][0]['vTroco'] = "%.02f" % self.troco or '0.00'
+# 
+#             chave_nfe = self.chave_nfe
+#             ambiente = 1 if self.ambiente == 'producao' else 2
+#             estado = self.company_id.state_id.ibge_code
+# 
+#             cid_token = int(self.company_id.id_token_csc)
+#             csc = self.company_id.csc
+# 
+#             c_hash_QR_code = "{0}|2|{1}|{2}{3}".format(
+#                 chave_nfe, ambiente, int(cid_token), csc)
+#             c_hash_QR_code = hashlib.sha1(c_hash_QR_code.encode()).hexdigest()
+# 
+#             QR_code_url = "p={0}|2|{1}|{2}|{3}".format(
+#                 chave_nfe, ambiente, int(cid_token), c_hash_QR_code)
+#             qr_code_server = url_qrcode(estado, ambiente)
+#             vals['qrCode'] = qr_code_server + QR_code_url
+#             vals['urlChave'] = qr_code_server
         return vals
 
     @api.multi
