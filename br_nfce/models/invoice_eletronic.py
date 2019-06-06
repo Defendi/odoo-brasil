@@ -43,7 +43,7 @@ class InvoiceEletronic(models.Model):
     def _hook_validation(self):
         errors = super(InvoiceEletronic, self)._hook_validation()
         if self.model == '65':
-            if not self.env.user.company_id.CSC_ident:
+            if not self.env.user.company_id.csc:
                 errors.append(u'Emitente / Indique o código do identificador CSC')
         return errors
     
