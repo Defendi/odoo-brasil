@@ -54,8 +54,8 @@ class InvoiceEletronic(models.Model):
             return res
         
         codigo_seguranca = {
-            'csc': self.env.user.company_id.CSC_ident,
-            'cid_token': 'dhgzjfgkj',
+            'csc': self.env.user.company_id.csc,
+            'cid_token': self.env.user.company_id.id_token_csc, #ebora envie o cid, mas ele não está sendo tratado na PyTrustNFe
         }
         
         res['codigo_seguranca'] = codigo_seguranca

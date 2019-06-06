@@ -7,9 +7,9 @@ import base64
 import logging
 import hashlib
 from lxml import etree
-from datetime import datetime
 from pytz import timezone
 from odoo import api, fields, models, _
+from datetime import datetime
 from odoo.exceptions import UserError
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from odoo.addons import decimal_precision as dp
@@ -27,7 +27,7 @@ try:
         gerar_nfeproc_cancel
     from pytrustnfe.nfe.danfe import danfe
     from pytrustnfe.xml.validate import valida_nfe
-    #from pytrustnfe.urls import url_qrcode, url_qrcode_exibicao
+#    from pytrustnfe.urls import url_qrcode, url_qrcode_exibicao
 except ImportError:
     _logger.error('Cannot import pytrustnfe', exc_info=True)
 

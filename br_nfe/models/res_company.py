@@ -27,8 +27,8 @@ class ResCompany(models.Model):
     nfe_sinc = fields.Boolean(string="Aceita envio síncrono")
 
     # Responsavel Técnico
-    id_token_csrt = fields.Char(string="Identificador do Responsavel Técnico")
-    csrt = fields.Char(string=u"Código de Segurança do Responsavel Técnico")
-    responsavel_tecnico_id = fields.Many2one(
-        string="Responsável Técnico",
-        comodel_name="res.partner")
+#     id_token_csrt = fields.Char(string="Identificador do Responsavel Técnico")
+#     csrt = fields.Char(string=u"Código de Segurança do Responsavel Técnico")
+#     responsavel_tecnico_id = fields.Many2one(
+#         string="Responsável Técnico",
+#         comodel_name="res.partner")
