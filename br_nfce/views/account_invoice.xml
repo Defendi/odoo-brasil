@@ -30,11 +30,11 @@
                     <field name="nfe_status" />
                 </div>
             </div>
-        	<field name="fiscal_position_id" position="after">
+        	<field name="product_serie_id" position="after">
         		<field name="ind_final" invisible="1"/>
-				<field name="cnpj_cpf" attrs="{'invisible': [('ind_final','=','0')]}"/>        		
-				<field name="nome" attrs="{'invisible': [('ind_final','=','0')]}"/>        		
-				<field name="email" attrs="{'invisible': [('ind_final','=','0')]}"/>        		
+				<field name="cnpj_cpf" attrs="{'invisible': ['|',('invoice_model', '!=', '65')]}"/>        		
+				<field name="nome" attrs="{'invisible': ['|',('invoice_model', '!=', '65')]}"/>        		
+				<field name="email" attrs="{'invisible': ['|',('invoice_model', '!=', '65')]}"/>        		
         	</field>
         </field>
     </record>

@@ -103,7 +103,7 @@ class InvoiceEletronic(models.Model):
     @api.multi
     def action_post_validate(self):
         super(InvoiceEletronic, self).action_post_validate()
-        if self.model == '65':
+        if self.model == '65' and self.xml_to_send:
             xml = base64.decodestring(self.xml_to_send)
             xml = etree.fromstring(xml)
             qrcode = xml.find(".//{http://www.portalfiscal.inf.br/nfe}qrCode")
