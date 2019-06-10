@@ -310,6 +310,7 @@
                 <tree string="Documentos Eletrônicos">
                     <field name="state" />
                     <field name="model"/>
+                    <field name="serie_documento"/>
                     <field name="numero"/>
                     <field name="partner_id"/>
                     <field name="valor_final"/>

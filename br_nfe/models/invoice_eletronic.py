@@ -904,29 +904,23 @@ class InvoiceEletronic(models.Model):
         }
         self.chave_nfe = gerar_chave(ChaveNFe(**chave_dict))
 
-        cert = self.company_id.with_context(
-            {'bin_size': False}).nfe_a1_file
-        cert_pfx = base64.decodestring(cert)
+        cert = self.company_id.with_context({'bin_size': False}).nfe_a1_file
+        
+        if cert:
+            cert_pfx = base64.decodestring(cert)
+            certificado = Certificado(cert_pfx, self.company_id.nfe_a1_password)
 
-        certificado = Certificado(
-            cert_pfx, self.company_id.nfe_a1_password)
+            nfe_values = self._prepare_eletronic_invoice_values()
 
-        nfe_values = self._prepare_eletronic_invoice_values()
+            lote = self._prepare_lote(self.id, nfe_values)
 
-        lote = self._prepare_lote(self.id, nfe_values)
+            xml_enviar = xml_autorizar_nfe(certificado, **lote)
 
-        xml_enviar = xml_autorizar_nfe(certificado, **lote)
-
-#         mensagens_erro = valida_nfe(xml_enviar)
-#         if mensagens_erro:
-#             raise UserError(mensagens_erro)
-
-        self.xml_to_send = base64.encodestring(
-            xml_enviar.encode('utf-8'))
-        if self.model == '55':
-            self.xml_to_send_name = 'nfe-enviar-%s.xml' % self.numero
-        else:
-            self.xml_to_send_name = 'nfce-enviar-%s.xml' % self.numero            
+            self.xml_to_send = base64.encodestring(xml_enviar.encode('utf-8'))
+            if self.model == '55':
+                self.xml_to_send_name = 'nfe-enviar-%s.xml' % self.numero
+            else:
+                self.xml_to_send_name = 'nfce-enviar-%s.xml' % self.numero            
 
     @api.multi
     def action_send_eletronic_invoice(self):

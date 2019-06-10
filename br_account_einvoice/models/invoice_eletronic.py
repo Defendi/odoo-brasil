@@ -247,10 +247,13 @@ class InvoiceEletronic(models.Model):
         """
         errors = []
         # Emitente
-        if not self.company_id.nfe_a1_file:
-            errors.append(u'Emitente - Certificado Digital')
-        if not self.company_id.nfe_a1_password:
-            errors.append(u'Emitente - Senha do Certificado Digital')
+        if self.company_id.tipo_ambiente == '1':
+            if not self.company_id.nfe_a1_file:
+                errors.append(u'Emitente - Certificado Digital')
+            if not self.company_id.nfe_a1_password:
+                errors.append(u'Emitente - Senha do Certificado Digital')
+            if self.company_id.cert_state != 'valid':
+                errors.append('Emitente - Certificado Digital Inválido')
         if not self.company_id.partner_id.legal_name:
             errors.append(u'Emitente - Razão Social')
         if not self.company_id.partner_id.cnpj_cpf:

@@ -6,6 +6,7 @@ import re
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from numpy.core.defchararray import isnumeric
 
 
 class AccountInvoice(models.Model):
@@ -28,13 +29,31 @@ class AccountInvoice(models.Model):
                 cnpj_cpf = "%s.%s.%s-%s"\
                     % (val[0:3], val[3:6], val[6:9], val[9:11])
                 self.cnpj_cpf = cnpj_cpf
-            else:
+            elif len(val) > 0:
                 raise UserError(u'Verifique CNPJ/CPF')
 
     def _prepare_edoc_vals(self, inv, inv_lines, serie_id):
         res = super(AccountInvoice, self)._prepare_edoc_vals(inv, inv_lines, serie_id)
-        res['cnpj_cpf'] = self.cnpj_cpf
-        res['nome'] = self.nome
-        res['email'] = self.email
+        if self.invoice_model == '65':
+            res['cnpj_cpf'] = self.cnpj_cpf
+            res['nome'] = self.nome
+            res['email'] = self.email
+            res['partner_id'] = False
         return res
+    
+    @api.onchange('partner_id','invoice_model')
+    def _onchange_partner_invoice_model(self):
+        self.cnpj_cpf = False
+        self.email = False
+        self.nome = False
+        if self.partner_id and self.invoice_model == '65':
+            if self.partner_id.cnpj_cpf:
+                self.cnpj_cpf = self.partner_id.cnpj_cpf
+                self.email = self.partner_id.email
+                self.nome = self.partner_id.name
+            else:
+                self.cnpj_cpf = 'Não Identificado'
+            
+                
+
     
