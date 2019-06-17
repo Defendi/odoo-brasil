@@ -8,6 +8,7 @@
             <field name="nfe_a1_password" position="after" >
                 <field name="tipo_ambiente" />
                 <field name="cabecalho_danfe" />
+                <field name="nfe_sinc"/>
             </field>
         </field>
     </record>

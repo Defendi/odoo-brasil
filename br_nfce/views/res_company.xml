@@ -10,7 +10,6 @@
                     <group>
 		                <field name="id_token_csc" />
 		                <field name="csc" />
-		                <field name="nfe_sinc"/>
                         <field name="danfe_model" />
                     </group>
                 </page>

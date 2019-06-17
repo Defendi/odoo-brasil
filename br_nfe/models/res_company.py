@@ -13,22 +13,9 @@ class ResCompany(models.Model):
         default="2",
     )
 
-    cabecalho_danfe = fields.Selection(
-        [
-            ("vertical", "Modelo Vertical"),
-            ("horizontal", "Modelo Horizontal"),
-        ],
-        string=u"Cabeçalho Danfe",
-        default="vertical",
-    )
-    # NFC-e
-    id_token_csc = fields.Char(string="Identificador do CSC")
-    csc = fields.Char(string=u"Código de Segurança do Contribuinte")
-    nfe_sinc = fields.Boolean(string="Aceita envio síncrono")
+    cabecalho_danfe = fields.Selection([('vertical', 'Modelo Vertical'),
+                                        ('horizontal', 'Modelo Horizontal')],
+                                       string=u"Cabeçalho Danfe",
+                                       default='vertical')
 
-    # Responsavel Técnico
-#     id_token_csrt = fields.Char(string="Identificador do Responsavel Técnico")
-#     csrt = fields.Char(string=u"Código de Segurança do Responsavel Técnico")
-#     responsavel_tecnico_id = fields.Many2one(
-#         string="Responsável Técnico",
-#         comodel_name="res.partner")
+    nfe_sinc = fields.Boolean(string="Aceita envio síncrono")
