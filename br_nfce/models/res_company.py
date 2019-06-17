@@ -10,7 +10,6 @@ class ResCompany(models.Model):
 
     id_token_csc = fields.Char(string="Identificador do CSC")
     csc = fields.Char(string=u'Código de Segurança do Contribuinte')
-    nfe_sinc = fields.Boolean(string="Aceita envio síncrono")
 
     danfe_model = fields.Selection([('central', 'Modelo QR Code Centralizado'),
                                     ('lateral', 'Modelo QR Code na lateral')],

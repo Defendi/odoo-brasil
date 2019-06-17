@@ -16,3 +16,5 @@ class ResCompany(models.Model):
                                         ('horizontal', 'Modelo Horizontal')],
                                        string=u"Cabeçalho Danfe",
                                        default='vertical')
+
+    nfe_sinc = fields.Boolean(string="Aceita envio síncrono")
