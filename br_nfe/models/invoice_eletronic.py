@@ -815,7 +815,7 @@ class InvoiceEletronic(models.Model):
     def _prepare_lote(self, lote, nfe_values):
         return {
             'idLote': lote,
-            'indSinc': 1 if self.company_id.nfe_sinc else 0,
+            'indSinc': 0, #1 if self.company_id.nfe_sinc else 0,
             'estado': self.company_id.partner_id.state_id.ibge_code,
             'ambiente': 1 if self.ambiente == 'producao' else 2,
             'NFes': [{
