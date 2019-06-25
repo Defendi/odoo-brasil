@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import io
+import re
 import logging
 
 from odoo import fields, models
@@ -29,15 +30,20 @@ class AccountBankStatementImport(models.TransientModel):
     _inherit = 'account.bank.statement.import'
 
     force_format = fields.Boolean(string=u'Forçar formato', default=False)
+    convert_decimal_br = fields.Boolean(string=u'Converte Decimal', default=True)
     file_format = fields.Selection([('ofx', 'Extrato OFX')],
                                    string="Formato do Arquivo",
                                    default='ofx')
     force_journal_account = fields.Boolean(string=u"Forçar conta bancária?")
     journal_id = fields.Many2one('account.journal', string=u"Conta Bancária",
                                  domain=[('type', '=', 'bank')])
+    force_duplicate_post = fields.Boolean(string=u"Permitir Duplicados?",default=False)
 
     def _parse_file(self, data_file):
         if self.force_format:
+            if self.force_decimal:
+                decmark_reg = re.compile('(?<=\d),(?=\d)')
+                data_file = decmark_reg.sub('.',data_file)
             self._check_ofx(data_file, raise_error=True)
             return self._parse_ofx(data_file)
         else:
@@ -48,11 +54,12 @@ class AccountBankStatementImport(models.TransientModel):
 
     def _check_ofx(self, data_file, raise_error=False):
         try:
+            data_file = data_file.replace('\r\n', '\n').replace('\r', '\n')
             OfxParser.parse(io.BytesIO(data_file))
             return True
         except Exception as e:
             if raise_error:
-                raise UserError(u"Arquivo formato inválido:\n%s" % str(e))
+                raise UserError("Arquivo formato inválido:\n%s" % str(e))
             return False
 
     def _parse_ofx(self, data_file):
