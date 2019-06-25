@@ -213,9 +213,7 @@ class AccountInvoiceLine(models.Model):
     cfop_id = fields.Many2one('br_account.cfop', 'CFOP')
     fiscal_classification_id = fields.Many2one(
         'product.fiscal.classification', u'Classificação Fiscal')
-    product_type = fields.Selection(
-        [('product', 'Produto'), ('service', u'Serviço')],
-        string='Tipo do Produto', required=True, default='product')
+    product_type = fields.Selection(related='product_id.fiscal_type', store=True)
     company_fiscal_type = fields.Selection(
         COMPANY_FISCAL_TYPE,
         default=_default_company_fiscal_type, string=u"Regime Tributário")
