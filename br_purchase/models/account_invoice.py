@@ -2,7 +2,7 @@
 # © 2016 Danimar Ribeiro, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class AccountInvoice(models.Model):
@@ -109,6 +109,19 @@ class AccountInvoice(models.Model):
         res['inss_aliquota'] = inss.amount or 0.0
         res['irrf_aliquota'] = irrf.amount or 0.0
         return res
+
+    # Load all unsold PO lines
+    @api.onchange('purchase_id')
+    def purchase_order_change(self):
+        if not self.purchase_id:
+            return {}
+        self.freight_responsibility = self.purchase_id.tipo_frete
+        self.shipping_supplier_id = self.purchase_id.transportadora_id
+        self.weight_net = self.purchase_id.peso_liquido
+        self.kind_of_packages = self.purchase_id.vol_especie
+        self.number_of_packages = self.purchase_id.volumes_total
+        super(AccountInvoice, self).purchase_order_change()
+        return {}
 
 
 class AccountInvoiceLine(models.Model):
