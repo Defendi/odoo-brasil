@@ -39,6 +39,7 @@ class PurchaseOrder(models.Model):
             res['account_id'] = self.fiscal_position_id.account_id.id
         if self.fiscal_position_id and self.fiscal_position_id.journal_id:
             res['journal_id'] = self.fiscal_position_id.journal_id.id
+        res['shipping_supplier_id'] = self.transportadora_id.id
         return res
 
     def _get_deadline_order(self):
@@ -49,7 +50,12 @@ class PurchaseOrder(models.Model):
         return fields.date.today()+datetime.timedelta(days)
 
     deadline_order = fields.Date('Data Final Cotação', states=READONLY_STATES, index=True, copy=False, default=_get_deadline_order, required=True)
-    tipo_frete = fields.Selection([('0',u"Emitente"),('1',u"Destinatário"),('2',u"Terceiros"),('9',u"Outros")],string=u"Frete",required=True,default='1',states=READONLY_STATES)
+    tipo_frete = fields.Selection([('0', '0 - Contratação do Frete por conta do Remetente (CIF)'),
+         ('1', '1 - Contratação do Frete por conta do Destinatário (FOB)'),
+         ('2', '2 - Contratação do Frete por conta de Terceiros'),
+         ('3', '3 - Transporte Próprio por conta do Remetente'),
+         ('4', '4 - Transporte Próprio por conta do Destinatário'),
+         ('9', '9 - Sem Ocorrência de Transporte')], string=u"Frete", required=True, default='1', states=READONLY_STATES)
     transportadora_id = fields.Many2one('res.partner',string=u"Transportador",states=READONLY_STATES)
     prazo_entrega = fields.Integer(string=u"Prazo Entrega", default=0,states=READONLY_STATES)
     vol_especie = fields.Char(string=u"Espécie Volumes",states=READONLY_STATES)
