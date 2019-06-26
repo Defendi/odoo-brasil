@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record model="ir.ui.view" id="br_cnab_retorno_form_view">
+        <field name="name">br_cnab.retorno.form.view</field>
+        <field name="model">cnab.retorno</field>
+        <field name="arch" type="xml">
+            <form string='Retorno do CNAB'>
+                <header>
+                    <button name="importar_arquivo_cnab" type="object" string="Importar" class="btn btn-primary" attrs="{'invisible': [('state', 'in', ('processado','close'))]}"/>
+                    <button name="cancelar_arquivo_cnab" type="object" string="Cancelar" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'processado')]}"/>
+                    <button name="reprocessar_arquivo_cnab" type="object" string="Reprocessar" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'processado')]}"/>
+                    <button name="set_close" type="object" string="Fechar" class="oe_highlight" confirm="Quer mesmo fechar esse retorno?" attrs="{'invisible': [('state', '!=', 'processado')]}"/>
+                    <field name="state" widget="statusbar" nolabel="1" />
+                </header>
+                <sheet>
+                	<div class="oe_title">
+                    	<h1><field name="name" /></h1>
+                    </div>
+                    <div class="oe_right oe_button_box" name="buttons">
+                    <!-- 
+                    	<field name="move_line_ids" invisible="1"/>
+						<button class="oe_stat_button" name="button_journal_entries"
+						        string="Itens de Diário" type="object"
+						        groups="account.group_account_manager"
+						        attrs="{'invisible':[('move_line_ids','=',[])]}" icon="fa-bars"/>
+					 -->
+                    </div>
+                    <group>
+                        <group>
+                            <field name="journal_id" attrs="{'readonly': [('state', 'in', ('processado','close'))]}" />
+                            <field name="cnab_file" filename="cnab_name" attrs="{'readonly': [('state', 'in', ('processado','close'))]}"/>
+                            <field name="cnab_name" invisible="1"/>
+                            <field name="error_message" attrs="{'invisible': ['|', ('error_message', '=', False), ('state', '=', 'processado')]}"/>
+                        </group>
+                        <group>
+                            <field name="data_geracao" />
+                            <field name="data_credito" />
+                            <field name="total_creditado" />
+                            <field name="statement_id" attrs="{'invisible': [('statement_id', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="eventos_id" nolabel="1" attrs="{'readonly': [('state', 'in', ('close'))]}">
+                            <tree colors="blue:state=='done';red:state=='fail';gray:state=='none';">
+                                <field name="numero_documento" />
+                                <field name="nosso_numero" />
+                                <field name="partner_name" />
+                                <field name="cod_motivo"/>
+                                <field name="msg_motivo"/>
+                                <field name="data_vencimento"/>
+                                <field name="valor"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="br_cnab_retorno_tree_view" model="ir.ui.view">
+        <field name="name">br_cnab.retorno.tree.view</field>
+        <field name="model">cnab.retorno</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml" >
+            <field name="name" />
+            <field name="cnab_name"/>
+            <field name="journal_id"/>
+            <field name="data_geracao" />
+            <field name="data_credito" />
+            <field name="total_creditado" />
+            <field name="state"/>
+        </field>
+    </record>
+
+    <record id="action_br_cnab_retorno_form" model="ir.actions.act_window">
+        <field name="name">Retorno CNAB</field>
+        <field name="res_model">cnab.retorno</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="br_cnab_retorno_tree_view"/>
+    </record>
+
+    <menuitem sequence="31" action="action_br_cnab_retorno_form"
+              id="menu_action_br_cnab_retorno"
+              parent="br_account_payment.menu_br_payments"/>
+
+</odoo>

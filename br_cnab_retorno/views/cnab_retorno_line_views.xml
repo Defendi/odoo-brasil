@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record model="ir.ui.view" id="br_cnab_retorno_line_form_view">
+        <field name="name">br_cnab.retorno.line.form.view</field>
+        <field name="model">cnab.retorno.line</field>
+        <field name="arch" type="xml">
+            <form string='Retorno do CNAB'>
+                <header>
+                    <button name="cancel_cnab" type="object" string="Cancelar" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'done')]}"/>
+                    <button name="none_cnab" type="object" string="Não Tratar" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'fail')]}"/>
+            	</header>
+                <sheet>
+                	<field name="cnab_retorno_state" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="partner_name" attrs="{'readonly': [('state', 'in', ['done','none'])]}"/>
+                            <field name="data_vencimento" attrs="{'readonly': [('state', 'in', ['done','none'])]}"/>
+                            <field name="valor" attrs="{'readonly': [('state', 'in', ['done','none'])]}"/>
+                            <field name="numero_documento" attrs="{'readonly': [('state', 'in', ['done','none'])]}"/>
+                            <field name="nosso_numero" attrs="{'readonly': [('state', 'in', ['done','none'])]}"/>
+                        </group>
+                        <group>
+                        	<field name="statementline_id" readonly="1"/>
+                        	<field name="move_id" invisible="1"/>
+                        	<field name="moveline_id" attrs="{'readonly': [('state', 'in', ['done','none'])]}" domain="[('debit','&gt;', 0.0),('reconciled','=',False)]"/>
+                            <field name="cod_motivo" readonly="1"/>
+                            <field name="msg_motivo" readonly="1"/>
+                            <field name="state" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                    	<field name="note" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="br_cnab_retorno_line_tree_view" model="ir.ui.view">
+        <field name="name">br_cnab.retorno.line.tree.view</field>
+        <field name="model">cnab.retorno.line</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml" >
+            <tree colors="blue:state=='done';red:state=='fail';gray:state=='none';">
+                <field name="numero_documento" />
+                <field name="nosso_numero" />
+                <field name="partner_name" />
+                <field name="cod_motivo"/>
+                <field name="msg_motivo"/>
+                <field name="data_vencimento"/>
+                <field name="valor" />
+                <field name="state" />
+            </tree>
+        </field>
+    </record>
+
+</odoo>

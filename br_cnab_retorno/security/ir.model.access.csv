@@ -1,0 +1,3 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"br_cnab_retorno","br_cnab.retorno","model_cnab_retorno","account.group_account_invoice",1,1,1,1
+"br_cnab_retorno_line","br_cnab.retorno.line","model_cnab_retorno_line","account.group_account_invoice",1,1,1,1
