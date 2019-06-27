@@ -44,7 +44,11 @@ class PaymentOrder(models.Model):
             remessa = cnab.remessa(order)
             order.line_ids.write({'state': 'sent'})
 
+<<<<<<< HEAD
             self.name = self._get_next_code()
+=======
+            self.name = self.env['ir.sequence'].next_by_code('seq.boleto.name')
+>>>>>>> af0145a3e97e5c67e81fd3841564fc063d2d7a12
             self.cnab_file = base64.b64encode(remessa.encode('UTF-8'))
 
             self.env['ir.attachment'].create({

@@ -445,9 +445,20 @@ class InvoiceEletronic(models.Model):
         if self.model not in ('55', '65'):
             return res
 
+<<<<<<< HEAD
         tz = timezone(self.env.user.tz)
         dt_emissao = datetime.now(tz).replace(microsecond=0).isoformat()
         paramObj = self.env['ir.config_parameter']
+=======
+        paramObj = self.env['ir.config_parameter']
+
+        local_tz = pytz.timezone('America/Sao_Paulo')
+        
+        dt_emissao = datetime.strptime(self.data_emissao, DTFT)
+        dt_emissao = dt_emissao.replace(tzinfo=timezone.utc).astimezone(local_tz)
+        dt_emissao = local_tz.normalize(dt_emissao)
+
+>>>>>>> af0145a3e97e5c67e81fd3841564fc063d2d7a12
         ide = {
             'cUF': self.company_id.state_id.ibge_code,
             'cNF': "%08d" % self.numero_controle,
@@ -455,8 +466,13 @@ class InvoiceEletronic(models.Model):
             'mod': self.model,
             'serie': self.serie.code,
             'nNF': self.numero,
+<<<<<<< HEAD
             'dhEmi': dt_emissao,
             'dhSaiEnt': dt_emissao,
+=======
+            'dhEmi': dt_emissao.strftime('%Y-%m-%dT%H:%M:%S-03:00'),
+            'dhSaiEnt': dt_emissao.strftime('%Y-%m-%dT%H:%M:%S-03:00'),
+>>>>>>> af0145a3e97e5c67e81fd3841564fc063d2d7a12
             'tpNF': '0' if self.tipo_operacao == 'entrada' else '1',
             'idDest': self.ind_dest or 1,
             'cMunFG': "%s%s" % (self.company_id.state_id.ibge_code,
@@ -828,9 +844,15 @@ class InvoiceEletronic(models.Model):
 # 
 #             QR_code_url = "p={0}|2|{1}|{2}|{3}".format(
 #                 chave_nfe, ambiente, int(cid_token), c_hash_QR_code)
+<<<<<<< HEAD
 #             qr_code_server = url_qrcode(estado, str(ambiente))
 #             vals['qrCode'] = qr_code_server + QR_code_url
 #             vals['urlChave'] = url_qrcode_exibicao(estado, str(ambiente))
+=======
+#             qr_code_server = url_qrcode(estado, ambiente)
+#             vals['qrCode'] = qr_code_server + QR_code_url
+#             vals['urlChave'] = qr_code_server
+>>>>>>> af0145a3e97e5c67e81fd3841564fc063d2d7a12
         return vals
 
     @api.multi
