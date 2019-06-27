@@ -19,16 +19,30 @@ class PaymentOrder(models.Model):
                 _('Ordem de Cobrança não possui Linhas de Cobrança!'))
         self.data_emissao_cnab = datetime.now()
         self.file_number = self.env['ir.sequence'].next_by_code('cnab.nsa')
-        for order_id in self:
-            if order_id.line_ids.filtered(
+        
+        for order in self:
+            if order.line_ids.filtered(
                lambda x: x.state in ('processed', 'rejected', 'paid')):
                 raise UserError(
                     _('Arquivo já enviado e processado pelo banco!'))
 
-            cnab = Cnab.get_cnab(
-                order_id.src_bank_account_id.bank_bic, '240')()
-            remessa = cnab.remessa(order_id)
-            order_id.line_ids.write({'state': 'sent'})
+            bank = order.payment_mode_id.bank_account_id
+            if not bank:
+                raise UserError(u'Informe a Conta Bancária no "Modo de Pagamento"')
+            if not bank.acc_number or not bank.bra_number or not bank.acc_number_dig:
+                return {
+                    'name': u'Confirme os Dados da Conta Bancária',
+                    'view_type': 'form',
+                    'view_mode': 'form',
+                    'res_model': bank._name,
+                    'res_id': bank.id,
+                    'type': 'ir.actions.act_window',
+                    'target': 'new',
+                }
+
+            cnab = Cnab.get_cnab(order.src_bank_account_id.bank_bic, '240')()
+            remessa = cnab.remessa(order)
+            order.line_ids.write({'state': 'sent'})
 
             self.name = self._get_next_code()
             self.cnab_file = base64.b64encode(remessa.encode('UTF-8'))
@@ -39,7 +53,7 @@ class PaymentOrder(models.Model):
                 'datas_fname': self.name,
                 'description': 'Arquivo CNAB 240',
                 'res_model': 'payment.order',
-                'res_id': order_id
+                'res_id': order.id
             })
 
 

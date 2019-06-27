@@ -270,7 +270,6 @@ class AccountInvoice(models.Model):
                     self.invoice_line_ids[i].declaration_line_ids
         return new_acc_inv
 
-
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
