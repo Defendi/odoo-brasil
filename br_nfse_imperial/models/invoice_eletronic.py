@@ -10,12 +10,12 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-try:
-    from pytrustnfe.nfse.imperial import gerar_nota
-    from pytrustnfe.nfse.imperial import xml_gerar_nota
-    from pytrustnfe.nfse.imperial import cancelar_nota
-except ImportError:
-    _logger.error('Cannot import pytrustnfe', exc_info=True)
+# try:
+#     #from pytrustnfe.nfse.imperial import gerar_nota
+#     #from pytrustnfe.nfse.imperial import xml_gerar_nota
+#     #from pytrustnfe.nfse.imperial import cancelar_nota
+# except ImportError:
+#     _logger.error('Cannot import pytrustnfe', exc_info=True)
 
 
 STATE = {'edit': [('readonly', False)]}
@@ -132,10 +132,10 @@ class InvoiceEletronic(models.Model):
             return
 
         nfse_values = self._prepare_eletronic_invoice_values()
-        xml_enviar = xml_gerar_nota(None, nfse=nfse_values)
+        #xml_enviar = xml_gerar_nota(None, nfse=nfse_values)
 
-        self.xml_to_send = base64.encodestring(xml_enviar)
-        self.xml_to_send_name = 'nfse-enviar-%s.xml' % self.numero
+#         self.xml_to_send = base64.encodestring(xml_enviar)
+#         self.xml_to_send_name = 'nfse-enviar-%s.xml' % self.numero
 
     @api.multi
     def action_send_eletronic_invoice(self):
@@ -146,28 +146,28 @@ class InvoiceEletronic(models.Model):
         self.state = 'error'
 
         xml_to_send = base64.decodestring(self.xml_to_send)
-        dic_retorno = gerar_nota(None, xml=xml_to_send, ambiente=self.ambiente)
+        #dic_retorno = gerar_nota(None, xml=xml_to_send, ambiente=self.ambiente)
 
-        obj = dic_retorno['object'].GerarNotaResponse
-        if obj.RetornoNota.Resultado == 1:
-            self.state = 'done'
-            self.codigo_retorno = '1'
-            self.mensagem_retorno = \
-                'Nota Fiscal Digital emitida com sucesso'
-            self.recibo_nfe = obj.RetornoNota.autenticidade
-            self.numero_nfse = obj.RetornoNota.Nota
-            self.url_danfe = obj.RetornoNota.LinkImpressao
-
-        else:
-            self.codigo_retorno = 0
-            self.mensagem_retorno = obj.DescricaoErros.item[0].DescricaoErro
+        #obj = dic_retorno['object'].GerarNotaResponse
+#         if obj.RetornoNota.Resultado == 1:
+#             self.state = 'done'
+#             self.codigo_retorno = '1'
+#             self.mensagem_retorno = \
+#                 'Nota Fiscal Digital emitida com sucesso'
+#             self.recibo_nfe = obj.RetornoNota.autenticidade
+#             self.numero_nfse = obj.RetornoNota.Nota
+#             self.url_danfe = obj.RetornoNota.LinkImpressao
+# 
+#         else:
+#             self.codigo_retorno = 0
+#             self.mensagem_retorno = obj.DescricaoErros.item[0].DescricaoErro
 
         self.env['invoice.eletronic.event'].create({
             'code': self.codigo_retorno,
             'name': self.mensagem_retorno,
             'invoice_eletronic_id': self.id,
         })
-        self._create_attachment('nfse-ret', self, dic_retorno['received_xml'])
+#         self._create_attachment('nfse-ret', self, dic_retorno['received_xml'])
 
     @api.multi
     def action_cancel_document(self, context=None, justificativa=None):
@@ -197,21 +197,21 @@ class InvoiceEletronic(models.Model):
             'tomador_email': self.partner_id.email or partner.email or '',
             'motivo': justificativa,
         }
-        dic_retorno = cancelar_nota(
-            None, cancelamento=canc, ambiente=self.ambiente)
+#         dic_retorno = cancelar_nota(
+#             None, cancelamento=canc, ambiente=self.ambiente)
 
-        obj = dic_retorno['object'].CancelarNotaResponse
-        if obj.RetornoNota.Resultado == 1:
-            self.state = 'cancel'
-            self.codigo_retorno = '100'
-            self.mensagem_retorno = 'Nota Fiscal de Serviço Cancelada'
-        else:
-            raise UserError(obj.DescricaoErros.item[0].DescricaoErro)
-
-        self.env['invoice.eletronic.event'].create({
-            'code': self.codigo_retorno,
-            'name': self.mensagem_retorno,
-            'invoice_eletronic_id': self.id,
-        })
-        self._create_attachment('canc', self, dic_retorno['sent_xml'])
-        self._create_attachment('canc-ret', self, dic_retorno['received_xml'])
+#         obj = dic_retorno['object'].CancelarNotaResponse
+#         if obj.RetornoNota.Resultado == 1:
+#             self.state = 'cancel'
+#             self.codigo_retorno = '100'
+#             self.mensagem_retorno = 'Nota Fiscal de Serviço Cancelada'
+#         else:
+#             raise UserError(obj.DescricaoErros.item[0].DescricaoErro)
+# 
+#         self.env['invoice.eletronic.event'].create({
+#             'code': self.codigo_retorno,
+#             'name': self.mensagem_retorno,
+#             'invoice_eletronic_id': self.id,
+#         })
+#         self._create_attachment('canc', self, dic_retorno['sent_xml'])
+#         self._create_attachment('canc-ret', self, dic_retorno['received_xml'])

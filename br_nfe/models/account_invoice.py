@@ -276,8 +276,4 @@ class AccountInvoiceLine(models.Model):
     declaration_line_ids = fields.One2many(
         'br_account.import.declaration.line',
         'invoice_line_id', string='Adições da DI')
-<<<<<<< HEAD
-=======
 
-    
->>>>>>> af0145a3e97e5c67e81fd3841564fc063d2d7a12
