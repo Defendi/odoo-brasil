@@ -129,7 +129,8 @@ class AccountInvoice(models.Model):
         res['ambiente'] = 'homologacao' \
             if inv.company_id.tipo_ambiente == '2' else 'producao'
 
-        res['valor_final'] = round(inv.total_bruto,2) 
+        #todo: Verificar o cálculo final da NFde
+        #res['valor_final'] = round(inv.total_bruto+inv.,2) 
         
 
         # Indicador Consumidor Final
