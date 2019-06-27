@@ -58,11 +58,7 @@ class AccountBankStatementImport(models.TransientModel):
             return True
         except Exception as e:
             if raise_error:
-<<<<<<< a57fd94de6c3850e76895942bbd51c3a6abc7174
                 raise UserError(_("Arquivo formato inválido:\n%s") % str(e))
-=======
-                raise UserError("Arquivo formato inválido:\n%s" % str(e))
->>>>>>> Ajustes na importacao do OFX
             return False
 
     def _parse_ofx(self, data_file):
