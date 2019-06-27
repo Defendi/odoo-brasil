@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2009 Renato Lima - Akretion
 # © 2016 Danimar Ribeiro, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
@@ -84,22 +83,16 @@ class AccountInvoice(models.Model):
     @api.one
     @api.depends('move_id.line_ids')
     def _compute_receivables(self):
-        receivable_lines = []
-        for line in self.move_id.line_ids:
-            if line.account_id.user_type_id.type == "receivable":
-                receivable_lines.append(line.id)
-        self.receivable_move_line_ids = self.env['account.move.line'].browse(
-            list(set(receivable_lines)))
+        self.receivable_move_line_ids = self.move_id.line_ids.filtered(
+            lambda m: m.account_id.user_type_id.type == 'receivable'
+            ).sorted(key=lambda m: m.date_maturity)
 
     @api.one
     @api.depends('move_id.line_ids')
     def _compute_payables(self):
-        payable_lines = []
-        for line in self.move_id.line_ids:
-            if line.account_id.user_type_id.type == "payable":
-                payable_lines.append(line.id)
-        self.payable_move_line_ids = self.env['account.move.line'].browse(
-            list(set(payable_lines)))
+        self.receivable_move_line_ids = self.move_id.line_ids.filtered(
+            lambda m: m.account_id.user_type_id.type == 'payable'
+            ).sorted(key=lambda m: m.date_maturity)
 
     date_invoice = fields.Date(string='Invoice Date',
         readonly=True, states={'draft': [('readonly', False)]}, index=True, required=True,

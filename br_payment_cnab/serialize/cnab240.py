@@ -16,7 +16,7 @@ except ImportError:
     _logger.error('Cannot import pycnab240', exc_info=True)
 
 
-class Cnab_240(object):
+class Cnab240(object):
 
     def _hour_now(self):
         return (int(datetime.now().strftime("%H%M%S")[0:4]))
@@ -78,9 +78,17 @@ class Cnab_240(object):
         }
         return headerArq
 
-    def _get_segmento(self, line, lot_sequency, num_lot):
+    def _get_segmento(self, line, lot_sequency, num_lot, nome_segmento):
         information_id = line.payment_information_id
         segmento = {
+            'numero_parcela': str(information_id.numero_parcela_icms),
+            'divida_ativa_etiqueta': str(information_id.divida_ativa_etiqueta),
+            "cedente_inscricao_numero": self._string_to_num(
+                self._order.company_id.cnpj_cpf),
+            "identificador_fgts": information_id.identificacao_fgts,
+            "lacre_conectividade_social": information_id.conec_social_fgts,
+            "lacre_conectividade_social_dv":
+                information_id.conec_social_dv_fgts,
             "controle_lote": num_lot,
             "sequencial_registro_lote": lot_sequency,
             "tipo_movimento": information_id.mov_type,
@@ -121,22 +129,19 @@ class Cnab_240(object):
             "cep_complemento": self._just_numbers(line.partner_id.zip[5:]),
             "favorecido_uf": line.partner_id.state_id.code or '',
             "valor_documento": self._float_to_monetary(line.amount_total),
-            "valor_abatimento": self._float_to_monetary(
-                information_id.rebate_value),
-            "valor_desconto": self._float_to_monetary(
-                information_id.discount_value),
-            "valor_mora": self._float_to_monetary(
-                information_id.interest_value),
-            "valor_multa": self._float_to_monetary(information_id.fine_value),
+            "valor_abatimento": self._float_to_monetary(line.rebate_value),
+            "valor_desconto": self._float_to_monetary(line.discount_value),
+            "valor_mora": self._float_to_monetary(line.interest_value),
+            "valor_multa": self._float_to_monetary(line.fine_value),
             "hora_envio_ted": self._hour_now(),
             "codigo_historico_credito": information_id.credit_hist_code,
             "cedente_nome": self._order.company_id.legal_name[:30],
             "valor_nominal_titulo":  self._float_to_monetary(
                 line.amount_total),
             "valor_desconto_abatimento": self._float_to_monetary(
-                information_id.rebate_value + information_id.discount_value),
+                line.rebate_value + line.discount_value),
             "valor_multa_juros": self._float_to_monetary(
-                information_id.interest_value + information_id.fine_value),
+                line.interest_value + line.fine_value),
             "codigo_moeda": int(information_id.currency_code),
             "codigo_de_barras": self._string_to_num(line.barcode),
             "codigo_de_barras_alfa": line.barcode or '',
@@ -145,11 +150,9 @@ class Cnab_240(object):
             (line.partner_id.legal_name or line.partner_id.name)[:30],
             "data_vencimento": int(self.format_date(line.date_maturity)),
             "valor_juros_encargos": self._string_to_monetary(
-                information_id.interest_value),
+                line.interest_value),
             # GPS
             "contribuinte_nome": self._order.company_id.legal_name[:30],
-            "valor_total_pagamento": self._string_to_monetary(
-                line.value_final),
             "codigo_receita_tributo": information_id.codigo_receita or '',
             "tipo_identificacao_contribuinte": 1,
             "identificacao_contribuinte": self._string_to_num(
@@ -181,10 +184,11 @@ class Cnab_240(object):
         }
         return trailerArq
 
-    def _get_trailer_lot(self, total, num_lot):
+    def _get_trailer_lot(self, totais, num_lot):
         trailer_lot = {
             "controle_lote": num_lot,
-            "somatorio_valores": self._string_to_monetary(total)
+            "somatorio_valores": self._string_to_monetary(
+                totais.get('total'))
         }
         return trailer_lot
 
@@ -192,13 +196,13 @@ class Cnab_240(object):
         information_id = line.payment_information_id
         bank = self._order.src_bank_account_id
         header_lot = {
-            'forma_lancamento': lot,
+            "forma_lancamento": lot,
             "controle_lote": num_lot,
             "tipo_servico": int(information_id.service_type),
             "cedente_inscricao_tipo": 2,
             "cedente_inscricao_numero": self._string_to_num(
                 self._order.company_id.cnpj_cpf),
-            "codigo_convenio": str(bank.codigo_convenio),
+            "codigo_convenio": str(bank.l10n_br_convenio_pagamento),
             "cedente_agencia": bank.bra_number,
             "cedente_agencia_dv": bank.bra_number_dig or '',
             "cedente_conta": bank.acc_number,
@@ -254,8 +258,8 @@ class Cnab_240(object):
             for event in events:
                 lot_sequency = self.create_detail(
                     lote, event, lot_sequency, num_lot)
-            total_lote = self._sum_lot_values(events)
-            self._create_trailer_lote(total_lote, num_lot)
+            totais_lote = self._sum_lot_values(events)
+            self._create_trailer_lote(totais_lote, num_lot)
             num_lot = num_lot + 1
 
     def _create_header_lote(self, line, num_lot, lot):
@@ -267,10 +271,11 @@ class Cnab_240(object):
         if not segments:
             raise Exception(
                 'Pelo menos um segmento por tipo deve ser implementado!')
-        for segment in segments:
-            self._cnab_file.add_segment(
-                segment, self._get_segmento(
-                    event, lot_sequency, num_lot))
+        for nome_segmento in segments:
+            vals = self._get_segmento(
+                event, lot_sequency, num_lot, nome_segmento)
+            if vals is not None:
+                self._cnab_file.add_segment(nome_segmento, vals)
             lot_sequency += 1
         self._cnab_file.get_active_lot().get_active_event(None).close_event()
         return lot_sequency
@@ -281,9 +286,13 @@ class Cnab_240(object):
             "03": ["SegmentoA", "SegmentoB"],
         }
 
-    def _create_trailer_lote(self, total, num_lot):
+    def _get_trailer_lot_name(self):
+        return 'TrailerLote'
+
+    def _create_trailer_lote(self, totais, num_lot):
+        seg_name = self._get_trailer_lot_name()
         self._cnab_file.add_segment(
-            'TrailerLote', self._get_trailer_lot(total, num_lot))
+            seg_name, self._get_trailer_lot(totais, num_lot))
         self._cnab_file.get_active_lot().close_lot()
 
     def _generate_file(self):
@@ -300,7 +309,7 @@ class Cnab_240(object):
         total = 0
         for line in lot:
             total = total + line.value_final
-        return total
+        return {'total': total}
 
     def get_mes_ano_competencia(self, line):
         if not line.invoice_date:

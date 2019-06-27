@@ -53,9 +53,8 @@ class PaymentInformation(models.Model):
          ('03', 'Pagamento de Títulos'),
          ('04', 'Tributos com código de barras'),
          ('05', 'GPS - Guia de previdencia Social'),
-         ('06', 'DARF Normal'),
-         ('07', 'DARF Simples'),
-         ('08', 'FGTS'),
+         ('06', 'DARF Nomal'),
+         ('08', 'FGTS com Código de Barras'),
          ('09', 'ICMS')],
         string="Tipo de Operação")
 
@@ -74,14 +73,6 @@ class PaymentInformation(models.Model):
     lote_serv = fields.Integer('Order of Service')
 
     reg_type = fields.Integer('Register Type')
-
-    interest_value = fields.Float('Interest Value')
-
-    fine_value = fields.Float('Duty Value')
-
-    rebate_value = fields.Float('Rebate Value')
-
-    discount_value = fields.Float('Discount Value')
 
     mov_type = fields.Selection(
         [('0', 'Inclusion'),
@@ -113,7 +104,6 @@ class PaymentInformation(models.Model):
     ], string="Tipo de Serviço")
 
     message2 = fields.Char(string='Note Detail', size=40, default='')
-
     agency_name = fields.Char(string='Agency Name', size=30, default='')
 
     currency_code = fields.Selection(
@@ -126,6 +116,9 @@ class PaymentInformation(models.Model):
          ('08', 'FAJ-TR'),
          ('09', 'Real')],
         string="Currency code", default='09')
+
+    numero_parcela_icms = fields.Integer('Número da parcela/notificação')
+    divida_ativa_etiqueta = fields.Integer('Dívida ativa/número da etiqueta')
 
     message1 = fields.Char(string='Note Header', size=40, default='')
 
@@ -151,6 +144,14 @@ class PaymentInformation(models.Model):
         string='History Code')
 
     codigo_receita = fields.Char('Código da Receita')
+
+    cod_recolhimento_fgts = fields.Integer('Código de Recolhimento do FGTS')
+
+    identificacao_fgts = fields.Integer('Número de Identificação do FGTS')
+
+    conec_social_dv_fgts = fields.Integer("DV do conectividade Social")
+
+    conec_social_fgts = fields.Integer("Lacre do conectividade social")
 
     tax_identification = fields.Selection(
         [('16', 'DARF Normal'),

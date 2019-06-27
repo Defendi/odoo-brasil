@@ -1,5 +1,5 @@
 import logging
-from ..serialize.cnab240 import Cnab_240
+from ..serialize.cnab240 import Cnab240
 
 _logger = logging.getLogger(__name__)
 
@@ -10,7 +10,7 @@ except ImportError:
     _logger.error('Cannot import pycnab240 dependencies.', exc_info=True)
 
 
-class Sicoob240(Cnab_240):
+class Sicoob240(Cnab240):
 
     def __init__(self, pay_order):
         self._bank = sicoob
@@ -41,11 +41,13 @@ class Sicoob240(Cnab_240):
         })
         return header
 
-    def _get_segmento(self, line, lot_sequency, num_lot):
+    def _get_segmento(self, line, lot_sequency, num_lot, nome_segmento):
         segmento = super(Sicoob240, self)._get_segmento(
-            line, lot_sequency, num_lot)
+            line, lot_sequency, num_lot, nome_segmento)
         ignore = not self.is_doc_or_ted(
             line.payment_information_id.payment_type)
+        if (line.payment_information_id.payment_type == "08"):
+            segmento.update({'nome_concessionaria': ''})
         segmento.update({
             'tipo_movimento': int(segmento.get('tipo_movimento')),
             'favorecido_nome': segmento.get('favorecido_nome')[:30],
@@ -71,26 +73,15 @@ class Sicoob240(Cnab_240):
                 segmento.get('codigo_instrucao_movimento')),
             'codigo_camara_compensacao': self._string_to_num(
                 segmento.get('codigo_camara_compensacao')),
-            'finalidade_doc_ted': get_ted_doc_finality(
-                'sicoob', line.payment_information_id.payment_type,
-                segmento.get('finalidade_doc_ted'), ignore),
             'finalidade_ted': get_ted_doc_finality(
-                'sicoob', line.payment_information_id.payment_type,
-                segmento.get('finalidade_doc_ted'), ignore)
+                'sicoob', segmento.get('finalidade_doc_ted'), '01', ignore),
+            'finalidade_doc': get_ted_doc_finality(
+                'sicoob', segmento.get('finalidade_doc_ted'), '02', ignore),
+            'nome_concessionaria': (
+                '' if line.payment_information_id.payment_type == '10'
+                else segmento.get('nome_concessionaria'))
         })
         return segmento
-
-    def _get_trailer_lot(self, total, num_lot):
-        trailer = super(Sicoob240, self)._get_trailer_lot(total, num_lot)
-        trailer.update({
-        })
-        return trailer
-
-    def _get_trailer_arq(self):
-        trailer = super(Sicoob240, self)._get_trailer_arq()
-        trailer.update({
-        })
-        return trailer
 
     def segments_per_operation(self):
         segments = super(Sicoob240, self).segments_per_operation()

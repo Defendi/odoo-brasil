@@ -1,4 +1,4 @@
-from ..serialize.cnab240 import Cnab_240
+from ..serialize.cnab240 import Cnab240
 import time
 import logging
 _logger = logging.getLogger(__name__)
@@ -11,10 +11,11 @@ except ImportError:
     _logger.error('Cannot import from pycnab240', exc_info=True)
 
 
-class Itau240(Cnab_240):
+class Itau240(Cnab240):
     def __init__(self, pay_order):
         self._bank = itau
         self._order = pay_order
+        self._operation = None
         super(Itau240, self).__init__()
 
     def segments_per_operation(self):
@@ -53,6 +54,7 @@ class Itau240(Cnab_240):
     def _get_header_lot(self, line, num_lot, lot):
         info_id = line.payment_information_id
         header = super(Itau240, self)._get_header_lot(line, num_lot, lot)
+        self._operation = lot
         header.update({
             'forma_lancamento': self._string_to_num(
                 header.get('forma_lancamento')),
@@ -66,18 +68,19 @@ class Itau240(Cnab_240):
         })
         return header
 
-    def _get_segmento(self, line, lot_sequency, num_lot):
+    def _get_segmento(self, line, lot_sequency, num_lot, nome_segmento):
         segmento = super(Itau240, self)._get_segmento(
-            line, lot_sequency, num_lot)
-
-        if not segmento.get('favorecido_cidade'):
-            segmento.update({'favorecido_cidade': ''})  # Verificar se isso
-            # deve existir mesmo. Talvez tratar o erro da cidade faltando,
-            # pro caso de obrigatoriedade desse campo
+            line, lot_sequency, num_lot, nome_segmento)
+        vazio, dac = self.get_dac_agencia_e_conta(segmento)
         ignore = not self.is_doc_or_ted(
             line.payment_information_id.payment_type)
         del(segmento['codigo_camara_compensacao'])
         segmento.update({
+            'numero_parcela': int(segmento.get('numero_parcela')[:13]),
+            'divida_ativa_etiqueta': int(
+                segmento.get('divida_ativa_etiqueta')[:13]),
+            'identificador_fgts': self._string_to_num(
+                segmento.get('identificador_fgts')),
             'tipo_movimento': int(segmento.get('tipo_movimento')),
             'favorecido_endereco_rua':
                 segmento.get('favorecido_endereco_rua')[:30],
@@ -96,22 +99,66 @@ class Itau240(Cnab_240):
             'valor_real_pagamento': self._string_to_monetary(
                 segmento.get('valor_real_pagamento')),
             'favorecido_banco': int(line.bank_account_id.bank_id.bic),
-            'finalidade_doc_ted': get_ted_doc_finality(
-                'itau', segmento.get('finalidade_doc_ted'),
-                line.payment_information_id.payment_type, ignore),
+            'finalidade_ted': get_ted_doc_finality(
+                'itau', segmento.get('finalidade_doc_ted'), '01', ignore),
+            'finalidade_doc': get_ted_doc_finality(
+                'itau', segmento.get('finalidade_doc_ted'), '02', ignore),
             'codigo_receita_tributo': int(
-                segmento.get('codigo_receita_tributo'))
+                segmento.get('codigo_receita_tributo') or 0),
+            'vazio_dac': vazio,
+            'dac': dac
         })
         return segmento
 
-    def _get_trailer_lot(self, total, num_lot):
-        trailer = super(Itau240, self)._get_trailer_lot(total, num_lot)
+    # NOTA 11 do manual: se houverem dois digitos no dac da agencia/conta
+    # o campo 42 (inicialmente vazio) deve ser utilizado
+    def get_dac_agencia_e_conta(self, segmento):
+        dac_agencia = segmento.get('favorecido_agencia_dv')
+        dac_conta = segmento.get('favorecido_conta_dv')
+        dac_agencia = False if dac_agencia is '' else dac_agencia
+        dac_conta = False if dac_conta is '' else dac_conta
+
+        if dac_agencia and dac_conta:
+            return dac_agencia, dac_conta
+        if dac_agencia and not dac_conta:
+            return '', dac_agencia
+        if not dac_agencia and dac_conta:
+            return '', dac_conta
+        else:
+            return '', ''
+
+    def _sum_lot_values(self, lot):
+        if self._operation not in ['16', '17', '18', '35']:
+            return super(Itau240, self)._sum_lot_values(lot)
+
+        acrescimos, total_principal, outros = 0, 0, 0
+        for line in lot:
+            paymt_id = line.payment_information_id
+            if self._operation == '17':
+                outros += line.amount_total
+            total_principal += line.amount_total
+            acrescimos += paymt_id.interest_value + paymt_id.fine_value
+        return {
+            'total': total_principal + acrescimos,
+            'total_principal': total_principal,
+            'acrescimos': acrescimos,
+            'outros': outros or 0.00
+            }
+
+    def _get_trailer_lot(self, totais, num_lot):
+        trailer = super(Itau240, self)._get_trailer_lot(totais, num_lot)
         trailer.update({
+            'total_valor_principal': self._float_to_monetary(
+                totais.get('total_principal', 0.00)),
+            'total_valor_arrecadado': trailer.get('somatorio_valores'),
+            'total_valor_acrecimos': self._float_to_monetary(
+                totais.get('acrescimos', 0.00)),
+            'total_outro_valor': self._float_to_monetary(
+                totais.get('outros', 0.00))
         })
         return trailer
 
-    def _get_trailer_arq(self):
-        trailer = super(Itau240, self)._get_trailer_arq()
-        trailer.update({
-        })
-        return trailer
+    def _get_trailer_lot_name(self):
+        if self._operation not in ['16', '17', '18', '35']:
+            return 'TrailerLote'
+        return 'TrailerLoteTributos'
