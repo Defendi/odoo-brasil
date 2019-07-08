@@ -14,7 +14,6 @@
                     <field name="file_format" attrs="{'invisible': [('force_format', '=', False)]}" />
                     <field name="force_journal_account" />
                     <field name="journal_id" attrs="{'invisible': [('force_journal_account', '=', False)]}" />
-                    <field name="force_duplicate_post" />
                 </group>
             </field>
         </field>

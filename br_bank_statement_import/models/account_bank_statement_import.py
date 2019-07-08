@@ -5,7 +5,7 @@ import io
 import re
 import logging
 
-from odoo import fields, models, _
+from odoo import fields, models, api, _
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -36,13 +36,12 @@ class AccountBankStatementImport(models.TransientModel):
     force_journal_account = fields.Boolean(string=u"Forçar conta bancária?")
     journal_id = fields.Many2one('account.journal', string=u"Conta Bancária",
                                  domain=[('type', '=', 'bank')])
-    force_duplicate_post = fields.Boolean(string=u"Permitir Duplicados?",default=False)
 
     def _parse_file(self, data_file):
         if self.force_format:
-            if self.force_decimal:
+            if self.convert_decimal_br:
                 decmark_reg = re.compile('(?<=\d),(?=\d)')
-                data_file = decmark_reg.sub('.',data_file)
+                data_file = decmark_reg.sub('.',data_file.decode("utf-8"))
             self._check_ofx(data_file, raise_error=True)
             return self._parse_ofx(data_file)
         else:
@@ -54,6 +53,7 @@ class AccountBankStatementImport(models.TransientModel):
     def _check_ofx(self, data_file, raise_error=False):
         try:
             data_file = data_file.replace('\r\n', '\n').replace('\r', '\n')
+            data_file = data_file.encode()
             OfxParser.parse(io.BytesIO(data_file))
             return True
         except Exception as e:
@@ -62,7 +62,7 @@ class AccountBankStatementImport(models.TransientModel):
             return False
 
     def _parse_ofx(self, data_file):
-        ofx = OfxParser.parse(io.BytesIO(data_file))
+        ofx = OfxParser.parse(io.BytesIO(data_file.encode()))
         transacoes = []
         total = 0.0
         for account in ofx.accounts:
@@ -108,3 +108,21 @@ class AccountBankStatementImport(models.TransientModel):
             account_number,
             [vals_bank_statement]
         )
+
+    @api.multi
+    def import_file(self):
+        res = super(AccountBankStatementImport,self).import_file()
+        statment_id = res['context']['statement_ids']
+        if len(statment_id)>0:
+            statment = self.env['account.bank.statement'].browse(statment_id)[0]
+            Vals_atach = {
+                'name': self.filename,
+                'db_datas': self.data_file,
+                'datas_fname': self.filename,
+                'res_model': statment._name,
+                'res_id': statment.id,
+                'description': 'Arquivo OFX {} '.format(statment.name),
+                'type': 'binary',
+            }
+            self.env['ir.attachment'].sudo().create(Vals_atach)
+        return res
