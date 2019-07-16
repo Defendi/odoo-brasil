@@ -53,6 +53,11 @@
                         <field name="duplicata_ids" nolabel="1" context="{'default_invoice_eletronic_id': id}" />
                     </group>
                 </page>
+                <page name="pagamentos" string="Pagamentos">
+                    <group>
+                        <field name="pagamento_ids" nolabel="1" context="{'default_invoice_eletronic_id': id}" />
+                    </group>
+                </page>
                 <page name="exportacao" string="Exportação/Compras" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}">
                     <group>
                         <group string="Exportação">

@@ -51,9 +51,9 @@ class InvoiceEletronic(models.Model):
     _order = 'id desc'
 
     code = fields.Char(
-        u'Código', size=100, required=True, readonly=True, states=STATE)
+        u'Código', size=100, readonly=True, states=STATE)
     name = fields.Char(
-        u'Nome', size=100, required=True, readonly=True, states=STATE)
+        u'Nome', size=100, readonly=True, states=STATE)
     company_id = fields.Many2one(
         'res.company', u'Empresa', readonly=True, states=STATE)
     state = fields.Selection(
@@ -82,7 +82,7 @@ class InvoiceEletronic(models.Model):
     serie = fields.Many2one(
         'br_account.document.serie', string=u'Série',
         readonly=True, states=STATE)
-    serie_documento = fields.Char(string=u'Série Documento', size=6)
+    serie_documento = fields.Char(string=u'Série Documento', size=6, readonly=True, states=STATE)
     numero = fields.Integer(
         string=u'Número', readonly=True, states=STATE)
     numero_controle = fields.Integer(

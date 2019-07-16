@@ -153,6 +153,10 @@ class InvoiceEletronic(models.Model):
         'nfe.duplicata', 'invoice_eletronic_id',
         string=u"Duplicatas", readonly=True, states=STATE)
 
+    pagamento_ids = fields.One2many(
+        'nfe.pagamento', 'invoice_eletronic_id',
+        string=u"Pagamentos", readonly=True, states=STATE)
+
     # Compras
     nota_empenho = fields.Char(
         string="Nota de Empenho", size=22, readonly=True, states=STATE)
@@ -200,6 +204,7 @@ class InvoiceEletronic(models.Model):
          ('11', 'Vale Refeição'),
          ('12', 'Vale Presente'),
          ('13', 'Vale Combustível'),
+         ('14', 'Duplicata Mercantil'),
          ('15', 'Boleto Bancário'),
          ('90', 'Sem pagamento'),
          ('99', 'Outros')],
