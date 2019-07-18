@@ -15,7 +15,10 @@ class CashFlowWizard(models.TransientModel):
     start_amount = fields.Float(string="Initial value",
                                 digits=dp.get_precision('Account'))
     print_report = fields.Boolean(string="Imprimir")
+    print_graphic = fields.Boolean(string="Gráfico", default=False)
     ignore_outstanding = fields.Boolean(string="Ignorar Vencidos?")
+    report_nature = fields.Selection([('synthetic','Sintético'),('analytic','Analítico')],string='Natureza', default='synthetic')
+    
 
     @api.multi
     def button_calculate(self):
@@ -23,6 +26,8 @@ class CashFlowWizard(models.TransientModel):
             'end_date': self.end_date,
             'start_amount': self.start_amount,
             'ignore_outstanding': self.ignore_outstanding,
+            'report_nature': self.report_nature,
+            'print_graphic': self.print_graphic,
         })
         cashflow_id.action_calculate_report()
 

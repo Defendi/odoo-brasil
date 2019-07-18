@@ -19,15 +19,16 @@ class CashFlowReport(models.TransientModel):
             payables = 0
             balance_period = 0
             for line in item.line_ids:
-                balance += line.amount
-                if line.liquidity:
-                    start_balance += line.amount
-                if line.line_type == 'receivable':
-                    receivables += line.amount
-                if line.line_type == 'payable':
-                    payables += line.amount
-                if not line.liquidity:
-                    balance_period += line.amount
+                if line.line_type != 'amount':
+                    balance += line.amount
+                    if line.liquidity:
+                        start_balance += line.amount
+                    if line.line_type == 'receivable':
+                        receivables += line.amount
+                    if line.line_type == 'payable':
+                        payables += line.amount
+                    if not line.liquidity:
+                        balance_period += line.amount
             balance += item.start_amount
 
             item.start_balance = start_balance
@@ -60,88 +61,125 @@ class CashFlowReport(models.TransientModel):
     line_ids = fields.One2many(
         "account.cash.flow.line", "cashflow_id",
         string=u"Cash Flow Lines")
+    report_nature = fields.Selection(
+        [('synthetic','Sintético'),('analytic','Analítico')],
+        string='Natureza', default='synthetic')
+    print_graphic = fields.Boolean(string="Gráfico")
 
     @api.multi
     def draw_chart(self):
-        import plotly.graph_objs as go
-        from plotly.offline.offline import _plot_html
-        import pandas as pd
+        if self.print_graphic:
+            import plotly.graph_objs as go
+            from plotly.offline.offline import _plot_html
+            import pandas as pd
+    
+            diarios = []
+            bancos = self.line_ids.filtered(lambda x: x.liquidity)
+            for item in bancos:
+                diarios.append((item.amount, item.name))
+    
+            movimentacoes = []
+            if self.report_nature == 'analytic':
+                for item in self.line_ids.filtered(lambda x: not x.liquidity and x.line_type != 'amount'):
+                    movimentacoes.append((item.amount, item.date, item.line_type))
+        
+                diarios = pd.DataFrame(diarios, columns=['total', 'name'])
+                moves = pd.DataFrame(
+                    movimentacoes, columns=['total', 'date_maturity', 'type'])
+                moves['total'] = moves["total"].astype(float)
+                moves['date_maturity'] = pd.to_datetime(moves["date_maturity"])
+                moves['receitas'] = moves["total"]
+                moves['despesas'] = moves["total"]
+        
+                moves.ix[moves.type == 'payable', 'receitas'] = 0.0
+                moves.ix[moves.type == 'receivable', 'despesas'] = 0.0
+                moves = moves.sort_values(by="date_maturity")
+                moves["acumulado"] = moves["total"].cumsum()
+                moves["acumulado"] += diarios["total"].sum()
 
-        diarios = []
-        bancos = self.line_ids.filtered(lambda x: x.liquidity)
-        for item in bancos:
-            diarios.append((item.amount, item.name))
+            else:
+                for item in self.line_ids.filtered(lambda x: not x.liquidity and x.line_type == 'amount'):
+                    movimentacoes.append((item.amount, item.balance, item.date))
+        
+                diarios = pd.DataFrame(diarios, columns=['total', 'name'])
+                moves = pd.DataFrame(
+                    movimentacoes, columns=['saldo', 'acumulado', 'date_maturity'])
+                moves['saldo'] = moves["saldo"].astype(float)
+                moves['acumulado'] = moves["acumulado"].astype(float)
+                moves['date_maturity'] = pd.to_datetime(moves["date_maturity"])
 
-        movimentacoes = []
-        for item in self.line_ids.filtered(lambda x: not x.liquidity):
-            movimentacoes.append((item.amount, item.date, item.line_type))
+                moves = moves.sort_values(by="date_maturity")
 
-        diarios = pd.DataFrame(diarios, columns=['total', 'name'])
-        moves = pd.DataFrame(
-            movimentacoes, columns=['total', 'date_maturity', 'type'])
-
-        moves['total'] = moves["total"].astype(float)
-        moves['date_maturity'] = pd.to_datetime(moves["date_maturity"])
-        moves['receitas'] = moves["total"]
-        moves['despesas'] = moves["total"]
-
-        moves.ix[moves.type == 'payable', 'receitas'] = 0.0
-        moves.ix[moves.type == 'receivable', 'despesas'] = 0.0
-        moves = moves.sort_values(by="date_maturity")
-        moves["acumulado"] = moves["total"].cumsum()
-        moves["acumulado"] += diarios["total"].sum()
-
-        saldo = []
-        saldo_inicial = 0.0
-
-        for index, row in diarios.iterrows():
-            saldo.append(go.Bar(
-                x=["Saldo"],
-                y=[row["total"]],
-                name=row["name"]
-            ))
-            saldo_inicial += row["total"]
-
-        acumulado_x = pd.Series(["Saldo"])
-        acumulado_y = pd.Series([saldo_inicial])
-
-        trace3 = go.Bar(
-            x=moves['date_maturity'],
-            y=moves['receitas'],
-            name='Receitas'
-        )
-        trace4 = go.Bar(
-            x=moves['date_maturity'],
-            y=moves['despesas'],
-            name='Despesas'
-        )
-        moves.drop_duplicates(
-            subset='date_maturity', keep='last', inplace=True)
-        x = acumulado_x.append(moves["date_maturity"])
-        y = acumulado_y.append(moves["acumulado"])
-
-        trace5 = go.Scatter(
-            x=x,
-            y=y,
-            mode='lines+markers',
-            name="Saldo",
-            line=dict(
-                shape='spline'
+            if self.report_nature == 'analytic':
+    
+                saldo = []
+                saldo_inicial = 0.0
+        
+                for index, row in diarios.iterrows():
+                    saldo.append(go.Bar(
+                        x=["Saldo"],
+                        y=[row["total"]],
+                        name=row["name"]
+                    ))
+                    saldo_inicial += row["total"]
+        
+                acumulado_x = pd.Series(["Saldo"])
+                acumulado_y = pd.Series([saldo_inicial])
+    
+                trace3 = go.Bar(
+                    x=moves['date_maturity'],
+                    y=moves['receitas'],
+                    name='Receitas'
+                )
+                trace4 = go.Bar(
+                    x=moves['date_maturity'],
+                    y=moves['despesas'],
+                    name='Despesas'
+                )
+                moves.drop_duplicates(
+                    subset='date_maturity', keep='last', inplace=True)
+                x = acumulado_x.append(moves["date_maturity"])
+                y = acumulado_y.append(moves["acumulado"])
+        
+                trace5 = go.Scatter(
+                    x=x,
+                    y=y,
+                    mode='lines+markers',
+                    name="Saldo",
+                    line=dict(
+                        shape='spline'
+                    )
+                )
+                data = [trace3, trace4, trace5]
+            else:
+                trace4 = go.Bar(
+                    x=moves['date_maturity'],
+                    y=moves['saldo'],
+                    name='Saldo Dia'
+                )
+                trace5 = go.Scatter(
+                    x=moves["date_maturity"],
+                    y=moves["acumulado"],
+                    mode='lines+markers',
+                    name="Acumulado",
+                    line=dict(
+                        shape='spline'
+                    )
+                )
+                data = [trace4,trace5]
+                
+            layout = go.Layout(
+                barmode='stack',
+                xaxis=dict(
+                    tickformat="%d-%m-%Y"
+                ),
             )
-        )
-
-        data = [trace3, trace4, trace5]
-        layout = go.Layout(
-            barmode='stack',
-            xaxis=dict(
-                tickformat="%d-%m-%Y"
-            ),
-        )
-        fig = go.Figure(data=data, layout=layout)
-
-        plot_html, plotdivid, width, height = _plot_html(
-            fig, {}, True, '100%', 525, False)
-
+            fig = go.Figure(data=data, layout=layout)
+    
+            plot_html, plotdivid, width, height = _plot_html(
+                fig, {}, True, '100%', 525, False)
+        else:
+            plot_html = '<div></div>'
         return plot_html
 
     @api.multi
@@ -181,7 +219,7 @@ class CashFlowReport(models.TransientModel):
         ]
         if self.ignore_outstanding:
             domain += [('date_maturity', '>=', date.today())]
-        moveline_ids = moveline_obj.search(domain)
+        moveline_ids = moveline_obj.search(domain,order='date_maturity')
 
         moves = []
         for move in moveline_ids:
@@ -218,10 +256,51 @@ class CashFlowReport(models.TransientModel):
 
         move_lines.sort(key=lambda x: datetime.datetime.strptime(x['date'],
                                                                  '%Y-%m-%d'))
+        tot_dt = False
+        tot_cr = 0.0
+        tot_db = 0.0
         for lines in liquidity_lines+move_lines:
+            balance_ant = balance
             balance += lines['credit'] + lines['debit']
             lines['balance'] = balance
+            if not lines.get('liquidity',False):
+                if not tot_dt:
+                    tot_dt = lines['date']
+                if tot_dt != lines['date']:
+                    self.env['account.cash.flow.line'].create({
+                        'name': 'Sub-Total',
+                        'cashflow_id': self.id,
+                        'partner_id': False,
+                        'journal_id': False,
+                        'account_id': False,
+                        'line_type': 'amount',
+                        'date': tot_dt,
+                        'debit': tot_db,
+                        'credit': tot_cr,
+                        'amount': tot_cr-(tot_db*(-1)),
+                        'balance': balance_ant,
+                    })
+                    tot_dt = lines['date']
+                    tot_cr = lines['credit']
+                    tot_db = lines['debit']
+                else:
+                    tot_cr += lines['credit']
+                    tot_db += lines['debit']
             self.env['account.cash.flow.line'].create(lines)
+
+        self.env['account.cash.flow.line'].create({
+            'name': 'Sub-Total',
+            'cashflow_id': self.id,
+            'partner_id': False,
+            'journal_id': False,
+            'account_id': False,
+            'line_type': 'amount',
+            'date': tot_dt,
+            'debit': tot_db,
+            'credit': tot_cr,
+            'amount': tot_cr-(tot_db*(-1)),
+            'balance': balance,
+        })
 
 
 class CashFlowReportLine(models.TransientModel):
@@ -231,7 +310,7 @@ class CashFlowReportLine(models.TransientModel):
     name = fields.Char(string=u"Description", required=True)
     liquidity = fields.Boolean(strign=u"Liquidez?")
     line_type = fields.Selection(
-        [('receivable', u'Recebível'), ('payable', u'Pagável')], string="Tipo")
+        [('receivable', u'Recebível'), ('payable', u'Pagável'),('amount','Total')], string="Tipo")
     date = fields.Date(string="Date")
     partner_id = fields.Many2one("res.partner", string=u"Partner")
     account_id = fields.Many2one("account.account", string=u"Account")

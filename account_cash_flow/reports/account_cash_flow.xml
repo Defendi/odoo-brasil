@@ -5,13 +5,15 @@
         <template id="account_cash_flow_template_html_report">
              <t t-call="web.html_container">
                 <t t-call="web.external_layout">
-                    <script type="text/javascript" src="/account_cash_flow/static/src/lib/plotly-latest.min.js"></script>
-                    <h2>Gráfico</h2>
-                    <div class="row">
-                        <t t-raw="docs[0].draw_chart()" />
-                    </div>
+                	<t t-if="docs[0].print_graphic">
+	                    <script type="text/javascript" src="/account_cash_flow/static/src/lib/plotly-latest.min.js"></script>
+	                    <h2>Gráfico</h2>
+	                    <div class="row">
+	                        <t t-raw="docs[0].draw_chart()" />
+	                    </div>
+	                </t>
                     <div class="page">
-                        <h2>Cash Flow Report</h2>
+                        <h2>Cash Flow Report - <span t-field="docs[0].report_nature" /></h2>
                         <table class="table table-hover">
                             <tbody>
                                 <tr>
@@ -40,31 +42,66 @@
                                 </tr>
                             </tbody>
                         </table>
-
-                        <table class="table table-condensed table-bordered table-striped">
-                            <thead class="bg-primary">
-                                <tr>
-                                    <th style="color:white;">Description</th>
-                                    <th style="color:white;">Partner</th>
-                                    <th style="color:white;" class="text-right">Date</th>
-                                    <th style="color:white;" class="text-right">A Receber</th>
-                                    <th style="color:white;" class="text-right">A pagar</th>
-                                    <th style="color:white;" class="text-right">Saldo da linha</th>
-                                    <th style="color:white;" class="text-right">Accumulated balance</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr t-foreach="docs[0].line_ids.filtered(lambda x: not x.liquidity)" t-as="o">
-                                    <td><span t-field="o.name" /></td>
-                                    <td><span t-field="o.partner_id" /></td>
-                                    <td><span t-field="o.date" /></td>
-                                    <td><span t-field="o.credit" /></td>
-                                    <td><span t-field="o.debit" /></td>
-                                    <td><span t-field="o.amount" /></td>
-                                    <td><span t-field="o.balance" /></td>
-                                </tr>
-                            </tbody>
-                        </table>
+						<t t-if="docs[0].report_nature == 'analytic'">
+	                        <table class="table table-condensed table-bordered table-striped">
+	                            <thead class="bg-primary">
+	                                <tr>
+	                                    <th style="color:white;">Description</th>
+	                                    <th style="color:white;">Partner</th>
+	                                    <th style="color:white;">Account</th>
+	                                    <th style="color:white;" class="text-right">Date</th>
+	                                    <th style="color:white;" class="text-right">A Receber</th>
+	                                    <th style="color:white;" class="text-right">A pagar</th>
+	                                    <th style="color:white;" class="text-right">Saldo da linha</th>
+	                                    <th style="color:white;" class="text-right">Accumulated balance</th>
+	                                </tr>
+	                            </thead>
+	                            <tbody>
+	                                <tr t-foreach="docs[0].line_ids.filtered(lambda x: not x.liquidity)" t-as="o">
+	                                	<t t-if="o.line_type != 'amount'">
+		                                    <td><span t-field="o.name" /></td>
+		                                    <td><span t-field="o.partner_id" /></td>
+		                                    <td><span t-field="o.account_id" /></td>
+		                                    <td style="text-align: center;"><span t-field="o.date" /></td>
+		                                    <td style="text-align: right;"><span t-field="o.credit" /></td>
+		                                    <td style="text-align: right;"><span t-field="o.debit" /></td>
+		                                    <td style="text-align: right;"><span t-field="o.amount" /></td>
+		                                    <td style="text-align: right;"><span t-field="o.balance" /></td>
+		                                </t>
+		                                <t t-else="">
+		                                    <td colspan="3" style="background-color: #e6e5e5;"><span t-field="o.name" /></td>
+		                                    <td style="text-align: center; background-color: #e6e5e5;"><span t-field="o.date" /></td>
+		                                    <td style="text-align: right; background-color: #e6e5e5;"><span t-field="o.credit" /></td>
+		                                    <td style="text-align: right; background-color: #e6e5e5;"><span t-field="o.debit" /></td>
+		                                    <td style="text-align: right; background-color: #e6e5e5;"><span t-field="o.amount" /></td>
+		                                    <td style="text-align: right; background-color: #e6e5e5;"><span t-field="o.balance" /></td>
+		                                </t>
+	                                </tr>
+	                            </tbody>
+	                        </table>
+						</t>
+						<t t-if="docs[0].report_nature == 'synthetic'">
+	                        <table class="table table-condensed table-bordered table-striped">
+	                            <thead class="bg-primary">
+	                                <tr>
+	                                    <th style="color:white;" class="text-right">Date</th>
+	                                    <th style="color:white;" class="text-right">A Receber</th>
+	                                    <th style="color:white;" class="text-right">A pagar</th>
+	                                    <th style="color:white;" class="text-right">Saldo da linha</th>
+	                                    <th style="color:white;" class="text-right">Accumulated balance</th>
+	                                </tr>
+	                            </thead>
+	                            <tbody>
+	                                <tr t-foreach="docs[0].line_ids.filtered(lambda x: x.line_type == 'amount')" t-as="o">
+	                                    <td style="text-align: center;"><span t-field="o.date" /></td>
+	                                    <td style="text-align: right;"><span t-field="o.credit" /></td>
+	                                    <td style="text-align: right;"><span t-field="o.debit" /></td>
+	                                    <td style="text-align: right;"><span t-field="o.amount" /></td>
+	                                    <td style="text-align: right;"><span t-field="o.balance" /></td>
+	                                </tr>
+	                            </tbody>
+	                        </table>
+						</t>
                     </div>
                 </t>
             </t>
@@ -92,7 +129,7 @@
             <field name="margin_top">3.0</field>
             <field name="margin_left">3.0</field>
             <field name="margin_right">3.0</field>
-            <field name="margin_bottom">6.0</field>
+            <field name="margin_bottom">15.0</field>
         </record>
 
         <record id="account_cash_flow_html_report" model="ir.actions.report">
