@@ -47,6 +47,7 @@ def format_amount(env, amount, currency):
 
 class InvoiceEletronic(models.Model):
     _name = 'invoice.eletronic'
+    _description = "Nota Fiscal"
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
 
@@ -66,7 +67,11 @@ class InvoiceEletronic(models.Model):
     tipo_operacao = fields.Selection(
         [('entrada', 'Entrada'),
          ('saida', 'Saída')],
-        string=u'Tipo de Operação', readonly=True, states=STATE)
+        string=u'State', default='draft', readonly=True, states=STATE,
+        track_visibility='always')
+    schedule_user_id = fields.Many2one(
+        'res.users', string="Agendado por", readonly=True,
+        track_visibility='always')
     model = fields.Selection(
         [('55', u'55 - NFe'),
          ('65', u'65 - NFCe'),
@@ -210,9 +215,11 @@ class InvoiceEletronic(models.Model):
         string=u'Informações complementares', readonly=True, states=STATE)
 
     codigo_retorno = fields.Char(
-        string=u'Código Retorno', readonly=True, states=STATE)
+        string=u'Código Retorno', readonly=True, states=STATE,
+        track_visibility='onchange')
     mensagem_retorno = fields.Char(
-        string=u'Mensagem Retorno', readonly=True, states=STATE)
+        string=u'Mensagem Retorno', readonly=True, states=STATE,
+        track_visibility='onchange')
     numero_nfe = fields.Char(
         string=u"Numero Formatado NFe", readonly=True, states=STATE)
 
@@ -494,6 +501,18 @@ class InvoiceEletronic(models.Model):
                 documento eletrônico!') % self.name
         self.create_uid.notify(msg, sticky=True, title="Ação necessária!",
                                warning=True, redirect=redirect)
+        try:
+            activity_type_id = self.env.ref('mail.mail_activity_data_todo').id
+        except ValueError:
+            activity_type_id = False
+        self.env['mail.activity'].create({
+            'activity_type_id': activity_type_id,
+            'note': _('Please verify the eletronic document'),
+            'user_id': self.schedule_user_id.id,
+            'res_id': self.id,
+            'res_model_id': self.env.ref(
+                'br_account_einvoice.model_invoice_eletronic').id,
+        })
 
     def _get_state_to_send(self):
         return ('draft',)
@@ -508,6 +527,8 @@ class InvoiceEletronic(models.Model):
                               limit=limit)
         for item in nfes:
             try:
+                _logger.info('Sending edoc id: %s (number: %s) by cron' % (
+                    item.id, item.numero))
                 item.action_send_eletronic_invoice()
             except Exception as e:
                 item.log_exception(e)
@@ -524,6 +545,8 @@ class InvoiceEletronic(models.Model):
         if not mail:
             raise UserError(_('Modelo de email padrão não configurado'))
         atts = self._find_attachment_ids_email()
+        _logger.info('Sending e-mail for e-doc %s (number: %s)' % (
+            self.id, self.numero))
         self.invoice_id.message_post_with_template(
             mail.id, attachment_ids=[(6, 0, atts + mail.attachment_ids.ids)])
 
@@ -559,6 +582,7 @@ class InvoiceEletronicEvent(models.Model):
 class InvoiceEletronicItem(models.Model):
     _name = 'invoice.eletronic.item'
 
+    code = fields.Text(u'Código', readonly=True, states=STATE)
     name = fields.Text(u'Nome', readonly=True, states=STATE)
     company_id = fields.Many2one(
         'res.company', u'Empresa', index=True, readonly=True, states=STATE)
@@ -672,6 +696,16 @@ class InvoiceEletronicItem(models.Model):
     icms_st_valor = fields.Monetary(
         string=u'Valor Total', digits=dp.get_precision('Account'),
         readonly=True, states=STATE)
+    icms_st_bc_ret_ant = fields.Monetary(string=u'BC Retido Fornecedor',
+                                         readonly=True, states=STATE,
+                                         help=u'Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).') 
+    icms_st_ali_sup_cons = fields.Float(string=u'Aliq.Sup. Consumidor', digits=dp.get_precision('Account'),
+                                        readonly=True, states=STATE,
+                                        help=u'Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')                            
+    icms_st_substituto = fields.Monetary(string=u'Valor Substituto', readonly=True, states=STATE,
+                                         help=u'Valor do ICMS Próprio do Substituto cobrado em operação anterior') 
+    icms_st_ret_ant = fields.Monetary(string=u'Valor Retido Fornecedor', readonly=True, states=STATE,
+                                         help=u'Valor do ICMS ST cobrado anteriormente por ST (v2.0).') 
 
     icms_aliquota_diferimento = fields.Float(
         string=u'% Diferimento', digits=dp.get_precision('Account'),

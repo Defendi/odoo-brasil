@@ -1,12 +1,14 @@
 # © 2016 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import pytz
+import logging
 from datetime import datetime
 from random import SystemRandom
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 TYPE2EDOC = {
     'out_invoice': 'saida',        # Customer Invoice
@@ -64,7 +66,6 @@ class AccountInvoice(models.Model):
         return False
 
     def action_preview_danfe(self):
-
         docs = self.env['invoice.eletronic'].search(
             [('invoice_id', '=', self.id)])
 
@@ -130,6 +131,11 @@ class AccountInvoice(models.Model):
             icms_st_aliquota_reducao_base,
             'icms_st_base_calculo': line.icms_st_base_calculo,
             'icms_st_valor': line.icms_st_valor,
+            'icms_st_bc_ret_ant': line.icms_st_bc_ret_ant,
+            'icms_st_ali_sup_cons': line.icms_st_ali_sup_cons,                          
+            'icms_st_substituto': line.icms_st_substituto,
+            'icms_st_ret_ant': line.icms_st_ret_ant,
+            
             # - Simples Nacional -
             'icms_aliquota_credito': line.icms_aliquota_credito,
             'icms_valor_credito': line.icms_valor_credito,
@@ -191,6 +197,7 @@ class AccountInvoice(models.Model):
             'invoice_id': invoice.id,
             'code': invoice.number,
             'company_id': invoice.company_id.id,
+            'schedule_user_id': self.env.user.id,
             'state': 'draft',
             'tipo_operacao': TYPE2EDOC[invoice.type],
             'numero_controle': num_controle,
@@ -289,6 +296,9 @@ class AccountInvoice(models.Model):
                         _('Documento eletrônico emitido - Cancele o \
                           documento para poder cancelar a fatura'))
                 if edoc.can_unlink():
+                    _logger.info(
+                        'deleting edoc %s by user %s in action_cancel (%s)' %
+                        (edoc.id, self.env.user.id, item.move_name))
                     edoc.sudo().unlink()
         return res
 

@@ -294,6 +294,14 @@ class AccountInvoiceLine(models.Model):
     icms_st_base_calculo_manual = fields.Float(
         'Base ICMS ST Manual', digits=dp.get_precision('Account'),
         default=0.00)
+    icms_st_bc_ret_ant = fields.Monetary(string=u'BC Retido Fornecedor',
+                                         help=u'Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).') 
+    icms_st_ali_sup_cons = fields.Float(string=u'Aliq.Sup. Consumidor', digits=dp.get_precision('Account'),
+                                        help=u'Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')                            
+    icms_st_substituto = fields.Monetary(string=u'Valor Substituto', 
+                                         help=u'Valor do ICMS Próprio do Substituto cobrado em operação anterior') 
+    icms_st_ret_ant = fields.Monetary(string=u'Valor Retido Fornecedor', 
+                                      help=u'Valor do ICMS ST cobrado anteriormente por ST (v2.0).') 
 
     # =========================================================================
     # ICMS Difal
