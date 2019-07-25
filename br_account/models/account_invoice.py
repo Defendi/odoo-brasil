@@ -90,7 +90,7 @@ class AccountInvoice(models.Model):
     @api.one
     @api.depends('move_id.line_ids')
     def _compute_payables(self):
-        self.receivable_move_line_ids = self.move_id.line_ids.filtered(
+        self.payable_move_line_ids = self.move_id.line_ids.filtered(
             lambda m: m.account_id.user_type_id.type == 'payable'
             ).sorted(key=lambda m: m.date_maturity)
 

@@ -25,6 +25,7 @@
                                 </group>
                                 <group>
                                 	<field name="code"/>
+                                	<field name="barcode"/>
                                     <field name="tipo_produto" />
                                     <field name="cfop" />
                                     <field name="ncm" />
