@@ -39,6 +39,15 @@ class AccountInvoice(models.Model):
             res['nome'] = self.nome
             res['email'] = self.email
             res['partner_id'] = False
+            pags = []
+            for move in self.receivable_move_line_ids:
+                pag = (0,0,{
+                    'forma_pagamento': '0',
+                    'metodo_pagamento': move.payment_mode_id.tipo_pagamento if move.payment_mode_id else '01',
+                    'valor': move.debit,
+                })
+                pags.append(pag)
+            res['pagamento_ids'] = pags
         return res
     
     @api.onchange('partner_id','invoice_model')

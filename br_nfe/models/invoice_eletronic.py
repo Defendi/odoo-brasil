@@ -743,11 +743,23 @@ class InvoiceEletronic(models.Model):
             },
             'dup': duplicatas
         }
-        pag = {
-            'indPag': self.payment_term_id.indPag or '0',
-            'tPag': self.payment_mode_id.tipo_pagamento or '90',
-            'vPag': '0.00',
-        }
+        pag = []
+        if self.model == '55':        
+            detPag = {
+                'indPag': self.payment_term_id.indPag or '0',
+                'tPag': self.payment_mode_id.tipo_pagamento or '90',
+                'vPag': '0.00',
+            }
+            pag.append(detPag)
+        elif self.model == '65':
+            for pagamento in self.pagamento_ids:
+                detPag = {
+                    'indPag': pagamento.forma_pagamento or '0',
+                    'tPag': pagamento.metodo_pagamento or '90',
+                    'vPag': pagamento.valor or '0.00',
+                }
+                pag.append(detPag)
+        
         self.informacoes_complementares = self.informacoes_complementares.\
             replace('\n', '<br />')
         self.informacoes_legais = self.informacoes_legais.replace(
@@ -800,7 +812,7 @@ class InvoiceEletronic(models.Model):
             'autXML': autorizados,
             'detalhes': eletronic_items,
             'total': total,
-            'pag': [pag],
+            'pag': pag,
             'transp': transp,
             'infAdic': infAdic,
             'exporta': exporta,
@@ -816,8 +828,8 @@ class InvoiceEletronic(models.Model):
         if len(duplicatas) > 0 and\
                 self.fiscal_position_id.finalidade_emissao not in ('2', '4'):
             vals['cobr'] = cobr
-            pag['tPag'] = '01' if pag['tPag'] == '90' else pag['tPag']
-            pag['vPag'] = "%.02f" % self.valor_final
+#             pag['tPag'] = '01' if pag['tPag'] == '90' else pag['tPag']
+#             pag['vPag'] = "%.02f" % self.valor_final
 
 #         if self.model == '65':
 #             vals['pag'][0]['tPag'] = self.metodo_pagamento

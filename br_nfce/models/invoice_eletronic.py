@@ -77,7 +77,8 @@ class InvoiceEletronic(models.Model):
         
             if self.ambiente == 'homologacao':
                 res['dest']['xNome'] = 'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
-                 
+        
+
         if int(self.tipo_emissao) != 1:
             dt_contigencia = datetime.strptime(self.data_fatura, DTFT)
             res['ide']['xJust'] = 'Serviço fora do ar ou inacessivel'

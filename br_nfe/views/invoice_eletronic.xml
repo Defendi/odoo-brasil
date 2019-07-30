@@ -55,7 +55,13 @@
                 </page>
                 <page name="pagamentos" string="Pagamentos">
                     <group>
-                        <field name="pagamento_ids" nolabel="1" context="{'default_invoice_eletronic_id': id}" />
+                        <field name="pagamento_ids" nolabel="1" context="{'default_invoice_eletronic_id': id}">
+	                        <tree>
+	                            <field name="forma_pagamento" />
+	                            <field name="metodo_pagamento" />
+	                            <field name="valor" />
+	                        </tree>
+                        </field>
                     </group>
                 </page>
                 <page name="exportacao" string="Exportação/Compras" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}">
