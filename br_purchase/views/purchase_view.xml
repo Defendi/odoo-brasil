@@ -56,10 +56,9 @@
                 <attribute name="invisible">0</attribute>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="before">
-                <field name="discount"
-                groups="sale.group_discount_per_so_line"/>
+                <field name="discount" groups="sale.group_discount_per_so_line"/>
                 <field name="valor_desconto" invisible="1" />
-            </xpath>
+            </xpath> 
             <field name="amount_untaxed" position="attributes">
                 <attribute name="invisible">1</attribute>
             </field>
