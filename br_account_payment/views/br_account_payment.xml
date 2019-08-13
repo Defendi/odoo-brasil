@@ -19,7 +19,9 @@
         <field name="priority" eval="20"/>
         <field name="arch" type="xml">
             <tree default_order="date_maturity" string="Payments" colors="grey:reconciled==True;red:date_maturity&lt;current_date" create="false">
+            	<field name="date" readonly="1"/>
                 <field name="partner_id" readonly="1"/>
+                <field name="name"/>
                 <field name="account_id" readonly="1"/>
                 <field name="payment_value" sum="Total das parcelas" />
                 <field name="amount_residual" readonly="1" sum="Total"/>
@@ -45,6 +47,7 @@
                 <filter string="Pagos" domain="[('reconciled','=', True)]" help="Registros pagos" name="paid"/>
                 <filter string="Abertos" domain="[('reconciled','=', False)]" help="Pagamentos em aberto" name="open"/>
                 <separator orientation="vertical"/>
+                <field name="name"/>
                 <field name="account_id"/>
                 <field name="partner_id"/>
                 <field name="date_maturity"/>

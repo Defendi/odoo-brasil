@@ -6,6 +6,9 @@
         <field name="model">account.voucher</field>
         <field name="inherit_id" ref="account_voucher.view_voucher_tree"/>
         <field name="arch" type="xml">
+        	<field name="partner_id" position="after">
+        		<field name="reference"/>	
+        	</field>
             <field name="amount" position="after">
             	<field name="date_due"/>
                 <field name="l10n_br_residual" sum="Amount Due" />
@@ -36,6 +39,9 @@
 	    <field name="model">account.voucher</field>
 	    <field name="inherit_id" ref="account_voucher.view_voucher_filter_vendor"/>
 	    <field name="arch" type="xml">
+			<xpath expr="//filter" position="before">
+				<field name="reference"/>
+			</xpath>
 			<xpath expr="//filter" position="after">
 				<filter string="Vencimento" name="groupby_date_due" context="{'group_by':'date_due'}"/>
 			</xpath>
