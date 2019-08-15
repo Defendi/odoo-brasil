@@ -31,18 +31,18 @@ def format_amount(env, amount, currency):
 
     formatted_amount = lang.format(
         fmt, currency.round(amount), grouping=True, monetary=True).replace(
-            r' ', u'\N{NO-BREAK SPACE}').replace(
-                r'-', u'-\N{ZERO WIDTH NO-BREAK SPACE}')
+            r' ', '\N{NO-BREAK SPACE}').replace(
+                r'-', '-\N{ZERO WIDTH NO-BREAK SPACE}')
 
-    pre = post = u''
+    pre = post = ''
     if currency.position == 'before':
-        pre = u'{symbol}\N{NO-BREAK SPACE}'.format(
+        pre = '{symbol}\N{NO-BREAK SPACE}'.format(
             symbol=currency.symbol or '')
     else:
-        post = u'\N{NO-BREAK SPACE}{symbol}'.format(
+        post = '\N{NO-BREAK SPACE}{symbol}'.format(
             symbol=currency.symbol or '')
 
-    return u'{pre}{0}{post}'.format(formatted_amount, pre=pre, post=post)
+    return '{pre}{0}{post}'.format(formatted_amount, pre=pre, post=post)
 
 
 class InvoiceEletronic(models.Model):
@@ -52,88 +52,88 @@ class InvoiceEletronic(models.Model):
     _order = 'id desc'
 
     code = fields.Char(
-        u'Código', size=100, readonly=True, states=STATE)
+        'Código', size=100, readonly=True, states=STATE)
     name = fields.Char(
-        u'Nome', size=100, readonly=True, states=STATE)
+        'Nome', size=100, readonly=True, states=STATE)
     company_id = fields.Many2one(
         'res.company', u'Empresa', readonly=True, states=STATE)
     state = fields.Selection(
-        [('draft', u'Provisório'),
+        [('draft', 'Provisório'),
          ('edit', 'Editar'),
          ('error', 'Erro'),
          ('done', 'Enviado'),
          ('cancel', 'Cancelado')],
-        string=u'State', default='draft', readonly=True, states=STATE)
+        string='State', default='draft', readonly=True, states=STATE)
     tipo_operacao = fields.Selection(
         [('entrada', 'Entrada'),
          ('saida', 'Saída')],
-        string=u'State', default='draft', readonly=True, states=STATE,
+        string='State', default='draft', readonly=True, states=STATE,
         track_visibility='always')
     schedule_user_id = fields.Many2one(
         'res.users', string="Agendado por", readonly=True,
         track_visibility='always')
     model = fields.Selection(
-        [('55', u'55 - NFe'),
-         ('65', u'65 - NFCe'),
-         ('001', u'NFS-e - Nota Fiscal Paulistana'),
-         ('004', u'NFS-e - Provedor BETHA'),
-         ('002', u'NFS-e - Provedor GINFES'),
-         ('008', u'NFS-e - Provedor SIMPLISS'),
-         ('009', u'NFS-e - Provedor SUSESU'),
-         ('010', u'NFS-e Imperial - Petrópolis'),
-         ('012', u'NFS-e - Florianópolis'),
-         ('203', u'NFS-e - Itajaí')],
-        string=u'Modelo', readonly=True, states=STATE)
+        [('55', '55 - NFe'),
+         ('65', '65 - NFCe'),
+         ('001', 'NFS-e - Nota Fiscal Paulistana'),
+         ('004', 'NFS-e - Provedor BETHA'),
+         ('002', 'NFS-e - Provedor GINFES'),
+         ('008', 'NFS-e - Provedor SIMPLISS'),
+         ('009', 'NFS-e - Provedor SUSESU'),
+         ('010', 'NFS-e Imperial - Petrópolis'),
+         ('012', 'NFS-e - Florianópolis'),
+         ('203', 'NFS-e - Itajaí')],
+        string='Modelo', readonly=True, states=STATE)
     serie = fields.Many2one(
-        'br_account.document.serie', string=u'Série',
+        'br_account.document.serie', string='Série',
         readonly=True, states=STATE)
-    serie_documento = fields.Char(string=u'Série Documento', size=6, readonly=True, states=STATE)
+    serie_documento = fields.Char(string='Série Documento', size=6, readonly=True, states=STATE)
     numero = fields.Integer(
-        string=u'Número', readonly=True, states=STATE)
+        string='Número', readonly=True, states=STATE)
     numero_controle = fields.Integer(
-        string=u'Número de Controle', readonly=True, states=STATE)
+        string='Número de Controle', readonly=True, states=STATE)
     data_agendada = fields.Date(
-        string=u'Data agendada',
+        string='Data agendada',
         readonly=True,
         default=fields.Date.today,
         states=STATE)
     data_emissao = fields.Datetime(
-        string=u'Data emissão', readonly=True, states=STATE)
+        string='Data emissão', readonly=True, states=STATE)
     data_fatura = fields.Datetime(
-        string=u'Data Entrada/Saída', readonly=True, states=STATE)
+        string='Data Entrada/Saída', readonly=True, states=STATE)
     data_autorizacao = fields.Char(
-        string=u'Data de autorização', size=30, readonly=True, states=STATE)
+        string='Data de autorização', size=30, readonly=True, states=STATE)
     ambiente = fields.Selection(
-        [('homologacao', u'Homologação'),
-         ('producao', u'Produção')],
-        string=u'Ambiente', readonly=True, states=STATE)
+        [('homologacao', 'Homologação'),
+         ('producao', 'Produção')],
+        string='Ambiente', readonly=True, states=STATE)
     finalidade_emissao = fields.Selection(
-        [('1', u'1 - Normal'),
-         ('2', u'2 - Complementar'),
-         ('3', u'3 - Ajuste'),
-         ('4', u'4 - Devolução')],
-        string=u'Finalidade', help=u"Finalidade da emissão de NFe",
+        [('1', '1 - Normal'),
+         ('2', '2 - Complementar'),
+         ('3', '3 - Ajuste'),
+         ('4', '4 - Devolução')],
+        string='Finalidade', help="Finalidade da emissão de NFe",
         readonly=True, states=STATE)
     invoice_id = fields.Many2one(
-        'account.invoice', string=u'Fatura', readonly=True, states=STATE)
+        'account.invoice', string='Fatura', readonly=True, states=STATE)
     partner_id = fields.Many2one(
-        'res.partner', string=u'Parceiro', readonly=True, states=STATE)
+        'res.partner', string='Parceiro', readonly=True, states=STATE)
     commercial_partner_id = fields.Many2one(
         'res.partner', string='Commercial Entity',
         related='partner_id.commercial_partner_id', store=True)
     partner_shipping_id = fields.Many2one(
-        'res.partner', string=u'Entrega', readonly=True, states=STATE)
+        'res.partner', string='Entrega', readonly=True, states=STATE)
     payment_term_id = fields.Many2one(
         'account.payment.term', string='Condição pagamento',
         readonly=True, states=STATE)
     fiscal_position_id = fields.Many2one(
-        'account.fiscal.position', string=u'Posição Fiscal',
+        'account.fiscal.position', string='Posição Fiscal',
         readonly=True, states=STATE)
     eletronic_item_ids = fields.One2many(
-        'invoice.eletronic.item', 'invoice_eletronic_id', string=u"Linhas",
+        'invoice.eletronic.item', 'invoice_eletronic_id', string="Linhas",
         readonly=True, states=STATE)
     eletronic_event_ids = fields.One2many(
-        'invoice.eletronic.event', 'invoice_eletronic_id', string=u"Eventos",
+        'invoice.eletronic.event', 'invoice_eletronic_id', string="Eventos",
         readonly=True, states=STATE)
     valor_bruto = fields.Monetary(
         string=u'Total Produtos', readonly=True, states=STATE)
@@ -706,6 +706,13 @@ class InvoiceEletronicItem(models.Model):
                                          help=u'Valor do ICMS Próprio do Substituto cobrado em operação anterior') 
     icms_st_ret_ant = fields.Monetary(string=u'Valor Retido Fornecedor', readonly=True, states=STATE,
                                          help=u'Valor do ICMS ST cobrado anteriormente por ST (v2.0).') 
+
+    icms_st_bc_dest = fields.Monetary(string='BC na UF Destino',
+                                         readonly=True, states=STATE,
+                                         help='Informar o valor da BC do ICMS ST da UF destino (v2.0)') 
+
+    icms_st_dest = fields.Monetary(string='Valor da UF Destino ', readonly=True, states=STATE,
+                                         help='Informar o valor do ICMS ST da UF destino (v2.0)') 
 
     icms_aliquota_diferimento = fields.Float(
         string=u'% Diferimento', digits=dp.get_precision('Account'),

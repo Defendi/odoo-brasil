@@ -71,6 +71,8 @@
                                     <field name="icms_st_ali_sup_cons"/>
                                     <field name="icms_st_substituto"/>
                                     <field name="icms_st_ret_ant"/>
+                                    <field name="icms_st_bc_dest"/>
+                                    <field name="icms_st_dest"/>
                                 </group>
                             </group>
                         </page>
