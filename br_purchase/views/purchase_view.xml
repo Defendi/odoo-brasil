@@ -15,6 +15,10 @@
             <field name="fiscal_position_id" position="attributes">
                 <attribute name="domain">['|', ('fiscal_type', '=', 'import'), '|', ('fiscal_type', '=', 'entrada'), ('fiscal_type', '=', None)]</attribute>
             </field>
+            <field name="is_shipped" position="after">
+            	<field name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
+            	<field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
+            </field>      
             <xpath expr="//field[@name='order_line']/tree/field[@name='taxes_id']" position="before">
                 <field name="fiscal_position_type" invisible="1" />
                 <field name="valor_bruto" widget="monetary" />

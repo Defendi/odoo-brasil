@@ -4,6 +4,7 @@
 import io
 import re
 import logging
+import chardet
 
 from odoo import fields, models, api, _
 from odoo.exceptions import UserError
@@ -40,8 +41,11 @@ class AccountBankStatementImport(models.TransientModel):
     def _parse_file(self, data_file):
         if self.force_format:
             if self.convert_decimal_br:
+                encoding = chardet.detect(data_file)['encoding']
+                data_file = data_file.decode(encoding)
                 decmark_reg = re.compile('(?<=\d),(?=\d)')
-                data_file = decmark_reg.sub('.',data_file.decode("utf-8"))
+                data_file = decmark_reg.sub('.',data_file)
+                data_file = data_file.encode(encoding)
             self._check_ofx(data_file, raise_error=True)
             return self._parse_ofx(data_file)
         else:
@@ -52,8 +56,10 @@ class AccountBankStatementImport(models.TransientModel):
 
     def _check_ofx(self, data_file, raise_error=False):
         try:
+            encoding = chardet.detect(data_file)['encoding']
+            data_file = data_file.decode(encoding)
             data_file = data_file.replace('\r\n', '\n').replace('\r', '\n')
-            data_file = data_file.encode()
+            data_file = data_file.encode(encoding)
             OfxParser.parse(io.BytesIO(data_file))
             return True
         except Exception as e:
@@ -62,7 +68,7 @@ class AccountBankStatementImport(models.TransientModel):
             return False
 
     def _parse_ofx(self, data_file):
-        ofx = OfxParser.parse(io.BytesIO(data_file.encode()))
+        ofx = OfxParser.parse(io.BytesIO(data_file))
         transacoes = []
         total = 0.0
         for account in ofx.accounts:

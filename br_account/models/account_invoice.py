@@ -302,6 +302,14 @@ class AccountInvoice(models.Model):
         store=True,
         digits=dp.get_precision('Account'),
         compute='_compute_amount')
+    
+    account_analitic_id = fields.Many2one('account.analytic.account', 'Centro Custo', copy=True)
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', copy=True)
+
+    @api.onchange('account_analitic_id')
+    def _onchange_account_analitic_id(self):
+        if self.account_analitic_id:
+            self.analytic_tag_ids = [(6,0,self.account_analitic_id.tag_ids.ids)]
 
     @api.onchange('type')
     def _onchange_type(self):

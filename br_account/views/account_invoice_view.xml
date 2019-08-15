@@ -18,7 +18,9 @@
             </xpath>
             <field name="fiscal_position_id" position="replace"></field>
             <field name="payment_term_id" position="after">
-                <field name="fiscal_position_id" domain="['|', ('fiscal_type', '=', None), ('fiscal_type', '=', 'saida')]" />
+                <field name="fiscal_position_id" domain="['|', ('fiscal_type', '=', None), ('fiscal_type', '=', 'saida')]" options="{'no_create': True, 'no_create_edit': True}"/>
+            	<field name="account_analitic_id" groups="analytic.group_analytic_accounting" options="{'no_create': True, 'no_create_edit': True}"/>
+            	<field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
             </field>
             <field name="partner_bank_id" position="after">
             	<field name="product_document_nr" />
@@ -144,6 +146,8 @@
             <field name="reference" position="after">
                 <field name="fiscal_position_id" domain="['|', ('fiscal_type', '=', 'import'), '|', ('fiscal_type', '=', 'entrada'), ('fiscal_type', '=', None)]"/>
                 <field name="payment_term_id" />
+            	<field name="account_analitic_id" groups="analytic.group_analytic_accounting" options="{'no_create': True, 'no_create_edit': True}"/>
+            	<field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
             </field>
             <xpath expr="//field[@name='invoice_line_ids']/tree" position="attributes">
                 <attribute name="editable"></attribute>

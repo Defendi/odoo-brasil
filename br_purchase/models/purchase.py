@@ -40,6 +40,10 @@ class PurchaseOrder(models.Model):
         if self.fiscal_position_id and self.fiscal_position_id.journal_id:
             res['journal_id'] = self.fiscal_position_id.journal_id.id
         res['shipping_supplier_id'] = self.transportadora_id.id
+        tagsin = []
+        for tag in self.order_line.analytic_tag_ids:
+            tagsin.append(tag.id)
+        res['analytic_tag_ids'] = [(6,0,tagsin)]
         return res
 
     def _get_deadline_order(self):
@@ -73,6 +77,9 @@ class PurchaseOrder(models.Model):
         digits=dp.get_precision('Account'), store=True,
         help="The discount amount.")
 
+    account_analytic_id = fields.Many2one('account.analytic.account', 'Centro Custo', copy=True)
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', copy=True)
+
     @api.onchange('fiscal_position_id')
     def _compute_tax_id(self):
         """
@@ -90,6 +97,16 @@ class PurchaseOrder(models.Model):
         if not self.fiscal_position_id:
             fpos = self.partner_id.property_purchase_fiscal_position_id
             self.fiscal_position_id = fpos.id
+
+    @api.onchange('account_analytic_id')
+    def _onchange_account_analytic_id(self):
+        for order in self:
+            if order.account_analytic_id:
+                tagsin = []
+                for tag in order.account_analytic_id.tag_ids:
+                    tagsin.append(tag.id)
+                if tagsin:
+                    order.analytic_tag_ids = [(6,0,tagsin)]
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'

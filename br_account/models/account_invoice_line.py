@@ -526,6 +526,9 @@ class AccountInvoiceLine(models.Model):
 
     informacao_adicional = fields.Text(string=u"Informações Adicionais")
 
+    account_analytic_id = fields.Many2one('account.analytic.account', string='Analytic Account')
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
+
     def _update_tax_from_ncm(self):
         if self.product_id:
             ncm = self.product_id.fiscal_classification_id

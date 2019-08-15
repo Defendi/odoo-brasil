@@ -44,6 +44,43 @@ class ResPartner(models.Model):
          _(u'This CPF/CNPJ number is already being used by another partner!'))
     ]
 
+    @api.depends('is_company', 'name', 'parent_id.name', 'type', 'company_name', 'legal_name')
+    def _compute_display_name(self):
+        diff = dict(show_address=None, show_address_only=None, show_email=None)
+        names = dict(self.with_context(**diff).name_get())
+        for partner in self:
+            partner.display_name = names.get(partner.id)
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for partner in self:
+            if partner.name:
+                if partner.company_type == 'person':
+                    name = partner.name
+                else:
+                    name = '['+partner.name+'] '+partner.legal_name
+            else:
+                name = ''
+
+            if partner.company_name or partner.parent_id:
+                if not name and partner.type in ['invoice', 'delivery', 'other']:
+                    name = dict(self.fields_get(['type'])['type']['selection'])[partner.type]
+                if not partner.is_company:
+                    name = "%s, %s" % (partner.commercial_company_name or partner.parent_id.name, name)
+            if self._context.get('show_address_only'):
+                name = partner._display_address(without_company=True)
+            if self._context.get('show_address'):
+                name = name + "\n" + partner._display_address(without_company=True)
+            name = name.replace('\n\n', '\n')
+            name = name.replace('\n\n', '\n')
+            if self._context.get('show_email') and partner.email:
+                name = "%s <%s>" % (name, partner.email)
+            if self._context.get('html_format'):
+                name = name.replace('\n', '<br/>')
+            res.append((partner.id, name))
+        return res
+
     @api.v8
     def _display_address(self, without_company=False):
         address = self

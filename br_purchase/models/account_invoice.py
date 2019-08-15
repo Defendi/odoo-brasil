@@ -107,6 +107,12 @@ class AccountInvoice(models.Model):
         res['csll_aliquota'] = csll.amount or 0.0
         res['inss_aliquota'] = inss.amount or 0.0
         res['irrf_aliquota'] = irrf.amount or 0.0
+        
+        tagsin = []
+        for tag in line.analytic_tag_ids:
+            tagsin.append(tag.id)
+        res['analytic_tag_ids'] = [(6,0,tagsin)]
+        
         return res
 
     # Load all unsold PO lines
@@ -114,12 +120,19 @@ class AccountInvoice(models.Model):
     def purchase_order_change(self):
         if not self.purchase_id:
             return {}
+        if not self.partner_id:
+            self.partner_id = self.purchase_id.partner_id.id
         self.freight_responsibility = self.purchase_id.tipo_frete
         self.shipping_supplier_id = self.purchase_id.transportadora_id
         self.weight_net = self.purchase_id.peso_liquido
         self.kind_of_packages = self.purchase_id.vol_especie
         self.number_of_packages = self.purchase_id.volumes_total
+        self.account_analitic_id = self.purchase_id.account_analytic_id.id
         super(AccountInvoice, self).purchase_order_change()
+        tagsin = []
+        for tag in self.purchase_id.analytic_tag_ids:
+            tagsin.append(tag.id)
+        self.analytic_tag_ids = [(6,0,tagsin)]
         return {}
 
 
