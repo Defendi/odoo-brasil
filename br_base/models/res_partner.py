@@ -56,7 +56,7 @@ class ResPartner(models.Model):
         res = []
         for partner in self:
             if partner.name:
-                if partner.company_type == 'person':
+                if partner.company_type == 'person' or partner.legal_name == False:
                     name = partner.name
                 else:
                     name = '['+partner.name+'] '+partner.legal_name
