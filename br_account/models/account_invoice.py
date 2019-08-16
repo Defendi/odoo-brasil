@@ -406,8 +406,7 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def finalize_invoice_move_lines(self, move_lines):
-        res = super(AccountInvoice, self).\
-            finalize_invoice_move_lines(move_lines)
+        res = super(AccountInvoice, self).finalize_invoice_move_lines(move_lines)
         count = 1
         for invoice_line in res:
             line = invoice_line[2]
@@ -416,6 +415,13 @@ class AccountInvoice(models.Model):
                line['name'] == self.name and self.name):
                 line['name'] = "%02d" % count
                 count += 1
+            if not line.get('analytic_account_id',False):
+                line['analytic_account_id'] = self.account_analitic_id.id
+            if not line.get('analytic_tag_ids',False) or len(line['analytic_tag_ids']) == 0:
+                tagsin = []
+                for tag in self.analytic_tag_ids:
+                    tagsin.append(tag.id)
+                line['analytic_tag_ids'] = [(6,0,tagsin)]
         return res
 
     @api.multi
