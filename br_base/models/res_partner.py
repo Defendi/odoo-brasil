@@ -13,6 +13,7 @@ import logging
 from odoo import models, fields, api, _
 from ..tools import fiscal
 from odoo.exceptions import UserError, ValidationError
+from django.template.defaultfilters import default
 
 _logger = logging.getLogger(__name__)
 
@@ -26,6 +27,9 @@ except ImportError:
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    def _default_country(self):
+        return self.env['res.country'].search([('ibge_code', '=', '1058')],limit=1).id
+
     cnpj_cpf = fields.Char('CNPJ/CPF', size=18, copy=False)
     inscr_est = fields.Char('State Inscription', size=16, copy=False)
     rg_fisica = fields.Char('RG', size=16, copy=False)
@@ -33,6 +37,7 @@ class ResPartner(models.Model):
     suframa = fields.Char('Suframa', size=18)
     legal_name = fields.Char(
         u'Legal Name', size=60, help="Name used in fiscal documents")
+    country_id = fields.Many2one('res.country', string='Country', ondelete='restrict', default=_default_country)
     city_id = fields.Many2one(
         'res.state.city', u'City',
         domain="[('state_id','=',state_id)]")
@@ -121,7 +126,7 @@ class ResPartner(models.Model):
     def _check_cnpj_cpf(self):
         for item in self:
             country_code = item.country_id.code or ''
-            if item.cnpj_cpf and country_code.upper() == 'BR':
+            if item.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
                 if item.is_company:
                     if not fiscal.validate_cnpj(item.cnpj_cpf):
                         raise ValidationError(_(u'Invalid CNPJ Number!'))
@@ -177,7 +182,7 @@ class ResPartner(models.Model):
     @api.onchange('cnpj_cpf')
     def _onchange_cnpj_cpf(self):
         country_code = self.country_id.code or ''
-        if self.cnpj_cpf and country_code.upper() == 'BR':
+        if self.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
             val = re.sub('[^0-9]', '', self.cnpj_cpf)
             if len(val) == 14:
                 cnpj_cpf = "%s.%s.%s/%s-%s"\
