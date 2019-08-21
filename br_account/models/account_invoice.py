@@ -303,8 +303,10 @@ class AccountInvoice(models.Model):
         digits=dp.get_precision('Account'),
         compute='_compute_amount')
     
-    account_analitic_id = fields.Many2one('account.analytic.account', 'Centro Custo', copy=True)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', copy=True)
+    account_analitic_id = fields.Many2one('account.analytic.account', 'Centro Custo', 
+                                          copy=True, readonly=True, states={'draft': [('readonly', False)]})
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', 
+                                        copy=True, readonly=True, states={'draft': [('readonly', False)]})
 
     @api.onchange('account_analitic_id')
     def _onchange_account_analitic_id(self):
