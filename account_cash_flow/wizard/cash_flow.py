@@ -9,6 +9,8 @@ from openerp import api, fields, models
 class CashFlowWizard(models.TransientModel):
     _name = 'account.cash.flow.wizard'
 
+
+    start_date = fields.Date(string=u"Start Date", default=False)
     end_date = fields.Date(
         string="End Date", required=True,
         default=fields.date.today() + datetime.timedelta(6 * 365 / 12))
@@ -23,6 +25,7 @@ class CashFlowWizard(models.TransientModel):
     @api.multi
     def button_calculate(self):
         cashflow_id = self.env['account.cash.flow'].create({
+            'start_date': self.start_date,
             'end_date': self.end_date,
             'start_amount': self.start_amount,
             'ignore_outstanding': self.ignore_outstanding,

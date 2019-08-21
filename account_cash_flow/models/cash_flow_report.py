@@ -38,6 +38,7 @@ class CashFlowReport(models.TransientModel):
             item.final_amount = balance
 
     ignore_outstanding = fields.Boolean(string="Ignorar Vencidos?")
+    start_date = fields.Date(string=u"Start Date", default=False)
     end_date = fields.Date(
         string=u"End Date", required=True,
         default=fields.date.today()+datetime.timedelta(6*365/12))
@@ -222,10 +223,33 @@ class CashFlowReport(models.TransientModel):
         moveline_ids = moveline_obj.search(domain,order='date_maturity')
 
         moves = []
+        amount_cred = 0.0
+        amount_deb = 0.0
         for move in moveline_ids:
-            debit = move.amount_residual if move.amount_residual < 0 else 0.0
-            credit = move.amount_residual if move.amount_residual > 0 else 0.0
-            amount = credit + debit
+            if self.start_date and move.date_maturity < self.start_date:
+                amount_deb += move.amount_residual if move.amount_residual < 0 else 0.0 
+                amount_cred += move.amount_residual if move.amount_residual > 0 else 0.0
+                continue
+            else:
+                if amount_deb != 0.0 or amount_cred != 0.0:
+                    moves.append({
+                        'name': 'Saldo Anterior',
+                        'cashflow_id': self.id,
+                        'partner_id': False,
+                        'journal_id': False,
+                        'account_id': False,
+                        'line_type': False,
+                        'date': self.start_date,
+                        'debit': amount_deb,
+                        'credit': amount_cred,
+                        'amount': amount_cred + amount_deb,
+                    })
+                    amount_deb = 0.0
+                    amount_cred = 0.0
+                    
+                debit = move.amount_residual if move.amount_residual < 0 else 0.0
+                credit = move.amount_residual if move.amount_residual > 0 else 0.0
+                amount = credit + debit
 
             # Temporário: não mostra as linhas com os campos 'a receber' e
             # 'a pagar' zerados

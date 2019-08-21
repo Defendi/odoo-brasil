@@ -9,6 +9,7 @@
                 <form string="Generate Cash Flow">
                     <group>
                     	<group>
+                    		<field name="start_date"/>
 	                        <field name="end_date"/>
 	                        <field name="start_amount"/>
 	                        <field name="ignore_outstanding"/>
