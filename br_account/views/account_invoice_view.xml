@@ -113,7 +113,7 @@
             </field>
             <field name="move_name" position="attributes">
             	<attribute name="invisible">0</attribute>
-            	<attribute name="groups">account.group_account_manager</attribute>
+            	<attribute name="groups">base.group_no_one</attribute>
             </field>
         </field>
     </record>
@@ -230,7 +230,7 @@
            </field>
             <field name="move_name" position="attributes">
             	<attribute name="invisible">0</attribute>
-            	<attribute name="groups">account.group_account_manager</attribute>
+            	<attribute name="groups">base.group_no_one</attribute>
             </field>
         </field>
     </record>
