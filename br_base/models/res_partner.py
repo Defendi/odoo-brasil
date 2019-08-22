@@ -13,7 +13,6 @@ import logging
 from odoo import models, fields, api, _
 from ..tools import fiscal
 from odoo.exceptions import UserError, ValidationError
-from django.template.defaultfilters import default
 
 _logger = logging.getLogger(__name__)
 
