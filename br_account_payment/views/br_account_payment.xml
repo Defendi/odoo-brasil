@@ -22,6 +22,7 @@
             	<field name="date" readonly="1"/>
                 <field name="partner_id" readonly="1"/>
                 <field name="name"/>
+                <field name="invoice_id" string="Fatura"/>
                 <field name="account_id" readonly="1"/>
                 <field name="payment_value" sum="Total das parcelas" />
                 <field name="amount_residual" readonly="1" sum="Total"/>
@@ -51,10 +52,12 @@
                 <field name="account_id"/>
                 <field name="partner_id"/>
                 <field name="date_maturity"/>
+                <field name="invoice_id" string="Fatura"/>
                 <group expand="0" string="Agrupar por...">
                     <filter name="group_partner" string="Parceiro" domain="[]" context="{'group_by':'partner_id'}"/>
                     <filter name="group_date" string="Data de Vencimento" domain="[]" context="{'group_by':'date_maturity:day'}"/>
                     <filter name="group_month" string="Mês" domain="[]" context="{'group_by':'date_maturity'}"/>
+                    <filter name="invoice_id" string="Fatura" domain="[]" context="{'group_by':'invoice_id'}"/>
                </group>
            </search>
         </field>
