@@ -756,7 +756,7 @@ class InvoiceEletronic(models.Model):
                 detPag = {
                     'indPag': pagamento.forma_pagamento or '0',
                     'tPag': pagamento.metodo_pagamento or '90',
-                    'vPag': pagamento.valor or '0.00',
+                    'vPag': "%.02f" % pagamento.valor or '0.00',
                 }
                 pag.append(detPag)
         
