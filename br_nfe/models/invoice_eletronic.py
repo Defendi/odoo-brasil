@@ -249,6 +249,8 @@ class InvoiceEletronic(models.Model):
                 if not eletr.cfop:
                     errors.append(u'%s - CFOP' % prod)
                 if eletr.tipo_produto == 'product':
+                    if not eletr.ncm:
+                        errors.append(u'%s - NCM' % prod)
                     if not eletr.icms_cst:
                         errors.append(u'%s - CST do ICMS' % prod)
                     if not eletr.ipi_cst:
@@ -944,6 +946,12 @@ class InvoiceEletronic(models.Model):
                 self.xml_to_send_name = 'nfce-enviar-%s.xml' % self.numero            
 
     @api.multi
+    def action_back_to_draft(self):
+        if not bool(self.xml_to_send):
+            self.action_post_validate()
+        self.state = 'draft'
+
+    @api.multi
     def action_send_eletronic_invoice(self):
         super(InvoiceEletronic, self).action_send_eletronic_invoice()
 
@@ -964,6 +972,12 @@ class InvoiceEletronic(models.Model):
 
         certificado = Certificado(cert_pfx, self.company_id.nfe_a1_password)
 
+        if not bool(self.xml_to_send):
+            self.action_post_validate()
+
+        if not bool(self.xml_to_send):
+            raise UserError(_("XML a enviar é inválido ou inexistente"))
+            
         xml_to_send = base64.decodestring(self.xml_to_send).decode('utf-8')
 
         resposta_recibo = None

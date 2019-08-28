@@ -67,7 +67,7 @@ class InvoiceEletronic(models.Model):
     tipo_operacao = fields.Selection(
         [('entrada', 'Entrada'),
          ('saida', 'Saída')],
-        string='State', default='draft', readonly=True, states=STATE,
+        string='State', default='saida', readonly=True, states=STATE,
         track_visibility='always')
     schedule_user_id = fields.Many2one(
         'res.users', string="Agendado por", readonly=True,
@@ -223,7 +223,7 @@ class InvoiceEletronic(models.Model):
     numero_nfe = fields.Char(
         string=u"Numero Formatado NFe", readonly=True, states=STATE)
 
-    xml_to_send = fields.Binary(string="Xml a Enviar", readonly=True)
+    xml_to_send = fields.Binary(string="Xml a Enviar", readonly=True, states=STATE)
     xml_to_send_name = fields.Char(
         string=u"Nome xml a ser enviado", size=100, readonly=True)
 
