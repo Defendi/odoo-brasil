@@ -9,7 +9,7 @@ from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
 
 from odoo.addons.br_base.tools import fiscal
-
+from .cst import CST_ICMS
 
 class BrAccountCFOP(models.Model):
     """CFOP - Código Fiscal de Operações e Prestações"""
@@ -341,3 +341,36 @@ class BrAccountCategoriaFiscal(models.Model):
     _description = 'Categoria Fiscal'
 
     name = fields.Char('Descrição', required=True)
+
+class BrAccountBeneficioFiscal(models.Model):
+    _name = 'br_account.beneficio.fiscal'
+    _description = 'Código de Benefício Fiscal'
+
+    code = fields.Char('Código',size=10)
+    name = fields.Char('Descrição', required=True)
+    state_id = fields.Many2one('res.country.state', u'Estado', domain="[('country_id.code', '=', 'BR')]", required=True)
+    dt_start = fields.Date('Data Inicial')
+    dt_end = fields.Date('Data Final')
+    cst_line_ids = fields.One2many('br_account.beneficio.fiscal.cst', 'beneficio_id', string=u"CSTs", copy=True)
+    memo = fields.Text('Observação')
+
+    @api.multi
+    def name_get(self):
+        result = []
+        for rec in self:
+            result.append((rec.id, "[%s] %s" % (rec.code or '', rec.name or '')))
+        return result
+
+
+class BrAccountBeneficioFiscalCST(models.Model):
+    _name = 'br_account.beneficio.fiscal.cst'
+    _description = 'CST - Código de Benefício Fiscal'
+    
+    name = fields.Selection(CST_ICMS, string=u"CST ICMS")
+    beneficio_id = fields.Many2one('br_account.beneficio.fiscal',string='CST - Código de Benefício Fiscal')
+    code = fields.Char(related='beneficio_id.code',store=True)
+    #name = fields.Char(related='beneficio_id.code')
+    state_id = fields.Many2one(related='beneficio_id.state_id',store=True)
+    dt_start = fields.Date(related='beneficio_id.dt_start',store=True)
+    dt_end = fields.Date(related='beneficio_id.dt_end',store=True)
+    

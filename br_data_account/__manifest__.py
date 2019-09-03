@@ -11,6 +11,9 @@
     'depends': [
         'br_account',
     ],
+    'data':[
+        'data/br_account.beneficio.fiscal.csv',
+    ],
     'post_init_hook': 'post_init',
     'category': 'Localisation',
     'installable': True,

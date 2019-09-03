@@ -317,14 +317,16 @@ class InvoiceEletronic(models.Model):
             'vFrete': "%.02f" % item.frete if item.frete else '',
             'vSeg': "%.02f" % item.seguro if item.seguro else '',
             'vDesc': "%.02f" % item.desconto if item.desconto else '',
-            'vOutro': "%.02f" % item.outras_despesas
-            if item.outras_despesas else '',
+            'vOutro': "%.02f" % item.outras_despesas if item.outras_despesas else '',
             'indTot': item.indicador_total,
             'cfop': item.cfop,
             'CEST': re.sub('[^0-9]', '', item.cest or ''),
             'nItemPed': item.item_pedido_compra if item.item_pedido_compra else '',
             'xPed': item.nr_pedido_compra if item.nr_pedido_compra else '', 
         }
+        if item.icms_benef:
+            prod['cBenef'] = item.icms_benef.code
+            
         di_vals = []
         for di in item.import_declaration_ids:
             adicoes = []

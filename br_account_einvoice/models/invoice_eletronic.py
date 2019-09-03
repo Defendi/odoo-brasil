@@ -651,6 +651,8 @@ class InvoiceEletronicItem(models.Model):
     icms_aliquota = fields.Float(
         string=u'Alíquota', digits=dp.get_precision('Account'),
         readonly=True, states=STATE)
+    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Cod.Benf.Fiscal")
+    
     icms_tipo_base = fields.Selection(
         [('0', u'0 - Margem Valor Agregado (%)'),
          ('1', u'1 - Pauta (Valor)'),

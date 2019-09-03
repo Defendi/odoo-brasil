@@ -110,6 +110,7 @@ class AccountInvoice(models.Model):
             'desconto': line.valor_desconto,
             'valor_liquido': line.price_subtotal,
             'origem': line.icms_origem,
+            'icms_benef': line.icms_benef.id,
             'tributos_estimados': line.tributos_estimados,
             'ncm': line.fiscal_classification_id.code,
             'item_pedido_compra': line.item_pedido_compra,

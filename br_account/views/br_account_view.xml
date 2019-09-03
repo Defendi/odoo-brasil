@@ -362,6 +362,44 @@
         </field>
     </record>
 
+    <record id="view_br_account_beneficio_fiscal_tree" model="ir.ui.view">
+        <field name="name">br_account.beneficio.fiscal.tree</field>
+        <field name="model">br_account.beneficio.fiscal</field>
+        <field name="arch" type="xml">
+            <tree string="Benefício Fiscal">
+	        	<field name="code"/>
+	            <field name="name"/>
+	            <field name="state_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_br_account_beneficio_fiscal_form" model="ir.ui.view">
+        <field name="name">br_account.beneficio.fiscal.form</field>
+        <field name="model">br_account.beneficio.fiscal</field>
+        <field name="arch" type="xml">
+            <form string="Benefício Fiscal">
+                <group>
+                    <group>
+                    	<field name="code"/>
+                        <field name="name"/>
+                        <field name="state_id"/>
+                    </group>
+                    <group>
+                    	<field name="dt_start"/>
+                        <field name="dt_end"/>
+                    </group>
+                    <group string="CSTs" colspan="4">
+                        <field name="cst_line_ids" widget="many2many_tags" nolabel="1"/>
+                    </group>
+                    <group string="Observação" colspan="4">
+                        <field name="memo" nolabel="1"></field>
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+
     <record id="br_account_cfop_action" model="ir.actions.act_window">
         <field name="name">CFOP</field>
         <field name="type">ir.actions.act_window</field>
@@ -443,6 +481,15 @@
         <field name="view_id" ref="view_br_account_fiscal_category_tree"/>
     </record>
 
+    <record id="action_br_account_beneficio_fiscal" model="ir.actions.act_window">
+        <field name="name">Benefício Fiscal</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">br_account.beneficio.fiscal</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_type">form</field>
+        <field name="view_id" ref="view_br_account_beneficio_fiscal_tree"/>
+    </record>
+
     <menuitem
     id="menu_br_account_fiscal_manager"
     name="Cadastros"
@@ -508,5 +555,11 @@
     name="Categoria Fiscal"
     parent="br_account.menu_br_account_fiscal_manager"
     action="action_br_account_fiscal_category"/>
+
+    <menuitem
+    id="menu_action_br_account_beneficio_fiscal"
+    name="Beneficio Fiscal"
+    parent="br_account.menu_br_account_fiscal_manager"
+    action="action_br_account_beneficio_fiscal"/>
 
 </odoo>
