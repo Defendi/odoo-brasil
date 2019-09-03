@@ -123,7 +123,7 @@
         <field name="inherit_id" ref="account_cancel.invoice_form_cancel_inherit"/>
         <field name="arch" type="xml">
             <button name="action_invoice_cancel" position="replace">
-                <button name="action_invoice_cancel_paid" type="object" states="draft,proforma2,open,paid" string="Cancelar Fatura" groups="account.group_account_invoice"/></button>
+                <button name="action_invoice_cancel_paid" type="object" states="draft,proforma2,open,paid" string="Cancelar Fatura" groups="account.group_account_manager"/></button>
         </field>
     </record>
     <record id="view_br_account_invoice_supplier_form" model="ir.ui.view">
@@ -261,7 +261,7 @@
         <field name="inherit_id" ref="account_cancel.invoice_supplier_cancel_form_inherit"/>
         <field name="arch" type="xml">
             <button name="action_invoice_cancel" position="replace">
-                <button name="action_invoice_cancel_paid" type="object" states="draft,proforma2,open,paid" string="Cancelar Fatura" groups="account.group_account_invoice"/></button>
+                <button name="action_invoice_cancel_paid" type="object" states="draft,proforma2,open,paid" string="Cancelar Fatura" groups="action_invoice_cancel_paid"/></button>
         </field>
     </record>
     <!-- Invoice Line views -->
