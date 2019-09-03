@@ -42,6 +42,7 @@ class AccountFiscalPositionTaxRule(models.Model):
 
     cst_icms = fields.Selection(CST_ICMS, string=u"CST ICMS")
     csosn_icms = fields.Selection(CSOSN_SIMPLES, string=u"CSOSN ICMS")
+    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Cod.Benf.Fiscal")
     cst_pis = fields.Selection(CST_PIS_COFINS, string=u"CST PIS")
     cst_cofins = fields.Selection(CST_PIS_COFINS, string=u"CST COFINS")
     cst_ipi = fields.Selection(CST_IPI, string=u"CST IPI")
@@ -181,6 +182,7 @@ class AccountFiscalPosition(models.Model):
             return {
                 ('%s_rule_id' % type_tax): rules[0],
                 'cfop_id': rules[0].cfop_id,
+                'icms_benef': rules[0].icms_benef,
                 ('tax_%s_id' % type_tax): rules[0].tax_id,
                 # ICMS
                 'icms_cst_normal': rules[0].cst_icms,
