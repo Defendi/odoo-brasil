@@ -136,6 +136,12 @@ msgid "End Date"
 msgstr "Data Final"
 
 #. module: account_cash_flow
+#: model:ir.model.fields,field_description:account_cash_flow.field_account_cash_flow_start_date
+#: model:ir.model.fields,field_description:account_cash_flow.field_account_cash_flow_wizard_start_date
+msgid "Start Date"
+msgstr "Data Inicial"
+
+#. module: account_cash_flow
 #: model:ir.ui.view,arch_db:account_cash_flow.view_account_cash_flow_wizard_form
 msgid "Generate"
 msgstr "Gerar"
