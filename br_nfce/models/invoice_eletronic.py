@@ -66,17 +66,27 @@ class InvoiceEletronic(models.Model):
         if res.get('dest',False):
             del res['dest']
 
-        if self.cnpj_cpf:
-            dest = {
-                'tipo': 'person',
-                'cnpj_cpf': re.sub('[^0-9]', '', self.cnpj_cpf or ''),
-                'xNome': self.nome if self.nome else '',
-                'indIEDest': '9'
-            }
-            res['dest'] = dest
-        
-            if self.ambiente == 'homologacao':
-                res['dest']['xNome'] = 'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
+        if bool(self.cnpj_cpf):
+            cnpj_cpf = re.sub('[^0-9]', '', self.cnpj_cpf or '')
+            dest = {}
+            if len(cnpj_cpf) == 11:
+                dest.update({
+                    'tipo': 'person',
+                    'cnpj_cpf': cnpj_cpf,
+                    'xNome': self.nome if self.nome else '',
+                    'indIEDest': '9'
+                })
+            elif len(cnpj_cpf) == 14:
+                dest.update({
+                    'tipo': 'company',
+                    'cnpj_cpf': cnpj_cpf,
+                    'xNome': self.nome if self.nome else '',
+                    'indIEDest': '9'
+                })
+            if len(dest):
+                res['dest'] = dest
+                if self.ambiente == 'homologacao':
+                    res['dest']['xNome'] = 'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
         
 
         if int(self.tipo_emissao) != 1:

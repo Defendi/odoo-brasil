@@ -249,8 +249,11 @@ class InvoiceEletronic(models.Model):
                 if not eletr.cfop:
                     errors.append(u'%s - CFOP' % prod)
                 if eletr.tipo_produto == 'product':
-                    if not eletr.ncm:
+                    if not bool(eletr.ncm):
                         errors.append(u'%s - NCM' % prod)
+                    else:
+                        if len(eletr.ncm) < 8:
+                            errors.append(u'%s - NCM % - Código do NCM inválido' % (prod,eletr.ncm.code))
                     if not eletr.icms_cst:
                         errors.append(u'%s - CST do ICMS' % prod)
                     if not eletr.ipi_cst:
