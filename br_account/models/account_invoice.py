@@ -117,12 +117,12 @@ class AccountInvoice(models.Model):
     vendor_number = fields.Char(
         u'Número NF Entrada', size=18, readonly=True,
         states={'draft': [('readonly', False)]},
-        help=u"Número da Nota Fiscal do Fornecedor")
+        help=u"Número da Nota Fiscal do Fornecedor", copy=False)
     
     vendor_serie = fields.Char(
         u'Série NF Entrada', size=12, readonly=True,
         states={'draft': [('readonly', False)]},
-        help=u"Série do número da Nota Fiscal do Fornecedor")
+        help=u"Série do número da Nota Fiscal do Fornecedor",copy=False)
 
     product_serie_id = fields.Many2one(
         'br_account.document.serie', string=u'Série produtos',
@@ -307,6 +307,20 @@ class AccountInvoice(models.Model):
                                           copy=True, readonly=True, states={'draft': [('readonly', False)]})
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', 
                                         copy=True, readonly=True, states={'draft': [('readonly', False)]})
+
+
+    @api.multi
+    @api.constrains('type', 'issuer', 'partner_id', 'vendor_serie', 'vendor_number')
+    def _check_vendor_number(self):
+        # Verificação se já existe a fatura cadastrada
+        for inv in self:
+            if inv.type == 'in_invoice' and inv.issuer == '0' and bool(inv.partner_id) and bool(inv.vendor_serie) and bool(inv.vendor_number): 
+                if inv.env['account.invoice'].search([('id','!=',inv.id),
+                                                      ('partner_id','=',inv.partner_id.id),
+                                                      ('vendor_serie','=',inv.vendor_serie),
+                                                      ('vendor_number','=',inv.vendor_number)]):
+                        raise UserError(u'Não é possível ter mais que uma fatura com o mesmo número de um único fornecedor.')
+        return True
 
     @api.onchange('account_analitic_id')
     def _onchange_account_analitic_id(self):

@@ -497,7 +497,7 @@ class InvoiceEletronic(models.Model):
             'domain': [['id', '=', self.invoice_id.id]],
             'context': {}
         }
-        msg = _('Verifique a %s, ocorreu um problema com o envio de \
+        msg = _('Verifique o %s, ocorreu um problema com o envio de \
                 documento eletrônico!') % self.name
         self.create_uid.notify(msg, sticky=True, title="Ação necessária!",
                                warning=True, redirect=redirect)
