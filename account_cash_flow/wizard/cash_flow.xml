@@ -15,6 +15,7 @@
 	                        <field name="ignore_outstanding"/>
 	                    </group>
 	                    <group>
+   	                       <field name="account_ids" widget="many2many_tags" domain="[('internal_type', '=', 'liquidity')]"/>
 	                    	<field name="report_nature"/>
 	                    	<field name="print_report"/>
 	                    	<field name="print_graphic"/>

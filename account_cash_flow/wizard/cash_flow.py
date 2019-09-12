@@ -16,22 +16,29 @@ class CashFlowWizard(models.TransientModel):
         default=fields.date.today() + datetime.timedelta(6 * 365 / 12))
     start_amount = fields.Float(string="Initial value",
                                 digits=dp.get_precision('Account'))
+    account_ids = fields.Many2many('account.account', string="Filtrar Contas")
     print_report = fields.Boolean(string="Imprimir")
     print_graphic = fields.Boolean(string="Gráfico", default=False)
     ignore_outstanding = fields.Boolean(string="Ignorar Vencidos?")
     report_nature = fields.Selection([('synthetic','Sintético'),('analytic','Analítico')],string='Natureza', default='synthetic')
     
 
-    @api.multi
-    def button_calculate(self):
-        cashflow_id = self.env['account.cash.flow'].create({
+    def _prepare_vals(self):
+        return {
             'start_date': self.start_date,
             'end_date': self.end_date,
             'start_amount': self.start_amount,
             'ignore_outstanding': self.ignore_outstanding,
             'report_nature': self.report_nature,
             'print_graphic': self.print_graphic,
-        })
+            'account_ids': [(6, None, self.account_ids.ids)]
+        }
+        
+        
+    @api.multi
+    def button_calculate(self):
+        vals = self._prepare_vals()
+        cashflow_id = self.env['account.cash.flow'].create(vals)
         cashflow_id.action_calculate_report()
 
         if not self.print_report:
