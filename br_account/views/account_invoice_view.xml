@@ -9,7 +9,6 @@
         <field name="view_id" ref="account.view_account_payment_invoice_form"/>
         <field name="target">new</field>
     </record>
-    
     <record id="view_br_account_invoice_form" model="ir.ui.view">
         <field name="name">br_account.invoice.form</field>
         <field name="model">account.invoice</field>
@@ -116,6 +115,16 @@
             	<attribute name="groups">base.group_no_one</attribute>
             </field>
         </field>
+    </record>
+    <record id="view_br_account_invoice_tree" model="ir.ui.view">
+        <field name="name">view.br_account.invoice.tree</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_tree"/>
+        <field name="arch" type="xml">
+            <field name="date_due" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+      	</field>
     </record>
     <record id="view_br_account_invoice_cancel_form" model="ir.ui.view">
         <field name="name">br_account.invoice.cancel.form</field>
@@ -242,6 +251,9 @@
 			<xpath expr="//field[@name='date_invoice']" position="after">
 				<field name="vendor_number"/>
 			</xpath>
+			<field name="date_due" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
 		</field>
 	</record>
     <record id="view_br_account_invoice_filter" model="ir.ui.view">

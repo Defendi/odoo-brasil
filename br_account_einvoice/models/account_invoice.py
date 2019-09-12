@@ -113,7 +113,8 @@ class AccountInvoice(models.Model):
             'icms_benef': line.icms_benef.id,
             'tributos_estimados': line.tributos_estimados,
             'ncm': line.fiscal_classification_id.code,
-            'item_pedido_compra': line.item_pedido_compra,
+            'item_pedido_compra': line.item_pedido_compra, 
+            'nr_pedido_compra': line.nr_pedido_compra, 
             # - ICMS -
             'icms_cst': line.icms_cst,
             'icms_aliquota': line.icms_aliquota,
@@ -185,8 +186,6 @@ class AccountInvoice(models.Model):
             'inss_aliquota': abs(line.inss_aliquota),
             'inss_valor_retencao':
             abs(line.inss_valor) if line.inss_valor < 0 else 0,
-            'item_pedido_compra': line.item_pedido_compra, 
-            'nr_pedido_compra': line.nr_pedido_compra, 
         }
         return vals
 
@@ -320,7 +319,10 @@ class AccountInvoiceLine(models.Model):
     )
 
     item_pedido_compra = fields.Char(
-        string=u'Item Ped.Compra')
+        string="Item de compra", size=20,
+        help=u'Item do pedido de compra do cliente')
 
-    nr_pedido_compra   = fields.Char(
-        string=u'Número Ped.Compra')
+    nr_pedido_compra = fields.Char(
+        string="Pedido Compra", size=60,
+        help="Se setado aqui sobrescreve o pedido de compra da fatura")
+

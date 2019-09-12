@@ -13,11 +13,10 @@
                 </div>
             </div>
             <field name="date_invoice" position="before">
-                  <field name="numero_nfse" invisible='1'/>
+                  <field name="numero_nfse" attrs="{'invisible': [('numero_nfse', '=', '')]}" />
             </field>
         </field>
     </record>
-    
     <record id="view_br_nfse_account_invoice_supplier_form" model="ir.ui.view">
         <field name="name">view_br_nfse.account.invoice.form</field>
         <field name="model">account.invoice</field>
@@ -31,11 +30,12 @@
                 </div>
             </div>
             <field name="date_invoice" position="before">
-                  <field name="numero_nfse" invisible='1'/>
+                  <field name="numero_nfse" attrs="{'invisible': [('numero_nfse', '=', None)]}" />
             </field>
         </field>
     </record>
     
+    <!-- 
     <record id="view_br_nfse_account_invoice_tree" model="ir.ui.view">
         <field name="name">view_br_nfse.account.invoice.tree</field>
         <field name="model">account.invoice</field>
@@ -44,48 +44,7 @@
             <field name="number" position="after">
                 <field name="numero_nfse" />
             </field>
-      	</field>
-    </record>
-    
-    <record id="view_br_nfse_invoice_tree" model="ir.ui.view">
-        <field name="name">view.br_nfse.line.tree</field>
-        <field name="model">account.invoice</field>
-        <field name="inherit_id" ref="br_account_einvoice.view_br_nfse_invoice_tree"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='invoice_line_ids']/tree" position="attributes">
-                <attribute name="decoration-info">state == 'pendente'</attribute>
-                <attribute name="decoration-muted">state == 'transmitido'</attribute>
-            </xpath>
-            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='state']" position="after">
-                <field name="numero_nfse"/>
-            </xpath>
         </field>
     </record>
-    
-    <record id="view_br_nfse_invoice_form" model="ir.ui.view">
-        <field name="name">view.br_nfse.line.form</field>
-        <field name="model">account.invoice.line</field>
-        <field name="inherit_id" ref="br_account_einvoice.view_br_account_einvoice_invoice_line_form"/>
-        <field name="arch" type="xml">
-            <field name="item_pedido_compra" position="after">
-                <field name="numero_nfse" attrs="{'required': [('state', '=', 'transmitido')],'invisible': [('product_type', '=', 'product')]}"/>
-            </field>
-        </field>
-    </record>
-
-    <!-- view_br_nfe_invoice_line_form  -->
-    <record model="ir.ui.view" id="view_nfse_account_invoice_line_form">
-        <field name="name">br_account.invoice.line.form</field>
-        <field name="model">account.invoice.line</field>
-        <field name="inherit_id" ref="br_account.view_br_account_invoice_line_form" />
-        <field name="priority">10</field>
-        <field name="arch" type="xml">
-        	<field name="service_type_id" position="after">
-        		<field name="country_id" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>	
-        		<field name="state_id" domain="[('country_id','=',country_id)]" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>	
-        		<field name="city_id" domain="[('state_id','=',state_id)]" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>	
-        	</field>
-        </field>
-    </record>
-    
+	 -->
 </odoo>
