@@ -168,6 +168,8 @@ class SaleOrderLine(models.Model):
 
     icms_cst_normal = fields.Char(string=u"CST ICMS", size=5)
     icms_csosn_simples = fields.Char(string=u"CSOSN ICMS", size=5)
+    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Benficio Fiscal")
+    
     icms_st_aliquota_mva = fields.Float(string=u'Alíquota MVA (%)',
                                         digits=dp.get_precision('Account'))
     aliquota_icms_proprio = fields.Float(
@@ -286,6 +288,7 @@ class SaleOrderLine(models.Model):
 
         res['icms_cst_normal'] = self.icms_cst_normal
         res['icms_csosn_simples'] = self.icms_csosn_simples
+        res['icms_benef'] = self.icms_benef.id
 
         res['tax_icms_id'] = icms and icms.id or False
         res['tax_icms_st_id'] = icmsst and icmsst.id or False

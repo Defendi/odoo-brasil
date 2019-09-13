@@ -35,7 +35,10 @@
         </field>
     </record>
     
-    <!-- 
+    <!--
+    
+    Eliminar a view_br_nfse_invoice_form
+     
     <record id="view_br_nfse_account_invoice_tree" model="ir.ui.view">
         <field name="name">view_br_nfse.account.invoice.tree</field>
         <field name="model">account.invoice</field>
