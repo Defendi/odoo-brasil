@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <field name="fiscal_position_id" position="attributes">
                 <attribute name="domain">['|', ('fiscal_type', '=', None), ('fiscal_type', '=', 'saida')]</attribute>
+                <attribute name="options">{'no_create': '1'}</attribute>
             </field>
             <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="before">
                 <field name="icms_rule_id" invisible="1" />
