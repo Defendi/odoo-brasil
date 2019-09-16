@@ -4,6 +4,7 @@
 import base64
 import tempfile
 import csv
+import chardet
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 import logging
@@ -39,9 +40,11 @@ class ProductFiscalClassificationWizard(models.TransientModel):
     def import_ncm(self):
         if not self.product_fiscal_class_csv:
             raise UserError(_('Nenhum Arquivo Selecionado!'))
-        ncm_string = base64.decodestring(self.product_fiscal_class_csv)
+        data_file = base64.decodestring(self.product_fiscal_class_csv)
+        encoding = chardet.detect(data_file)['encoding']
+        data_file = data_file.decode(encoding)
         temp = tempfile.NamedTemporaryFile(delete=False)
-        temp.write(ncm_string)
+        temp.write(data_file.encode('utf-8'))
         temp.close()
         with open(temp.name, 'r') as csvfile:
             if not self.has_quote_char:
