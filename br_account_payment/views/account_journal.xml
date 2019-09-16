@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <field name="bank_id" position="before">
                 <field name="bank_agency_number" />
-                <field name="acc_partner_id" />
+                <field name="acc_partner_id" options="{'no_create': '1'}"/>
             </field>
             <field name="bank_statements_source" position="before">
                 <field name="acc_number_dig" />
@@ -29,7 +29,7 @@
         <field name="arch" type="xml">
             <field name="bank_acc_number" position="after">
                 <field name="bank_agency_number" />
-                <field name="acc_partner_id" />
+                <field name="acc_partner_id" options="{'no_create': '1'}"/>
             </field>
             <field name="company_id" position="before">
                 <field name="acc_number_dig" />

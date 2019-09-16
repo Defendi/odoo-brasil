@@ -159,6 +159,7 @@ class PurchaseOrderLine(models.Model):
 
     icms_cst_normal = fields.Char(string="CST ICMS", size=5)
     icms_csosn_simples = fields.Char(string="CSOSN ICMS", size=5)
+    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Benificio Fiscal")
     icms_st_aliquota_mva = fields.Float(string=u'Alíquota MVA (%)',
                                         digits=dp.get_precision('Account'))
     aliquota_icms_proprio = fields.Float(

@@ -21,6 +21,21 @@ class ProductFiscalClassificationWizard(models.TransientModel):
     ncm_quote_char = fields.Char(string=u'Caracter de Citação', size=3)
 
     @api.multi
+    def _verifica_arquivo(self,lines):
+        error = []
+        if not 'codigo' in lines.fieldnames:
+            error.append('codigo')
+        if not 'nacionalfederal' in lines.fieldnames:
+            error.append('nacionalfederal')
+        if not 'importadosfederal' in lines.fieldnames:
+            error.append('importadosfederal')
+        if not 'estadual' in lines.fieldnames:
+            error.append('estadual')
+        if not 'municipal' in lines.fieldnames:
+            error.append('municipal')
+        return error
+
+    @api.multi
     def import_ncm(self):
         if not self.product_fiscal_class_csv:
             raise UserError(_('Nenhum Arquivo Selecionado!'))
@@ -39,6 +54,15 @@ citação estiver marcado é necessário informá-lo!'))
                 ncm_lines = csv.DictReader(
                     csvfile, delimiter=str(self.ncm_csv_delimiter),
                     quotechar=self.ncm_quote_char)
+            erros = self._verifica_arquivo(ncm_lines)
+            if len(erros) > 0:
+                msg = 'Não localizamos os seguintes campos:\n'
+                for er in erros:
+                    msg += er + '\n'
+                msg += 'Constam os seguintes campos no arquivo:'
+                for cp in ncm_lines.fieldnames:
+                    msg += cp + '\n'
+                raise UserError(msg)
             for line in ncm_lines:
                 code = line['codigo']
                 ncm_tax = {

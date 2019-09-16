@@ -25,9 +25,19 @@
         	<xpath expr="//button[3]" position="attributes">
         		<attribute name="groups">account.group_account_manager</attribute>
         	</xpath>
-            <xpath expr="//field[@name='line_ids']/tree/field[@name='account_id']" position="attributes">
-                <attribute name="domain">[('deprecated', '=', False),('account_type', '=', 'expense')]</attribute>
-            </xpath>
+			<xpath expr="//field[@name='partner_id']" position="attributes">
+				<attribute name="options">{'no_quick_create': '1', 'no_quick_edit': '1', 'always_reload': True}</attribute>
+			</xpath>
+			<xpath expr="//field[@name='line_ids']/tree/field[@name='product_id']" position="attributes">
+				<attribute name="options">{'no_create': '1'}</attribute>
+			</xpath>
+			<xpath expr="//field[@name='line_ids']/tree/field[@name='account_id']" position="attributes">
+				<attribute name="domain">[('deprecated', '=', False),('account_type', '=', 'expense')]</attribute>
+				<attribute name="options">{'no_create': '1'}</attribute>
+			</xpath>
+			<xpath expr="//field[@name='line_ids']/tree/field[@name='account_analytic_id']" position="attributes">
+				<attribute name="options">{'no_create': '1'}</attribute>
+			</xpath>
             <xpath expr="//field[@name='line_ids']/tree/field[@name='account_analytic_id']" position="after">
                 <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags" options="{'color_field': 'color'}"/>
             </xpath>
@@ -71,9 +81,19 @@
         	<xpath expr="//button[3]" position="attributes">
         		<attribute name="groups">account.group_account_manager</attribute>
         	</xpath>
-            <xpath expr="//field[@name='line_ids']/tree/field[@name='account_id']" position="attributes">
+			<xpath expr="//field[@name='partner_id']" position="attributes">
+				<attribute name="options">{'no_quick_create': '1', 'no_quick_edit': '1', 'always_reload': True}</attribute>
+			</xpath>
+			<xpath expr="//field[@name='line_ids']/tree/field[@name='product_id']" position="attributes">
+				<attribute name="options">{'no_create': '1'}</attribute>
+			</xpath>
+			<xpath expr="//field[@name='line_ids']/tree/field[@name='account_id']" position="attributes">
                 <attribute name="domain">[('deprecated', '=', False),('account_type', '=', 'income')]</attribute>
-            </xpath>
+				<attribute name="options">{'no_create': '1'}</attribute>
+			</xpath>
+			<xpath expr="//field[@name='line_ids']/tree/field[@name='account_analytic_id']" position="attributes">
+				<attribute name="options">{'no_create': '1'}</attribute>
+			</xpath>
             <xpath expr="//field[@name='line_ids']/tree/field[@name='account_analytic_id']" position="after">
                 <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags" options="{'color_field': 'color'}"/>
             </xpath>
@@ -82,6 +102,8 @@
             </field>
         </field>
     </record>
+
+
 
     <record id="view_br_account_voucher_recurring_form" model="ir.ui.view">
         <field name="name">view.br_account_voucher.recurring.form</field>
@@ -126,7 +148,7 @@
                                   <field name="product_id"/>
                                   <field name="name"/>
                                   <field name="account_id" groups="account.group_account_user"/>
-                                  <field name="account_analytic_id" domain="[('company_id', '=', parent.company_id)]" groups="analytic.group_analytic_accounting"/>
+                                  <field name="account_analytic_id" options="{'no_create': '1'}" domain="[('company_id', '=', parent.company_id)]" groups="analytic.group_analytic_accounting"/>
                                   <field name="quantity"/>
                                   <field name="price_unit"/>
                                   <field name="tax_ids" widget="many2many_tags" domain="[('type_tax_use','=','purchase')]"/>

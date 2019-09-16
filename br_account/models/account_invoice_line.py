@@ -229,7 +229,7 @@ class AccountInvoiceLine(models.Model):
                            store=True, compute='_compute_cst_icms')
     icms_cst_normal = fields.Selection(CST_ICMS, string="CST ICMS")
     icms_origem = fields.Selection(ORIGEM_PROD, 'Origem', default='0')
-    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Cod.Benf.Fiscal")
+    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Benificio Fiscal")
     icms_tipo_base = fields.Selection(
         [('0', u'0 - Margem Valor Agregado (%)'),
          ('1', u'1 - Pauta (valor)'),

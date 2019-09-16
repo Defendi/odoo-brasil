@@ -337,7 +337,7 @@
                                     <field name="icms_cst_normal" attrs="{'invisible': [('company_fiscal_type', '!=', '3')] }" />
                                     <field name="icms_csosn_simples" attrs="{'invisible': [('company_fiscal_type', '==', '3')] }" />
                                     <field name="icms_origem"/>
-                                    <field name="icms_benef"/>
+                                    <field name="icms_benef" options="{'no_create': '1'}"/>
                                     <field name="icms_tipo_base" groups="base.group_no_one" readonly="1"/>
                                     <field name="incluir_ipi_base" />
                                     <field name="tem_difal" />
