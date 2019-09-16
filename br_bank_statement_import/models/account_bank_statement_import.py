@@ -187,3 +187,9 @@ class AccountBankStatementImport(models.TransientModel):
                 }
             }]
         return statement_ids, notifications
+
+    def _check_journal_bank_account(self, journal, account_number):
+        if not self.force_journal_account:
+            return bool(journal.bank_account_id.sanitized_acc_number == account_number)
+        else:
+            return True
