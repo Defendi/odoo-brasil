@@ -27,6 +27,7 @@
                 <field name="product_type" invisible="1"/>
                 <field name="company_fiscal_type" invisible="1"/>
                 <field name="cfop_id" invisible="1"/>
+                <field name="icms_benef" invisible="1"/>
                 <field name="fiscal_classification_id" invisible="1"/>
                 <field name="service_type_id" invisible="1"/>
                 <field name="icms_origem" invisible="1"/>

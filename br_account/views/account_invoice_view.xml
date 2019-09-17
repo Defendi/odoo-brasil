@@ -284,7 +284,9 @@
         <field name="priority">26</field>
         <field name="arch" type="xml">
             <field name="account_id" position="replace">
-                <field name="cfop_id" /></field>
+                <field name="cfop_id" />
+                <field name="icms_benef" />
+            </field>
         </field>
     </record>
     <record model="ir.ui.view" id="view_br_account_invoice_line_form">

@@ -127,42 +127,44 @@ class SaleOrderLine(models.Model):
 
     @api.depends('cfop_id', 'icms_st_aliquota_mva', 'aliquota_icms_proprio',
                  'incluir_ipi_base', 'icms_aliquota_reducao_base', 'tem_difal',
-                 'icms_st_aliquota_reducao_base', 'ipi_reducao_bc',
+                 'icms_st_aliquota_reducao_base', 'ipi_reducao_bc', 'icms_benef',
                  'icms_st_aliquota_deducao')
     def _compute_detalhes(self):
         for line in self:
             msg = []
             if line.cfop_id:
-                msg += [u'CFOP: %s' % line.cfop_id.code]
-            msg += [u'IPI na base ICMS: %s' % (
-                u'Sim' if line.incluir_ipi_base else u'Não')]
+                msg += ['CFOP: %s' % line.cfop_id.code]
+            if line.icms_benef:
+                msg += [': %s' % line.icms_benef.code]
+            msg += ['IPI na base ICMS: %s' % (
+                'Sim' if line.incluir_ipi_base else 'Não')]
             if line.icms_st_aliquota_mva:
-                msg += [u'MVA (%%): %.2f' % line.icms_st_aliquota_mva]
+                msg += ['MVA (%%): %.2f' % line.icms_st_aliquota_mva]
             if line.aliquota_icms_proprio:
-                msg += [u'ICMS Intra (%%): %.2f' % line.aliquota_icms_proprio]
+                msg += ['ICMS Intra (%%): %.2f' % line.aliquota_icms_proprio]
             if line.icms_aliquota_reducao_base:
-                msg += [u'Red. Base ICMS (%%): %.2f' %
+                msg += ['Red. Base ICMS (%%): %.2f' %
                         line.icms_aliquota_reducao_base]
             if line.icms_st_aliquota_reducao_base:
-                msg += [u'Red. Base ICMS ST (%%): %.2f' %
+                msg += ['Red. Base ICMS ST (%%): %.2f' %
                         line.icms_st_aliquota_reducao_base]
             if line.ipi_reducao_bc:
-                msg += [u'Red. Base IPI (%%): %.2f' % line.ipi_reducao_bc]
+                msg += ['Red. Base IPI (%%): %.2f' % line.ipi_reducao_bc]
 
-            line.detalhes_calculo = u'\n'.join(msg)
+            line.detalhes_calculo = '\n'.join(msg)
 
     icms_rule_id = fields.Many2one(
-        'account.fiscal.position.tax.rule', u'Regra ICMS')
+        'account.fiscal.position.tax.rule', 'Regra ICMS')
     ipi_rule_id = fields.Many2one(
-        'account.fiscal.position.tax.rule', u'Regra IPI')
+        'account.fiscal.position.tax.rule', 'Regra IPI')
     pis_rule_id = fields.Many2one(
-        'account.fiscal.position.tax.rule', u'Regra PIS')
+        'account.fiscal.position.tax.rule', 'Regra PIS')
     cofins_rule_id = fields.Many2one(
-        'account.fiscal.position.tax.rule', u'Regra COFINS')
+        'account.fiscal.position.tax.rule', 'Regra COFINS')
     issqn_rule_id = fields.Many2one(
-        'account.fiscal.position.tax.rule', u'Regra ISSQN')
+        'account.fiscal.position.tax.rule', 'Regra ISSQN')
     ii_rule_id = fields.Many2one(
-        'account.fiscal.position.tax.rule', u'Regra II')
+        'account.fiscal.position.tax.rule', 'Regra II')
 
     cfop_id = fields.Many2one('br_account.cfop', string=u"CFOP")
 
@@ -170,16 +172,16 @@ class SaleOrderLine(models.Model):
     icms_csosn_simples = fields.Char(string=u"CSOSN ICMS", size=5)
     icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Benficio Fiscal")
     
-    icms_st_aliquota_mva = fields.Float(string=u'Alíquota MVA (%)',
+    icms_st_aliquota_mva = fields.Float(string='Alíquota MVA (%)',
                                         digits=dp.get_precision('Account'))
     aliquota_icms_proprio = fields.Float(
-        string=u'Alíquota ICMS Próprio (%)',
+        string='Alíquota ICMS Próprio (%)',
         digits=dp.get_precision('Account'))
     incluir_ipi_base = fields.Boolean(string="Incluir IPI na Base ICMS")
     icms_aliquota_reducao_base = fields.Float(
-        string=u'Redução Base ICMS (%)', digits=dp.get_precision('Account'))
+        string='Redução Base ICMS (%)', digits=dp.get_precision('Account'))
     icms_st_aliquota_reducao_base = fields.Float(
-        string=u'Redução Base ICMS ST(%)', digits=dp.get_precision('Account'))
+        string='Redução Base ICMS ST(%)', digits=dp.get_precision('Account'))
     icms_st_aliquota_deducao = fields.Float(
         string=u"% Dedução", help=u"Alíquota interna ou interestadual aplicada \
          sobre o valor da operação para deduzir do ICMS ST - Para empresas \
@@ -189,25 +191,25 @@ class SaleOrderLine(models.Model):
         digits=dp.get_precision('Sale Price'))
     tem_difal = fields.Boolean(string=u"Possui Difal")
 
-    ipi_cst = fields.Char(string=u'CST IPI', size=5)
+    ipi_cst = fields.Char(string='CST IPI', size=5)
     ipi_reducao_bc = fields.Float(
-        string=u'Redução Base IPI (%)', digits=dp.get_precision('Account'))
+        string='Redução Base IPI (%)', digits=dp.get_precision('Account'))
     ipi_valor = fields.Monetary(
         string="Valor IPI", store=True, compute='_compute_amount',
         digits=dp.get_precision('Sale Price'))
 
-    pis_cst = fields.Char(string=u'CST PIS', size=5)
-    cofins_cst = fields.Char(string=u'CST COFINS', size=5)
+    pis_cst = fields.Char(string='CST PIS', size=5)
+    cofins_cst = fields.Char(string='CST COFINS', size=5)
     l10n_br_issqn_deduction = fields.Float(string="% Dedução de base ISSQN")
 
     valor_desconto = fields.Float(
-        compute='_compute_amount', string=u'Vlr. Desc. (-)', store=True,
+        compute='_compute_amount', string='Vlr. Desc. (-)', store=True,
         digits=dp.get_precision('Sale Price'))
     valor_bruto = fields.Float(
-        compute='_compute_amount', string=u'Vlr. Bruto', store=True,
+        compute='_compute_amount', string='Vlr. Bruto', store=True,
         digits=dp.get_precision('Sale Price'))
     price_without_tax = fields.Float(
-        compute='_compute_amount', string=u'Preço Base', store=True,
+        compute='_compute_amount', string='Preço Base', store=True,
         digits=dp.get_precision('Sale Price'))
 
     detalhes_calculo = fields.Text(
