@@ -14,8 +14,16 @@
                                 <field name="annual_revenue" string="Faturamento dos últimos 12 meses" />
                             </group>
                             <group string="Escritório de contabilidade">
-                                <field name="accountant_id" nolabel="1" />
+                                <field name="accountant_id"/>
+					    		<label string="Reg. CRC"/>
+				               	<div class="o_row">
+				                    <field name="crc_number"/>
+				                    <field name="crc_state_id"/>
+				                </div> 
                             </group>
+                        </group>
+                        <group name="responsavel" string="Sócio/Responsável">
+                        	<field name="director_id" nolabel="1" />
                         </group>
                         <group name="cnae" string="CNAE">
                             <field name="cnae_main_id"/>
