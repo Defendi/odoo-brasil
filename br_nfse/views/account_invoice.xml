@@ -13,7 +13,7 @@
                 </div>
             </div>
             <field name="date_invoice" position="before">
-                  <field name="numero_nfse" attrs="{'invisible': [('numero_nfse', '=', '')]}" />
+                  <field name="numero_nfse" attrs="{'invisible': [('numero_nfse', '=', False)]}" />
             </field>
         </field>
     </record>
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <field name="date_invoice" position="before">
-                  <field name="numero_nfse" attrs="{'invisible': [('numero_nfse', '=', None)]}" />
+                  <field name="numero_nfse" attrs="{'invisible': [('numero_nfse', '=', False)]}" />
             </field>
         </field>
     </record>
