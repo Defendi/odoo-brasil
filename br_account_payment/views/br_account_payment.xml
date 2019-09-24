@@ -26,6 +26,7 @@
                 <field name="date_maturity"/>
                 <field name="move_id" readonly="1"/>
                 <field name="reconciled" string="Pago" />
+                <field name="payment_date" />
                 <button name="action_register_payment" type="object" string="PAGAR" groups="account.group_account_invoice" attrs="{'invisible': [('reconciled', '!=', False)]}" class="btn btn-success btn-xs"/>
             </tree>
         </field>
@@ -49,6 +50,7 @@
                 <field name="account_id"/>
                 <field name="partner_id"/>
                 <field name="date_maturity"/>
+                <field name="payment_date"/>
                 <field name="invoice_id" string="Fatura"/>
                 <group expand="0" string="Agrupar por...">
                     <filter name="group_partner" string="Parceiro" domain="[]" context="{'group_by':'partner_id'}"/>

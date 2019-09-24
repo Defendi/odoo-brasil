@@ -17,8 +17,7 @@ class AccountPayment(models.Model):
     def default_get(self, fields):
         rec = super(AccountPayment, self).default_get(fields)
         if self.env.context.get('default_move_line_id', False):
-            rec['amount'] = self.env.context.get(
-                'default_amount', rec.get('amount', 0.0))
+            rec['amount'] = self.env.context.get('default_amount', rec.get('amount', 0.0))
         return rec
 
     def _create_payment_entry(self, amount):
