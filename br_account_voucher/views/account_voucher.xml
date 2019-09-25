@@ -44,6 +44,9 @@
             <field name="amount" position="after">
                 <field name="l10n_br_residual" />
             </field>
+            <field name="line_ids" position="attributes">
+            	<attribute name="context">{'name': reference}</attribute>	
+            </field>
         </field>
     </record>
 
@@ -99,6 +102,12 @@
             </xpath>
             <field name="amount" position="after">
                 <field name="l10n_br_residual" />
+            </field>
+            <field name="company_id" position="after">
+            	<field name="reference"/>
+            </field>
+            <field name="line_ids" position="attributes">
+            	<attribute name="context">{'name': reference}</attribute>	
             </field>
         </field>
     </record>

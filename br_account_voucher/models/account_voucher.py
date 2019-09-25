@@ -17,6 +17,8 @@ class AccountVoucher(models.Model):
         store=True, help="Saldo restante.")
     l10n_br_paid = fields.Boolean(string="Pago?", compute='_compute_residual')
 
+    date_due = fields.Date('Due Date', readonly=True, index=True, states={'draft': [('readonly', False)]},default=fields.Date.context_today)
+
     @api.one
     @api.depends('move_id.line_ids.amount_residual')
     def _compute_residual(self):
@@ -93,6 +95,8 @@ class AccountVoucher(models.Model):
             line_total, move_id, company_currency, current_currency)
         move = self.env['account.move'].browse(move_id)
         for line in move.line_ids:
+            if line.name == '/':
+                line.name = self.reference
             line2 = self.line_ids.filtered(
                 lambda x: x.account_id.id == line.account_id.id and
                 (x.price_subtotal if current_currency != company_currency else
@@ -112,3 +116,13 @@ class AccountVoucher(models.Model):
         if self.tax_amount < 0.0:
             vals['credit'] += self.tax_amount
         return vals
+
+class AccountVoucherLine(models.Model):
+    _inherit = 'account.voucher.line'
+ 
+    def _default_name(self):
+        if self.env.context.get('name',False):
+            return self.env.context['name']
+ 
+    name = fields.Text(string='Description', required=True, default=_default_name)
+
