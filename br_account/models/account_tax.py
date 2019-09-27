@@ -113,13 +113,14 @@ class AccountTax(models.Model):
         }
 
     def _compute_ipi(self, price_base):
+        precision = self.env['decimal.precision'].precision_get('Account')
         ipi_tax = self.filtered(lambda x: x.domain == 'ipi')
         if not ipi_tax:
             return []
         vals = self._tax_vals(ipi_tax)
         base_tax = self.calc_ipi_base(price_base)
 
-        vals['amount'] = round(ipi_tax._compute_amount(base_tax, 1.0),2)
+        vals['amount'] = round(ipi_tax._compute_amount(base_tax, 1.0),precision)
         if 'ipi_base_calculo_manual' in self.env.context and\
                 self.env.context['ipi_base_calculo_manual'] > 0:
             vals['base'] = self.env.context['ipi_base_calculo_manual']
@@ -143,6 +144,7 @@ class AccountTax(models.Model):
         return base_ipi * (1 - (reducao_ipi / 100.0))
 
     def _compute_icms(self, price_base, ipi_value):
+        precision = self.env['decimal.precision'].precision_get('Account')
         icms_tax = self.filtered(lambda x: x.domain == 'icms')
         if not icms_tax:
             return []
@@ -165,7 +167,7 @@ class AccountTax(models.Model):
             vals['operacao'] = vals['amount']
             vals['amount'] *= 1 - (diferimento_icms / 100.0)
 
-        vals['amount'] = round(vals['amount'],2)
+        vals['amount'] = round(vals['amount'],precision)
         
         return [vals]
 
@@ -190,6 +192,7 @@ class AccountTax(models.Model):
         return base_icms * (1 - (reducao_icms / 100.0))
 
     def _compute_icms_st(self, price_base, ipi_value, icms_value):
+        precision = self.env['decimal.precision'].precision_get('Account')
         icmsst_tax = self.filtered(lambda x: x.domain == 'icmsst')
         if not icmsst_tax:
             return []
@@ -225,15 +228,16 @@ class AccountTax(models.Model):
         if icmsst_tax.icms_st_incluso:
             icmsst = round(
                 ((base_icmsst - icms_value)*(icmsst_tax.amount / 100.0) / (
-                    1 - icmsst_tax.amount / 100.0)) - icms_value, 2)
+                    1 - icmsst_tax.amount / 100.0)) - icms_value, precision)
         else:
             icmsst = round(
-                (base_icmsst * (icmsst_tax.amount / 100.0)) - icms_value, 2)
-        vals['amount'] = round(icmsst,2) if icmsst >= 0.0 else 0.0
+                (base_icmsst * (icmsst_tax.amount / 100.0)) - icms_value, precision)
+        vals['amount'] = round(icmsst,precision) if icmsst >= 0.0 else 0.0
         vals['base'] = base_icmsst
         return [vals]
 
     def _compute_difal(self, price_base, ipi_value):
+        precision = self.env['decimal.precision'].precision_get('Account')
         icms_inter = self.filtered(lambda x: x.domain == 'icms_inter')
         icms_intra = self.filtered(lambda x: x.domain == 'icms_intra')
         icms_fcp = self.filtered(lambda x: x.domain == 'fcp')
@@ -272,9 +276,9 @@ class AccountTax(models.Model):
         else:
             icms_inter_part = 100.0
         vals_inter['amount'] = round((interno - interestadual) *
-                                     (100 - icms_inter_part) / 100, 2)
+                                     (100 - icms_inter_part) / 100, precision)
         vals_intra['amount'] = round((interno - interestadual) *
-                                     icms_inter_part / 100, 2)
+                                     icms_inter_part / 100, precision)
 
         taxes = [vals_inter, vals_intra]
         if vals_fcp:
@@ -285,6 +289,7 @@ class AccountTax(models.Model):
         return taxes
 
     def _compute_pis_cofins(self, price_base):
+        precision = self.env['decimal.precision'].precision_get('Account')
         pis_cofins_tax = self.filtered(lambda x: x.domain in ('pis', 'cofins'))
         if not pis_cofins_tax:
             return []
@@ -310,11 +315,12 @@ class AccountTax(models.Model):
                 else:
                     vals['amount'] = tax._compute_amount(price_base, 1.0)
                     vals['base'] = price_base
-            vals['amount'] = round(vals['amount'],2)
+            vals['amount'] = round(vals['amount'],precision)
             taxes.append(vals)
         return taxes
 
     def _compute_ii(self, price_base):
+        precision = self.env['decimal.precision'].precision_get('Account')
         ii_tax = self.filtered(lambda x: x.domain == 'ii')
         if not ii_tax:
             return []
@@ -322,22 +328,24 @@ class AccountTax(models.Model):
         if "ii_base_calculo" in self.env.context and \
                 self.env.context['ii_base_calculo'] > 0:
             price_base = self.env.context["ii_base_calculo"]
-        vals['amount'] = round(ii_tax._compute_amount(price_base, 1.0),2)
+        vals['amount'] = round(ii_tax._compute_amount(price_base, 1.0),precision)
         vals['base'] = price_base
         return [vals]
 
     def _compute_issqn(self, price_base):
+        precision = self.env['decimal.precision'].precision_get('Account')
         issqn_tax = self.filtered(lambda x: x.domain == 'issqn')
         if not issqn_tax:
             return []
         issqn_deduction = self.env.context.get('l10n_br_issqn_deduction', 0.0)
         price_base *= (1 - (issqn_deduction / 100.0))
         vals = self._tax_vals(issqn_tax)
-        vals['amount'] = round(issqn_tax._compute_amount(price_base, 1.0),2)
+        vals['amount'] = round(issqn_tax._compute_amount(price_base, 1.0),precision)
         vals['base'] = price_base
         return [vals]
 
     def _compute_retention(self, price_base):
+        precision = self.env['decimal.precision'].precision_get('Account')
         retention_tax = self.filtered(
             lambda x: x.domain in ('csll', 'irrf', 'inss', 'outros'))
         if not retention_tax:
@@ -345,17 +353,18 @@ class AccountTax(models.Model):
         taxes = []
         for tax in retention_tax:
             vals = self._tax_vals(tax)
-            vals['amount'] = round(tax._compute_amount(price_base, 1.0),2)
+            vals['amount'] = round(tax._compute_amount(price_base, 1.0),precision)
             vals['base'] = price_base
             taxes.append(vals)
         return taxes
 
     def _compute_others(self, price_base):
+        precision = self.env['decimal.precision'].precision_get('Account')
         others = self.filtered(lambda x: x.domain == 'outros' or not x.domain)
         if not others:
             return []
         vals = self._tax_vals(others)
-        vals['amount'] = round(others._compute_amount(price_base, 1.0),2)
+        vals['amount'] = round(others._compute_amount(price_base, 1.0),precision)
         vals['base'] = price_base
         return [vals]
 
@@ -383,11 +392,12 @@ class AccountTax(models.Model):
     def compute_all(self, price_unit, currency=None, quantity=1.0,
                     product=None, partner=None, fisc_pos=None):
 
+        precision = self.env['decimal.precision'].precision_get('Account')
         exists_br_tax = len(self.filtered(lambda x: x.domain)) > 0
         if not exists_br_tax:
             res = super(AccountTax, self).compute_all(
                 price_unit, currency, quantity, product, partner)
-            res['price_without_tax'] = round(price_unit * quantity, 2)
+            res['price_without_tax'] = round(price_unit * quantity, precision)
             return res
 
         price_base = price_unit * quantity
@@ -397,7 +407,7 @@ class AccountTax(models.Model):
         for tax in taxes:
             tax_id = self.filtered(lambda x: x.id == tax['id'])
             if not tax_id.price_include:
-                total_included += round(tax['amount'], 2)
+                total_included += round(tax['amount'], precision)
 
         return {
             'taxes': sorted(taxes, key=lambda k: k['sequence']),
