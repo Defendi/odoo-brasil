@@ -64,20 +64,19 @@ class AccountInvoice(models.Model):
         return super(AccountInvoice, self)._return_pdf_invoice(doc)
 
     def action_number(self, serie_id):
-
+        inv_eletronic = self.env['invoice.eletronic']
         if not serie_id:
             return
 
         inv_inutilized = self.env['invoice.eletronic.inutilized'].search([
             ('serie', '=', serie_id.id)], order='numeration_end desc', limit=1)
 
-        if not inv_inutilized:
-            return serie_id.internal_sequence_id.next_by_id()
-
-        if inv_inutilized.numeration_end >= \
-                serie_id.internal_sequence_id.number_next_actual:
-            serie_id.internal_sequence_id.sudo().write(
-                {'number_next_actual': inv_inutilized.numeration_end + 1})
+        if len(inv_inutilized) > 0 and inv_inutilized.numeration_end >= serie_id.internal_sequence_id.number_next_actual:
+            serie_id.internal_sequence_id.sudo().write({'number_next_actual': inv_inutilized.numeration_end + 1})
+        
+        while (len(inv_eletronic.search([('serie','=',serie_id.id),('numero','=',serie_id.internal_sequence_id.number_next_actual)]))):
+            serie_id.internal_sequence_id.sudo().write({'number_next_actual': serie_id.internal_sequence_id.number_next_actual + 1})
+        
         return serie_id.internal_sequence_id.next_by_id()
 
     def apply_di_to_items(self):

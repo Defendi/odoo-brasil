@@ -7,6 +7,7 @@ from random import SystemRandom
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 _logger = logging.getLogger(__name__)
 
@@ -254,9 +255,31 @@ class AccountInvoice(models.Model):
         })
         return vals
 
+    def action_invoice_open(self):
+        # lots of duplicate calls to action_invoice_open, so we remove those already open
+        to_open_invoices = self.filtered(lambda inv: inv.state != 'open')
+        if to_open_invoices.filtered(lambda inv: inv.state != 'draft'):
+            raise UserError(_("Invoice must be in draft state in order to validate it."))
+        if to_open_invoices.filtered(lambda inv: float_compare(inv.amount_total, 0.0, precision_rounding=inv.currency_id.rounding) == -1):
+            raise UserError(_("You cannot validate an invoice with a negative total amount. You should create a credit note instead."))
+        res = to_open_invoices.invoice_validate()
+        to_open_invoices.action_date_assign()
+        to_open_invoices.action_move_create()
+        to_open_invoices.invoice_prepare_edoc()
+        return res 
+
+
     @api.multi
     def invoice_validate(self):
-        res = super(AccountInvoice, self).invoice_validate()
+        for invoice in self.filtered(lambda invoice: invoice.partner_id not in invoice.message_partner_ids):
+            invoice.message_subscribe([invoice.partner_id.id])
+        self._check_duplicate_supplier_reference()
+        self.invoice_enumerate()
+        self.env.cr.commit()
+        return self.write({'state': 'open'})
+
+    @api.multi
+    def invoice_prepare_edoc(self):
         for item in self:
             if item.product_document_id.electronic:
                 if item.company_id.l10n_br_nfse_conjugada:
@@ -281,8 +304,6 @@ class AccountInvoice(models.Model):
                     eletronic = self.env['invoice.eletronic'].create(edoc_vals)
                     eletronic.validate_invoice()
                     eletronic.action_post_validate()
-        self.env.cr.commit()
-        return res
     
     @api.multi
     def action_cancel(self):

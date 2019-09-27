@@ -35,8 +35,8 @@ class AccountInvoice(models.Model):
         res['model'] = serie_id.fiscal_document_id.code
 
         # Feito para evitar que o número seja incrementado duas vezes
-        if 'numero' not in res:
-            res['numero'] = serie_id.internal_sequence_id.next_by_id()
+        #if 'numero' not in res:
+        #    res['numero'] = serie_id.internal_sequence_id.next_by_id()
         return res
 
     def _prepare_edoc_item_vals(self, line):
