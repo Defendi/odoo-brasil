@@ -18,6 +18,9 @@
         <field name="model">account.move.line</field>
         <field name="inherit_id" ref="account.view_move_line_form"/>
         <field name="arch" type="xml">
+            <field name="account_id" position="after">
+                <field name="reconcile" invisible="1"/>
+            </field>
             <field name="date_maturity" position="after">
                 <field name="payment_date" readonly="1"/>
             </field>
@@ -30,6 +33,21 @@
             <field name="date_maturity" position="attributes">
             	<attribute name="readonly">1</attribute>
             </field>
+            <xpath expr="//notebook/page[last()]" position="after">
+            	<page string="Histórico de Vencimento" attrs="{'invisible': [('reconcile', '=', False)]}">  
+                    <group colspan="4">
+                    	<field nolabel="1" name="change_date_maturity_ids" domain="[('state', '!=', 'draft')]" readonly="1">
+			                <tree domain="[('state','=','posted')]">
+			                    <field name="date_maturity"/>
+			                    <field name="date_maturity_new"/>
+			                    <field name="narration"/>
+			                    <field name="user_id"/>
+			                    <field name="state"/>
+			                </tree>
+                    	</field>	
+                    </group>
+            	</page>
+            </xpath>
 		</field>
 	</record>
 

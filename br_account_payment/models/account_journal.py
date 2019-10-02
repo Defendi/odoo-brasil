@@ -13,8 +13,7 @@ class AccountJournal(models.Model):
     acc_number_dig = fields.Char(related='bank_account_id.acc_number_dig')
     bank_agency_number = fields.Char(related='bank_account_id.bra_number')
     bank_agency_dig = fields.Char(related='bank_account_id.bra_number_dig')
-    acc_partner_id = fields.Many2one('res.partner',
-                                     related='bank_account_id.partner_id')
+    acc_partner_id = fields.Many2one('res.partner',related='bank_account_id.partner_id')
 
     @api.multi
     def write(self, vals):

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_account_move_line_change_date_maturity_form" model="ir.ui.view">
+            <field name="name">account.move.line.change.date.maturity.form</field>
+            <field name="model">account.move.line.change.date.maturity</field>
+            <field name="arch" type="xml">
+                <form string="Histórico de Mudança na Data de Vencimento">
+                	<field name="can_do" invisible="1"/>
+                    <div name="alertas" class="alert alert-info" role="alert" style="margin-bottom:0px;" attrs="{'invisible': [('can_do', '==', True)]}">
+                        <div class="row">
+                            <div class="col-md-6 col-md-offset-1">
+                                <b>Não é possível alterar a data de vencimento deste lançamento</b>
+                            </div>
+                        </div>
+                    </div>
+                    <group string="Alterar a Data de Vencimento" colspan="4" attrs="{'invisible': [('can_do', '==', False)]}">
+                        <field name="move_id" readonly="1"/>
+                        <field name="user_id" readonly="1"/>
+                        <field name="date_maturity" readonly="1"/>
+                        <field name="date_maturity_new" required="1"/>
+                        <field name="state" required="1"/>
+                    </group>
+                    <group string="Narrativo" colspan="4" attrs="{'invisible': [('can_do', '==', False)]}">
+                    	<field name="narration" placeholder="Narrativa da alteração..." nolabel="1"  required="1"/>	
+                    </group>
+                    <footer>
+                        <button string="Publicar" name="do_new_date_maturity" type="object" default_focus="1" class="btn-primary" attrs="{'invisible': [('can_do', '==', False)]}"/>
+                        <button string="Cancelar" class="btn-default" special="cancel"/>
+                    </footer>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_account_move_line_change_date_maturity" model="ir.actions.act_window">
+            <field name="name">Change Expiration</field>
+            <field name="res_model">account.move.line.change.date.maturity</field>
+        	<field name="context">{'default_move_id': active_id}</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_account_move_line_change_date_maturity_form"/>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="account.model_account_move_line" />
+        </record>
+
+	</data>
+</odoo>

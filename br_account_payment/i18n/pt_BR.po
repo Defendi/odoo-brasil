@@ -328,3 +328,9 @@ msgstr ""
 #: model:ir.model,name:br_account_payment.model_payment_order_line
 msgid "payment.order.line"
 msgstr ""
+
+#. module: br_account_payment
+#: model:ir.actions.act_window,name:br_account_payment.action_account_move_line_change_date_maturity
+msgid "Reconcile Entries"
+msgstr "Alterar Vencimento"
+

@@ -14,13 +14,14 @@
         <field name="model">account.move.line</field>
         <field name="field_parent">partner_id</field>
         <field name="priority" eval="20"/>
-        <field name="arch" type="xml">
+        <field name="arch" type="xml"> 
             <tree default_order="date_maturity" string="Payments" colors="grey:reconciled==True;red:date_maturity&lt;current_date" create="false">
             	<field name="date" readonly="1"/>
                 <field name="partner_id" readonly="1"/>
                 <field name="name"/>
                 <field name="invoice_id" string="Fatura"/>
                 <field name="account_id" readonly="1"/>
+                <field name="user_type_id"/>
                 <field name="payment_value" sum="Total das parcelas" />
                 <field name="amount_residual" readonly="1" sum="Total"/>
                 <field name="date_maturity"/>
