@@ -10,6 +10,7 @@ class AccountMoveLine(models.Model):
 
     boleto_emitido = fields.Boolean(string=u"Emitido")
     nosso_numero = fields.Char(string=u"Nosso Número", size=30)
+    boleto = fields.Boolean(related="payment_mode_id.boleto")
 
     @api.multi
     def unlink(self):

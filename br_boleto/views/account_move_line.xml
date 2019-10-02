@@ -8,8 +8,8 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook/page/group/group[2]" position="after">
                 <group name="boletos" string="Boletos">
-                    <field name="payment_mode_id" />
                     <field name="nosso_numero" />
+                    <field name="boleto" invisible="1"/>
                 </group>
             </xpath>
         </field>
@@ -20,8 +20,11 @@
         <field name="model">account.move.line</field>
         <field name="inherit_id" ref="br_account_payment.view_payments_tree_a_receber" />
         <field name="arch" type="xml">
+        	<field name="date_maturity" position="after">
+        		<field name="boleto" invisible="1"/>
+        	</field>
             <button name="action_register_payment" position="after">
-                <button name="open_wizard_print_boleto" type="object" string="BOLETO" class="btn btn-success btn-xs" attrs="{'invisible': ['|',('reconciled', '!=', False),('amount_residual', '&lt;=', 0.0),]}"/>
+                <button name="open_wizard_print_boleto" type="object" string="BOLETO" class="btn btn-success btn-xs" attrs="{'invisible': ['|',('reconciled', '!=', False),'|',('amount_residual', '&lt;=', 0.0),('boleto', '=', True)]}"/>
             </button>
         </field>
     </record>

@@ -13,7 +13,8 @@
                 <button name="action_print_boleto" type="object" class="oe_stat_button" icon="fa-file-pdf-o" string="Gerar Boleto" attrs="{'invisible': ['|', ('state', '==', 'draft'), ('boleto', '==', False)]}" />
             </div>
             <tree name="vencimentos" position="inside">
-                <button name="open_wizard_print_boleto" type="object" string="BOLETO" class="btn btn-success btn-xs"/>
+            	<field name="boleto" invisible="1"/>
+                <button name="open_wizard_print_boleto" type="object" string="BOLETO" class="btn btn-success btn-xs" attrs="{'invisible': ['|',('reconciled', '!=', False),('boleto', '=', False)]}"/>
             </tree>
         </field>
     </record>
