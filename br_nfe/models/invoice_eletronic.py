@@ -242,7 +242,6 @@ class InvoiceEletronic(models.Model):
         if self.model in ('55', '65'):
             if not self.company_id.partner_id.inscr_est:
                 errors.append(u'Emitente / Inscrição Estadual')
-
             for eletr in self.eletronic_item_ids:
                 prod = u"Produto: %s - %s" % (eletr.product_id.default_code,
                                               eletr.product_id.name)

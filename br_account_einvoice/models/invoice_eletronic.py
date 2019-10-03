@@ -309,6 +309,10 @@ class InvoiceEletronic(models.Model):
             return errors
         company = self.company_id
         # Destinatário
+        #TODO: Faturamento para contatos
+        if len(self.partner_id.parent_id) > 0:  
+            errors.append('Destinatário / Não pode ser um contato')
+            
         if partner.is_company and not partner.legal_name:
             errors.append(u'Destinatário - Razão Social')
 
