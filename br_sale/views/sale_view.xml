@@ -6,6 +6,9 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
+			<xpath expr="//field[@name='partner_id']" position="attributes">
+				<attribute name="options">{'no_quick_create': '1', 'no_quick_edit': '1', 'always_reload': True}</attribute>
+			</xpath>
             <field name="fiscal_position_id" position="attributes">
                 <attribute name="domain">['|', ('fiscal_type', '=', None), ('fiscal_type', '=', 'saida')]</attribute>
                 <attribute name="options">{'no_create': '1'}</attribute>
