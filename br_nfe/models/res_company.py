@@ -19,3 +19,14 @@ class ResCompany(models.Model):
                                        default='vertical')
 
     nfe_sinc = fields.Boolean(string="Aceita envio síncrono")
+
+    iest_ids = fields.One2many(
+        'res.company.iest', 'company_id', string="Inscrições Estaduais ST")
+
+
+class ResCompanyIest(models.Model):
+    _name = 'res.company.iest'
+
+    name = fields.Char(string="Inscrição Estadual", required=True)
+    state_id = fields.Many2one('res.country.state', string="Estado", required=True)
+    company_id = fields.Many2one('res.company', string="Empresa", required=True)

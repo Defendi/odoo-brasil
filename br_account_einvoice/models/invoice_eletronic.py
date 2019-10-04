@@ -99,8 +99,8 @@ class InvoiceEletronic(models.Model):
         states=STATE)
     data_emissao = fields.Datetime(
         string='Data emissão', readonly=True, states=STATE)
-    data_fatura = fields.Datetime(
-        string='Data Entrada/Saída', readonly=True, states=STATE)
+#     data_fatura = fields.Datetime(
+#         string='Data Entrada/Saída', readonly=True, states=STATE)
     data_autorizacao = fields.Char(
         string='Data de autorização', size=30, readonly=True, states=STATE)
     ambiente = fields.Selection(
@@ -470,6 +470,7 @@ class InvoiceEletronic(models.Model):
 
     @api.multi
     def action_back_to_draft(self):
+        self.action_post_validate()
         self.state = 'draft'
 
     @api.multi
