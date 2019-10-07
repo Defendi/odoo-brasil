@@ -60,9 +60,14 @@ class ResPartner(models.Model):
         res = []
         for partner in self:
             name = partner.name
-            if len(partner.parent_id) > 0:
+            if partner.type != 'contact':
+                name = ''
+            elif len(partner.parent_id) > 0:
                 name = partner.parent_id.legal_name if bool(partner.parent_id.legal_name) else partner.parent_id.name
-                name = '['+name+'] ' + partner.name
+                if bool(name):
+                    name = '['+name+'] ' + partner.name
+                else:
+                    name = partner.name
             elif partner.company_type == 'company' and bool(partner.legal_name):
                 name = '['+partner.name+'] '+partner.legal_name
 
