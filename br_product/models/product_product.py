@@ -24,10 +24,10 @@ class ProductTemplate(models.Model):
             if bool(prod.default_code):
                 vl_cod = re.sub('[0-9a-zA-Z]','',prod.default_code)
                 if len(vl_cod) > 0:
-                    raise ValidationError('Código do modelo de produto não é válido.\nSomente números e alfanuméricos, sem espaços, podem ser usados')
+                    raise ValidationError('A referência interna do produto não é válida.\nSomente números e alfanuméricos, sem espaços, podem ser usados')
                 outro = self.search([('default_code','=',self.default_code),('id','!=',self.id)])
                 if len(outro) > 0:
-                    raise ValidationError('Código do modelo de produto já foi usado em outro modelo de produto')
+                    raise ValidationError('A referência interna de produto já foi usado em outro modelo de produto')
         
     
 
