@@ -316,8 +316,8 @@
                                 <group>
                                     <field name="cfop_id" domain="[('internal_type', '=', 'normal')]" attrs="{'invisible': [('product_type', '=', 'service')]}"/>
                                     <field name="fiscal_classification_id" />
-                                    <field domain="[('user_type_id', '&lt;&gt;', 'view')]" name="account_id" groups="account.group_account_user"/>
-                                    <field domain="[('company_id', '=', parent.company_id)]" name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
+                                    <field name="account_id" domain="[('deprecated', '=', False),('user_type_id', '&lt;&gt;', 'view')]" groups="account.group_account_user"/>
+                                    <field name="account_analytic_id" domain="[('company_id', '=', parent.company_id)]" groups="analytic.group_analytic_accounting"/>
                                     <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags" options="{'color_field': 'color'}"/>
                                     <field name="company_id" groups="base.group_multi_company" readonly="1"/>
                                     <field name="tributos_estimados_federais" />
