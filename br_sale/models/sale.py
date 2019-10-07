@@ -74,8 +74,7 @@ class SaleOrderLine(models.Model):
             'icms_st_aliquota_mva': self.icms_st_aliquota_mva,
             'aliquota_icms_proprio': self.aliquota_icms_proprio,
             'icms_aliquota_reducao_base': self.icms_aliquota_reducao_base,
-            'icms_st_aliquota_reducao_base':
-            self.icms_st_aliquota_reducao_base,
+            'icms_st_aliquota_reducao_base': self.icms_st_aliquota_reducao_base,
             'ipi_reducao_bc': self.ipi_reducao_bc,
             'icms_st_aliquota_deducao': self.icms_st_aliquota_deducao,
         }

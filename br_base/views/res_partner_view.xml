@@ -114,7 +114,7 @@
 	            <field name="phone"/>
 	            <field name="city_id"/>
 	        </xpath>
-	        <xpath expr="//div[@class='oe_kanban_details']/ul/li[1]" position="before">
+	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[1]" position="before">
 	            <li t-if="record.cnpj_cpf.raw_value">
 	                CPF/CNPJ:<strong><field name="cnpj_cpf"/></strong>
 	            </li>
@@ -122,7 +122,7 @@
 	                <field name="phone"/>
 	            </li>
 	        </xpath>
-	        <xpath expr="//div[@class='oe_kanban_details']/ul/li[4]" position="before">
+	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[4]" position="before">
 	            <li t-if="record.city_id.raw_value and !record.state_id.raw_value">
 	                <field name="city_id"/>
 	            </li>
@@ -133,12 +133,12 @@
 	                <field name="city_id"/>, <field name="state_id"/>
 	            </li>
 	        </xpath>
-	        <xpath expr="//div[@class='oe_kanban_details']/strong/field[@name='display_name']" position="replace">
+	        <xpath expr="//div[hasclass('oe_kanban_details')]/strong/field[@name='display_name']" position="replace">
 	        	<field name="name"/>
 	        </xpath>
-	        <xpath expr="//div[@class='oe_kanban_details']/ul/li[7]" position="replace"/>
-	        <xpath expr="//div[@class='oe_kanban_details']/ul/li[8]" position="replace"/>
-	        <xpath expr="//div[@class='oe_kanban_details']/ul/li[9]" position="replace"/>
+	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[7]" position="replace"/>
+	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[8]" position="replace"/>
+	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[9]" position="replace"/>
 	    </field>
 	</record>
 

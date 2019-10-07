@@ -8,13 +8,15 @@
         <field name="model">br_account.import.declaration.line</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <field name="sequence"/>
-                    <field name="name"/>
-                    <field name="manufacturer_code"/>
-                    <field name="amount_discount"/>
-                    <field name="drawback_number"/>
-                </group>
+            	<sheet>
+	                <group>
+	                    <field name="sequence"/>
+	                    <field name="name"/>
+	                    <field name="manufacturer_code"/>
+	                    <field name="amount_discount"/>
+	                    <field name="drawback_number"/>
+	                </group>
+	            </sheet>
             </form>
         </field>
     </record>
@@ -259,14 +261,16 @@
         <field name="model">br_account.fiscal.observation</field>
         <field name="arch" type="xml">
             <form string="Observações Fiscais">
-                <group>
-                    <field name="name" />
-                    <field name="document_id"/>
-                    <field name="tipo"/>
-                </group>
-                <group string="Mensagem a ser destacada no documento eletrônico">
-                    <field name="message" nolabel="1" placeholder="Utilize ${invoice.origin} para campos dinâmicos"/>
-                </group>
+            	<sheet>
+	                <group>
+	                    <field name="name" />
+	                    <field name="document_id"/>
+	                    <field name="tipo"/>
+	                </group>
+	                <group string="Mensagem a ser destacada no documento eletrônico">
+	                    <field name="message" nolabel="1" placeholder="Utilize ${invoice.origin} para campos dinâmicos"/>
+	                </group>
+	            </sheet>
             </form>
         </field>
     </record>
@@ -328,26 +332,28 @@
         <field name="model">br_account.import.declaration</field>
         <field name="arch" type="xml">
             <form string="Declaração de Importação">
-                <group>
-                    <group>
-                        <field name="name"/>
-                        <field name="date_registration"/>
-                        <field name="state_id" options="{'no_create': True, 'no_create_edit': True}"/>
-                        <field name="location"/>
-                        <field name="date_release"/>
-                        <field name="type_transportation" />
-                    </group>
-                    <group>
-                        <field name="afrmm_value" />
-                        <field name="type_import" />
-                        <field name="thirdparty_cnpj" />
-                        <field name="thirdparty_state_id" options="{'no_create': True, 'no_create_edit': True}"/>
-                        <field name="exporting_code"/>
-                    </group>
-                    <group string="Adições" colspan="4">
-                        <field name="line_ids" nolabel="1"></field>
-                    </group>
-                </group>
+            	<sheet>
+	                <group>
+	                    <group>
+	                        <field name="name"/>
+	                        <field name="date_registration"/>
+	                        <field name="state_id" options="{'no_create': True, 'no_create_edit': True}"/>
+	                        <field name="location"/>
+	                        <field name="date_release"/>
+	                        <field name="type_transportation" />
+	                    </group>
+	                    <group>
+	                        <field name="afrmm_value" />
+	                        <field name="type_import" />
+	                        <field name="thirdparty_cnpj" />
+	                        <field name="thirdparty_state_id" options="{'no_create': True, 'no_create_edit': True}"/>
+	                        <field name="exporting_code"/>
+	                    </group>
+	                    <group string="Adições" colspan="4">
+	                        <field name="line_ids" nolabel="1"></field>
+	                    </group>
+	                </group>
+	            </sheet>
             </form>
         </field>
     </record>
@@ -379,23 +385,25 @@
         <field name="model">br_account.beneficio.fiscal</field>
         <field name="arch" type="xml">
             <form string="Benefício Fiscal">
-                <group>
-                    <group>
-                    	<field name="code"/>
-                        <field name="name"/>
-                        <field name="state_id"/>
-                    </group>
-                    <group>
-                    	<field name="dt_start"/>
-                        <field name="dt_end"/>
-                    </group>
-                    <group string="CSTs" colspan="4">
-                        <field name="cst_line_ids" widget="many2many_tags" nolabel="1"/>
-                    </group>
-                    <group string="Observação" colspan="4">
-                        <field name="memo" nolabel="1"></field>
-                    </group>
-                </group>
+            	<sheet>
+	                <group>
+	                    <group>
+	                    	<field name="code"/>
+	                        <field name="name"/>
+	                        <field name="state_id"/>
+	                    </group>
+	                    <group>
+	                    	<field name="dt_start"/>
+	                        <field name="dt_end"/>
+	                    </group>
+	                    <group string="CSTs" colspan="4">
+	                        <field name="cst_line_ids" widget="many2many_tags" nolabel="1"/>
+	                    </group>
+	                    <group string="Observação" colspan="4">
+	                        <field name="memo" nolabel="1"></field>
+	                    </group>
+	                </group>
+	            </sheet>
             </form>
         </field>
     </record>
