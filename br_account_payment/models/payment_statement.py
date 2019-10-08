@@ -6,6 +6,7 @@ from odoo import api, fields, models
 
 class L10nBrPaymentStatement(models.Model):
     _name = 'l10n_br.payment.statement'
+    _description = """Comprovante Pagamento"""
 
     _description = "Payment Statement"
     _order = "date desc, id desc"

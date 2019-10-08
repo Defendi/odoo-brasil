@@ -1,23 +1,20 @@
-# © 2016 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
-
 class CancelNFe(models.TransientModel):
     _name = 'wizard.cancel.nfe'
+    _description = """Assistente Cancelamento NFe"""
 
     edoc_id = fields.Many2one('invoice.eletronic', string="Documento")
     justificativa = fields.Text('Justificativa', size=255, required=True)
-    state = fields.Selection([('drat', u'Provisório'), ('error', u'Erro')],
+    state = fields.Selection([('drat', 'Provisório'), ('error', 'Erro')],
                              string="Situação")
-    message = fields.Char(string=u"Mensagem", size=300, readonly=True)
+    message = fields.Char(string="Mensagem", size=300, readonly=True)
     sent_xml = fields.Binary(string="Xml Envio", readonly=True)
-    sent_xml_name = fields.Char(string=u"Xml Envio", size=30, readonly=True)
-    received_xml = fields.Binary(string=u"Xml Recebimento", readonly=True)
+    sent_xml_name = fields.Char(string="Xml Envio", size=30, readonly=True)
+    received_xml = fields.Binary(string="Xml Recebimento", readonly=True)
     received_xml_name = fields.Char(
-        string=u"Xml Recebimento", size=30, readonly=True)
+        string="Xml Recebimento", size=30, readonly=True)
 
     @api.multi
     def action_cancel_nfe(self):

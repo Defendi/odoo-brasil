@@ -13,6 +13,7 @@ _logger = logging.getLogger(__name__)
 class CnabRetorno(models.Model):
     _name = "cnab.retorno"
     _order = 'data_geracao desc'
+    _description = """CNAB Retorno"""
     
     @api.depends('eventos_id.valor')
     def tot_credit(self):

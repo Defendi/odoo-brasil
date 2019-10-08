@@ -1,6 +1,3 @@
-# © 2016 Danimar Ribeiro, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import re
 import json
 import logging
@@ -13,7 +10,6 @@ from datetime import datetime
 _logger = logging.getLogger(__name__)
 
 odoo_request = request
-
 
 class AcquirerCielo(models.Model):
     _inherit = 'payment.acquirer'
@@ -104,24 +100,24 @@ class AcquirerCielo(models.Model):
 class TransactionCielo(models.Model):
     _inherit = 'payment.transaction'
 
-    cielo_transaction_id = fields.Char(string=u'ID Transação')
+    cielo_transaction_id = fields.Char(string='ID Transação')
     state_cielo = fields.Selection(
-        [('1', u'Pendente'), ('2', u'Pago'), ('3', u'Negado'),
-         ('5', u'Cancelado'), ('6', u'Não Finalizado'), ('7', u'Autorizado')],
-        string=u"Situação Cielo")
+        [('1', 'Pendente'), ('2', 'Pago'), ('3', 'Negado'),
+         ('5', 'Cancelado'), ('6', 'Não Finalizado'), ('7', 'Autorizado')],
+        string="Situação Cielo")
     transaction_type = fields.Selection(
-        [('1', u'Cartão de Crédito'), ('2', u'Boleto Bancário'),
-         ('3', u'Débito Online'), ('4', u'Cartão de Débito')],
-        string=u'Tipo pagamento')
-    payment_installments = fields.Integer(u'Número de parcelas')
+        [('1', 'Cartão de Crédito'), ('2', 'Boleto Bancário'),
+         ('3', 'Débito Online'), ('4', 'Cartão de Débito')],
+        string='Tipo pagamento')
+    payment_installments = fields.Integer('Número de parcelas')
     payment_method_brand = fields.Selection(
-        [('1', u'Visa'), ('2', u'Mastercard'), ('3', u'American Express'),
-         ('4', u'Diners'), ('5', u'Elo'), ('6', u'Aura'), ('7', u'JCB')],
-        string=u"Bandeira Cartão")
-    payment_boletonumber = fields.Char(string=u"Número boleto", size=100)
+        [('1', 'Visa'), ('2', 'Mastercard'), ('3', 'American Express'),
+         ('4', 'Diners'), ('5', 'Elo'), ('6', 'Aura'), ('7', 'JCB')],
+        string="Bandeira Cartão")
+    payment_boletonumber = fields.Char(string="Número boleto", size=100)
 
     url_cielo = fields.Char(
-        string=u"Cielo", size=60,
+        string="Cielo", size=60,
         default="https://www.cielo.com.br/VOL/areaProtegida/index.jsp")
 
     @api.model

@@ -8,11 +8,10 @@ from openerp import api, fields, models
 
 class CashFlowWizard(models.TransientModel):
     _name = 'account.cash.flow.wizard'
+    _description = """Assistente de Fluxo de Caixa"""
 
-
-    start_date = fields.Date(string=u"Start Date", default=False)
-    end_date = fields.Date(
-        string="End Date", required=True,
+    start_date = fields.Date(string="Start Date", default=False)
+    end_date = fields.Date(string="End Date", required=True,
         default=fields.date.today() + datetime.timedelta(6 * 365 / 12))
     start_amount = fields.Float(string="Initial value",
                                 digits=dp.get_precision('Account'))

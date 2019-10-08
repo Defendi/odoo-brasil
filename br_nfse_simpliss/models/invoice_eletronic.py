@@ -1,6 +1,3 @@
-# © 2016 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import re
 import pytz
 import base64
@@ -48,7 +45,7 @@ class InvoiceEletronic(models.Model):
             if not self.company_id.inscr_mun:
                 errors.append(u'Inscrição municipal obrigatória')
             for eletr in self.eletronic_item_ids:
-                prod = u"Produto: %s - %s" % (eletr.product_id.default_code,
+                prod = "Produto: %s - %s" % (eletr.product_id.default_code,
                                               eletr.product_id.name)
                 if eletr.tipo_produto == 'product':
                     errors.append(

@@ -58,6 +58,7 @@ class ProductProduct(models.Model):
 
 class L10nBrProductChanges(models.Model):
     _name = "l10n_br.product.changes"
+    _description = """Alteração no produto"""
 
     product_id = fields.Many2one('product.product', 'Product')
     name = fields.Char('Field name', readonly=True, size=30)

@@ -1,9 +1,5 @@
-# © 2016 Alessandro Fernandes Martini, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-
 
 class PaymentOrderLine(models.Model):
     _name = 'payment.order.line'
@@ -35,7 +31,7 @@ class PaymentOrderLine(models.Model):
     journal_id = fields.Many2one('account.journal', string="Diário")
     move_id = fields.Many2one('account.move', string="Lançamento de Diário",
                               related='move_line_id.move_id', readonly=True)
-    nosso_numero = fields.Char(string=u"Nosso Número", size=20)
+    nosso_numero = fields.Char(string="Nosso Número", size=20)
     payment_mode_id = fields.Many2one(
         'l10n_br.payment.mode', string="Modo de pagamento")
     date_maturity = fields.Date(string="Vencimento")
@@ -70,6 +66,7 @@ class PaymentOrderLine(models.Model):
 
 class PaymentOrder(models.Model):
     _name = 'payment.order'
+    _description = """Ordem de Pagamento"""
     _order = 'id desc'
 
     @api.depends('line_ids')

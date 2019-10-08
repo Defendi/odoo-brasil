@@ -1,13 +1,7 @@
-# © 2009  Renato Lima - Akretion
-# © 2012  Raphaël Valyi - Akretion
-# © 2016 Danimar Ribeiro, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 from datetime import timedelta
 
 from odoo import models, fields, api
 from odoo.addons import decimal_precision as dp
-
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -165,10 +159,10 @@ class SaleOrderLine(models.Model):
     ii_rule_id = fields.Many2one(
         'account.fiscal.position.tax.rule', 'Regra II')
 
-    cfop_id = fields.Many2one('br_account.cfop', string=u"CFOP")
+    cfop_id = fields.Many2one('br_account.cfop', string="CFOP")
 
-    icms_cst_normal = fields.Char(string=u"CST ICMS", size=5)
-    icms_csosn_simples = fields.Char(string=u"CSOSN ICMS", size=5)
+    icms_cst_normal = fields.Char(string="CST ICMS", size=5)
+    icms_csosn_simples = fields.Char(string="CSOSN ICMS", size=5)
     icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Benficio Fiscal")
     
     icms_st_aliquota_mva = fields.Float(string='Alíquota MVA (%)',
@@ -182,13 +176,13 @@ class SaleOrderLine(models.Model):
     icms_st_aliquota_reducao_base = fields.Float(
         string='Redução Base ICMS ST(%)', digits=dp.get_precision('Account'))
     icms_st_aliquota_deducao = fields.Float(
-        string=u"% Dedução", help=u"Alíquota interna ou interestadual aplicada \
+        string="% Dedução", help="Alíquota interna ou interestadual aplicada \
          sobre o valor da operação para deduzir do ICMS ST - Para empresas \
          do Simples Nacional", digits=dp.get_precision('Account'))
     icms_st_valor = fields.Monetary(
         string="Valor ICMS ST", store=True, compute='_compute_amount',
         digits=dp.get_precision('Sale Price'))
-    tem_difal = fields.Boolean(string=u"Possui Difal")
+    tem_difal = fields.Boolean(string="Possui Difal")
 
     ipi_cst = fields.Char(string='CST IPI', size=5)
     ipi_reducao_bc = fields.Float(
@@ -212,7 +206,7 @@ class SaleOrderLine(models.Model):
         digits=dp.get_precision('Sale Price'))
 
     detalhes_calculo = fields.Text(
-        string=u"Detalhes Cálculo", compute='_compute_detalhes', store=True)
+        string="Detalhes Cálculo", compute='_compute_detalhes', store=True)
 
     def _update_tax_from_ncm(self):
         if self.product_id:

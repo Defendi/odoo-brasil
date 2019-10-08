@@ -1,6 +1,3 @@
-# © 2016 Alessandro Martini <alessandrofmartini@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import os
 import io
 import base64
@@ -8,12 +5,12 @@ import os.path
 from zipfile import ZipFile
 from odoo import api, fields, models
 
-
 class ExportNfe(models.TransientModel):
     _name = 'wizard.export.nfe'
+    _description = """Exportador NFe"""
 
-    start_date = fields.Date(string=u"Data Inicial", required=True)
-    end_date = fields.Date(string=u"Data Final", required=True)
+    start_date = fields.Date(string="Data Inicial", required=True)
+    end_date = fields.Date(string="Data Final", required=True)
     model = fields.Many2one(
         'br_account.fiscal.document', string='Documento')
     zip_file = fields.Binary('Arquivo', readonly=True)

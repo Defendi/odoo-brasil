@@ -1,11 +1,3 @@
-# © 2004-2010 Tiny SPRL (<http://tiny.be>)
-# © Thinkopen Solutions (<http://www.thinkopensolutions.com.br>)
-# © Akretion (<http://www.akretion.com>)
-# © KMEE (<http://www.kmee.com.br>)
-# © 2016 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
-
 import re
 import logging
 import base64
@@ -18,7 +10,6 @@ try:
     from OpenSSL import crypto
 except ImportError:
     _logger.error('Cannot import OpenSSL.crypto', exc_info=True)
-
 
 class ResCompany(models.Model):
 
@@ -102,28 +93,28 @@ class ResCompany(models.Model):
         except:
             self.cert_state = 'unknown'
             _logger.warning(
-                _(u'Unknown error when validating certificate'),
+                _('Unknown error when validating certificate'),
                 exc_info=True)
 
     cnpj_cpf = fields.Char(
         compute=_get_br_data, inverse=_set_br_cnpj_cpf, size=18,
-        string=u'CNPJ')
+        string='CNPJ')
 
     inscr_est = fields.Char(
         compute=_get_br_data, inverse=_set_br_inscr_est, size=16,
-        string=u'State Inscription')
+        string='State Inscription')
 
     inscr_mun = fields.Char(
         compute=_get_br_data, inverse=_set_br_inscr_mun, size=18,
-        string=u'Municipal Inscription')
+        string='Municipal Inscription')
 
     suframa = fields.Char(
         compute=_get_br_data, inverse=_set_br_suframa, size=18,
-        string=u'Suframa')
+        string='Suframa')
 
     legal_name = fields.Char(
         compute=_get_br_data, inverse=_set_br_legal_name, size=128,
-        string=u'Legal Name')
+        string='Legal Name')
 
     city_id = fields.Many2one(
         compute=_get_address_data, inverse='_set_city_id',
@@ -131,27 +122,27 @@ class ResCompany(models.Model):
 
     district = fields.Char(
         compute=_get_address_data, inverse='_set_br_district', size=32,
-        string=u"District", multi='address')
+        string="District", multi='address')
 
     number = fields.Char(
         compute=_get_address_data, inverse='_set_br_number', size=10,
-        string=u"Number", multi='address')
+        string="Number", multi='address')
 
-    nfe_a1_file = fields.Binary(u'NFe A1 File')
-    nfe_a1_password = fields.Char(u'NFe A1 Password', size=64)
+    nfe_a1_file = fields.Binary('NFe A1 File')
+    nfe_a1_password = fields.Char('NFe A1 Password', size=64)
 
     cert_state = fields.Selection(
-        [('not_loaded', u'Not loaded'),
-         ('expired', u'Expired'),
-         ('invalid_password', u'Invalid Password'),
-         ('unknown', u'Unknown'),
-         ('valid', u'Valid')],
-        string=u"Cert. State", compute=_compute_expiry_date,
+        [('not_loaded', 'Not loaded'),
+         ('expired', 'Expired'),
+         ('invalid_password', 'Invalid Password'),
+         ('unknown', 'Unknown'),
+         ('valid', 'Valid')],
+        string="Cert. State", compute=_compute_expiry_date,
         default='not_loaded')
     cert_information = fields.Text(
-        string=u"Cert. Info", compute=_compute_expiry_date)
+        string="Cert. Info", compute=_compute_expiry_date)
     cert_expire_date = fields.Date(
-        string=u"Cert. Expiration Date", compute=_compute_expiry_date)
+        string="Cert. Expiration Date", compute=_compute_expiry_date)
 
     @api.onchange('cnpj_cpf')
     def onchange_mask_cnpj_cpf(self):

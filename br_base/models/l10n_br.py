@@ -1,6 +1,3 @@
-# © 2018 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import json
 from lxml import etree
 
@@ -10,7 +7,8 @@ from odoo import api, fields, models
 
 class L10nBR(models.AbstractModel):
     _name = 'l10n.br'
-
+    _description = """Localização"""
+    
     def _get_user_localization(self):
         user_id = self.env.context.get('uid')
         template_id = self.env['res.users'].browse(

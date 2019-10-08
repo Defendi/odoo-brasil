@@ -88,7 +88,7 @@ class HrEmployee(models.Model):
     rg = fields.Char('RG', help=u'Número do RG')
     cpf = fields.Char(related='address_home_id.cnpj_cpf',
                       string='CPF')
-    organ_exp = fields.Char(u"Orgão de expedição")
+    organ_exp = fields.Char("Orgão de expedição")
     rg_emission = fields.Date(u'Data de emissão')
     title_voter = fields.Char('Title', help=u'Número título')
     zone_voter = fields.Char('Zona')
@@ -125,6 +125,6 @@ class HrEmployeeDependent(models.Model):
     dependent_age = fields.Date('Data de nascimento', required=True)
     dependent_type = fields.Char('Tipo', required=True)
     pension_benefits = fields.Float(
-        u'% Pensão', help=u"Percentual a descontar de pensão alimenticia")
+        u'% Pensão', help="Percentual a descontar de pensão alimenticia")
     is_dependent = fields.Boolean(u'É dependente', required=False)
     use_health_plan = fields.Boolean(u'Plano de saúde?', required=False)

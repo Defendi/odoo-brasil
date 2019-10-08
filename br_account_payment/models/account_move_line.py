@@ -2,7 +2,6 @@ import datetime
 
 from odoo import api, fields, models
 
-
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
@@ -23,7 +22,7 @@ class AccountMoveLine(models.Model):
                 
     payment_value = fields.Monetary(string="Valor", compute=_compute_payment_value, store=True,currency_field='company_currency_id')
     payment_date = fields.Char(string="Pago em", size=12, compute=_compute_payment_value, store=True, index=True)
-    payment_mode_id = fields.Many2one('l10n_br.payment.mode', string=u"Modo de pagamento")
+    payment_mode_id = fields.Many2one('l10n_br.payment.mode', string="Modo de pagamento")
     l10n_br_order_line_id = fields.Many2one('payment.order.line', string='Linha de Pagamento')
     change_date_maturity_ids = fields.One2many("account.move.line.change.date.maturity", "move_id", string="Mudanças de Vencimento", readonly=True)
     reconcile = fields.Boolean(related="account_id.reconcile")

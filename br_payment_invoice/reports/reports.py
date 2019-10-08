@@ -4,6 +4,7 @@ from odoo.exceptions import UserError
 
 class PaymentCnabReport(models.AbstractModel):
     _name = 'report.br_payment_invoice.report_cnab_payment_invoice'
+    _description = """Relatório de pagamentos de faturas através de CNAB"""
 
     @api.model
     def get_report_values(self, docids, data=None):

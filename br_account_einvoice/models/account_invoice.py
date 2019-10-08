@@ -39,7 +39,7 @@ class AccountInvoice(models.Model):
     internal_number = fields.Integer(
         'Invoice Number', readonly=True,
         states={'draft': [('readonly', False)]},
-        help=u"""Unique number of the invoice, computed
+        help="""Unique number of the invoice, computed
             automatically when the invoice is created.""")
 
     @api.multi

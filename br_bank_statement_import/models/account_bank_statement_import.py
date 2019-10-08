@@ -1,6 +1,3 @@
-# © 2016 Danimar Ribeiro, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import io
 import re
 import logging
@@ -30,13 +27,13 @@ class AccountBankStatementLine(models.Model):
 class AccountBankStatementImport(models.TransientModel):
     _inherit = 'account.bank.statement.import'
 
-    force_format = fields.Boolean(string=u'Forçar formato', default=False)
-    convert_decimal_br = fields.Boolean(string=u'Converte Decimal', default=True)
+    force_format = fields.Boolean(string='Forçar formato', default=False)
+    convert_decimal_br = fields.Boolean(string='Converte Decimal', default=True)
     file_format = fields.Selection([('ofx', 'Extrato OFX')],
                                    string="Formato do Arquivo",
                                    default='ofx')
-    force_journal_account = fields.Boolean(string=u"Forçar conta bancária?")
-    journal_id = fields.Many2one('account.journal', string=u"Conta Bancária",
+    force_journal_account = fields.Boolean(string="Forçar conta bancária?")
+    journal_id = fields.Many2one('account.journal', string="Conta Bancária",
                                  domain=[('type', '=', 'bank')])
 
     def _parse_file(self, data_file):
@@ -97,7 +94,7 @@ class AccountBankStatementImport(models.TransientModel):
             dummy, journal = self._find_additional_data(
                 ofx.account.statement.currency, ofx.account.number)
 
-        name = u"%s - %s até %s" % (
+        name = "%s - %s até %s" % (
             journal.name,
             ofx.account.statement.start_date.strftime('%d/%m/%Y'),
             ofx.account.statement.end_date.strftime('%d/%m/%Y')

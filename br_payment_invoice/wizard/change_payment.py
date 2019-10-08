@@ -14,6 +14,7 @@ except ImportError:
 
 class WizardChangePayment(models.TransientModel):
     _name = 'wizard.change.payment'
+    _description = """Assitente de Mudança do Pagamento"""
 
     move_line_id = fields.Many2one('account.move.line', readonly=True)
     amount_total = fields.Float(string="Valor Original", readonly=True)

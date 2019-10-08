@@ -32,7 +32,7 @@ class InvoiceEletronicItem(models.Model):
     _inherit = 'invoice.eletronic.item'
 
     codigo_tributacao_municipio = fields.Char(
-        string=u"Cód. Tribut. Munic.", size=20, readonly=True,
+        string="Cód. Tribut. Munic.", size=20, readonly=True,
         help="Código de Tributação no Munípio", states=STATE)
 
 
@@ -65,25 +65,25 @@ class InvoiceEletronic(models.Model):
         if self.model == '002':
             issqn_codigo = ''
             if not self.company_id.inscr_mun:
-                errors.append(u'Inscrição municipal obrigatória')
+                errors.append('Inscrição municipal obrigatória')
             if not self.company_id.cnae_main_id.code:
-                errors.append(u'CNAE Principal da empresa obrigatório')
+                errors.append('CNAE Principal da empresa obrigatório')
             for eletr in self.eletronic_item_ids:
-                prod = u"Produto: %s - %s" % (eletr.product_id.default_code,
+                prod = "Produto: %s - %s" % (eletr.product_id.default_code,
                                               eletr.product_id.name)
                 if eletr.tipo_produto == 'product':
                     errors.append(
-                        u'Esse documento permite apenas serviços - %s' % prod)
+                        'Esse documento permite apenas serviços - %s' % prod)
                 if eletr.tipo_produto == 'service':
                     if not eletr.issqn_codigo:
-                        errors.append(u'%s - Código de Serviço' % prod)
+                        errors.append('%s - Código de Serviço' % prod)
                     if not issqn_codigo:
                         issqn_codigo = eletr.issqn_codigo
                     if issqn_codigo != eletr.issqn_codigo:
-                        errors.append(u'%s - Apenas itens com o mesmo código \
+                        errors.append('%s - Apenas itens com o mesmo código \
                                       de serviço podem ser enviados' % prod)
                     if not eletr.codigo_tributacao_municipio:
-                        errors.append(u'%s - %s - Código de tributação do município \
+                        errors.append('%s - %s - Código de tributação do município \
                         obrigatório' % (
                             eletr.product_id.name,
                             eletr.product_id.service_type_id.name))
@@ -369,7 +369,7 @@ class InvoiceEletronic(models.Model):
         if "Cancelamento" in dir(retorno):
             self.state = 'cancel'
             self.codigo_retorno = '100'
-            self.mensagem_retorno = u'Nota Fiscal de Serviço Cancelada'
+            self.mensagem_retorno = 'Nota Fiscal de Serviço Cancelada'
         else:
             # E79 - Nota já está cancelada
             if retorno.ListaMensagemRetorno.MensagemRetorno.Codigo != 'E79':
@@ -381,7 +381,7 @@ class InvoiceEletronic(models.Model):
 
             self.state = 'cancel'
             self.codigo_retorno = '100'
-            self.mensagem_retorno = u'Nota Fiscal de Serviço Cancelada'
+            self.mensagem_retorno = 'Nota Fiscal de Serviço Cancelada'
 
         self.env['invoice.eletronic.event'].create({
             'code': self.codigo_retorno,

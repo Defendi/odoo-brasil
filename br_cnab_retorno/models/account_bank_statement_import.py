@@ -175,7 +175,7 @@ class AccountBankStatementImport(models.TransientModel):
         last_balance = last_bank_stmt and last_bank_stmt[0].balance_end or 0.0
 
         vals_bank_statement = {
-            'name': u"%s - %s até %s" % (
+            'name': "%s - %s até %s" % (
                 arquivo.header.nome_do_banco,
                 inicio.strftime('%d/%m/%Y'),
                 final.strftime('%d/%m/%Y')),

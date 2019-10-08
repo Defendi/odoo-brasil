@@ -19,7 +19,7 @@ except ImportError:
 
 class BrZip(models.Model):
     _name = 'br.zip'
-    _description = u'CEP'
+    _description = 'CEP'
     _rec_name = 'zip'
 
     zip = fields.Char('CEP', size=8, required=True)

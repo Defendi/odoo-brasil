@@ -38,6 +38,7 @@ _STATUS = [
 
 class CnabRetornoLine(models.Model):
     _name = "cnab.retorno.line"
+    _description = """Linha CNAB Retorno"""
 
     partner_name = fields.Char(string='Parceiro')
     numero_documento = fields.Char(string='Número Documento')

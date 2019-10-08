@@ -1,6 +1,3 @@
-# © 2016 Alessandro Fernandes Martini <alessandrofmartini@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import base64
 import os
 
@@ -216,7 +213,7 @@ class TestCartaCorrecao(TransactionCase):
         carta = self.env['carta.correcao.eletronica.evento'].search([])
         self.assertEquals(len(carta), 1)
         self.assertEquals(
-            carta.message, u"Evento registrado e vinculado a NF-e")
+            carta.message, "Evento registrado e vinculado a NF-e")
         self.assertEquals(carta.protocolo, "135160008802236")
         self.assertEquals(carta.correcao, 'Teste de Carta de Correcao' * 10)
         self.assertEquals(carta.sequencial_evento, 1)

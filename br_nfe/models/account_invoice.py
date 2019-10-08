@@ -1,9 +1,5 @@
-# © 2016 Danimar Ribeiro, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-
 
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
@@ -31,9 +27,9 @@ class AccountInvoice(models.Model):
     nfe_status = fields.Char(
         string="Mensagem NFe", compute="_compute_nfe_number")
     nfe_number = fields.Integer(
-        string=u"Número NFe", compute="_compute_nfe_number")
+        string="Número NFe", compute="_compute_nfe_number")
     nfe_exception_number = fields.Integer(
-        string=u"Número NFe", compute="_compute_nfe_number")
+        string="Número NFe", compute="_compute_nfe_number")
     import_declaration_ids = fields.One2many(
         'br_account.import.declaration', 'invoice_id')
 

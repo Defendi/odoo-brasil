@@ -6,6 +6,7 @@ from odoo import api, models
 
 class BoletoSendEmail(models.TransientModel):
     _name = 'boleto.send.email'
+    _description = """Enviar Boleto E-mail"""
 
     @api.multi
     def send_boletos_by_email(self):

@@ -1,6 +1,3 @@
-# © 2017 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import re
 import requests
 import base64
@@ -17,9 +14,7 @@ _logger = logging.getLogger(__name__)
 # except ImportError:
 #     _logger.error('Cannot import pytrustnfe', exc_info=True)
 
-
 STATE = {'edit': [('readonly', False)]}
-
 
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
@@ -35,18 +30,18 @@ class InvoiceEletronic(models.Model):
             if not self.company_id.senha_nfse_imperial:
                 errors.append('Senha do contribuinte obrigatória')
             for eletr in self.eletronic_item_ids:
-                prod = u"Produto: %s - %s" % (eletr.product_id.default_code,
+                prod = "Produto: %s - %s" % (eletr.product_id.default_code,
                                               eletr.product_id.name)
                 if eletr.tipo_produto == 'product':
                     errors.append(
-                        u'Esse documento permite apenas serviços - %s' % prod)
+                        'Esse documento permite apenas serviços - %s' % prod)
                 if eletr.tipo_produto == 'service':
                     if not eletr.issqn_codigo:
-                        errors.append(u'%s - Código de Serviço' % prod)
+                        errors.append('%s - Código de Serviço' % prod)
                     if not issqn_codigo:
                         issqn_codigo = eletr.issqn_codigo
                     if issqn_codigo != eletr.issqn_codigo:
-                        errors.append(u'%s - Apenas itens com o mesmo código \
+                        errors.append('%s - Apenas itens com o mesmo código \
                                       de serviço podem ser enviados' % prod)
 
         return errors

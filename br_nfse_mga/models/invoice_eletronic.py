@@ -1,6 +1,3 @@
-# © 2018 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import re
 import base64
 import pytz
@@ -32,7 +29,7 @@ class InvoiceEletronicItem(models.Model):
     _inherit = 'invoice.eletronic.item'
 
     codigo_tributacao_municipio = fields.Char(
-        string=u"Cód. Tribut. Munic.", size=20, readonly=True,
+        string="Cód. Tribut. Munic.", size=20, readonly=True,
         help="Código de Tributação no Munípio", states=STATE)
 
     exigibilidade_iss = fields.Selection(
@@ -60,15 +57,15 @@ class InvoiceEletronic(models.Model):
         errors = super(InvoiceEletronic, self)._hook_validation()
         if self.model == '015':
             if not self.company_id.inscr_mun:
-                errors.append(u'Inscrição municipal obrigatória')
+                errors.append('Inscrição municipal obrigatória')
             if not self.company_id.cnae_main_id.code:
-                errors.append(u'CNAE Principal da empresa obrigatório')
+                errors.append('CNAE Principal da empresa obrigatório')
             for eletr in self.eletronic_item_ids:
-                prod = u"Produto: %s - %s" % (eletr.product_id.default_code,
+                prod = "Produto: %s - %s" % (eletr.product_id.default_code,
                                               eletr.product_id.name)
                 if not eletr.codigo_tributacao_municipio:
                     errors.append(
-                        u'Código de Tributação no Munípio obrigatório - %s' %
+                        'Código de Tributação no Munípio obrigatório - %s' %
                         prod)
 
         return errors

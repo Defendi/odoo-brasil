@@ -1,6 +1,3 @@
-# © 2016 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import re
 import time
 import pytz
@@ -51,21 +48,21 @@ class InvoiceEletronic(models.Model):
             item.discriminacao_servicos = descricao
 
     operation = fields.Selection(
-        [('T', u"Tributado em São Paulo"),
-         ('F', u"Tributado Fora de São Paulo"),
-         ('A', u"Tributado em São Paulo, porém isento"),
-         ('B', u"Tributado Fora de São Paulo, porém isento"),
-         ('M', u"Tributado em São Paulo, porém Imune"),
-         ('N', u"Tributado Fora de São Paulo, porém Imune"),
-         ('X', u"Tributado em São Paulo, porém Exigibilidade Suspensa"),
-         ('V', u"Tributado Fora de São Paulo, porém Exigibilidade Suspensa"),
-         ('P', u"Exportação de Serviços"),
-         ('C', u"Cancelado")], u"Operação",
+        [('T', "Tributado em São Paulo"),
+         ('F', "Tributado Fora de São Paulo"),
+         ('A', "Tributado em São Paulo, porém isento"),
+         ('B', "Tributado Fora de São Paulo, porém isento"),
+         ('M', "Tributado em São Paulo, porém Imune"),
+         ('N', "Tributado Fora de São Paulo, porém Imune"),
+         ('X', "Tributado em São Paulo, porém Exigibilidade Suspensa"),
+         ('V', "Tributado Fora de São Paulo, porém Exigibilidade Suspensa"),
+         ('P', "Exportação de Serviços"),
+         ('C', "Cancelado")], "Operação",
         default='T', readonly=True, states=STATE)
     verify_code = fields.Char(
-        string=u'Código Autorização', size=20, readonly=True, states=STATE)
+        string='Código Autorização', size=20, readonly=True, states=STATE)
     numero_nfse = fields.Char(
-        string=u"Número NFSe", size=50, readonly=True, states=STATE)
+        string="Número NFSe", size=50, readonly=True, states=STATE)
 
     discriminacao_servicos = fields.Char(compute='_compute_discriminacao')
 
@@ -86,28 +83,28 @@ class InvoiceEletronic(models.Model):
         if self.model == '001':
             issqn_codigo = ''
             if not self.company_id.inscr_mun:
-                errors.append(u'Inscrição municipal obrigatória')
+                errors.append('Inscrição municipal obrigatória')
             for eletr in self.eletronic_item_ids:
-                prod = u"Produto: %s - %s" % (eletr.product_id.default_code,
+                prod = "Produto: %s - %s" % (eletr.product_id.default_code,
                                               eletr.product_id.name)
                 if eletr.tipo_produto == 'product':
                     errors.append(
-                        u'Esse documento permite apenas serviços - %s' % prod)
+                        'Esse documento permite apenas serviços - %s' % prod)
                 if eletr.tipo_produto == 'service':
                     if not eletr.issqn_codigo:
-                        errors.append(u'%s - Código de Serviço' % prod)
+                        errors.append('%s - Código de Serviço' % prod)
                     if not issqn_codigo:
                         issqn_codigo = eletr.issqn_codigo
                     if issqn_codigo != eletr.issqn_codigo:
-                        errors.append(u'%s - Apenas itens com o mesmo código \
+                        errors.append('%s - Apenas itens com o mesmo código \
                                       de serviço podem ser enviados' % prod)
                     if not eletr.codigo_servico_paulistana:
-                        errors.append(u'%s - Código da NFSe paulistana não \
+                        errors.append('%s - Código da NFSe paulistana não \
                                       configurado' % prod)
                 if not eletr.pis_cst:
-                    errors.append(u'%s - CST do PIS' % prod)
+                    errors.append('%s - CST do PIS' % prod)
                 if not eletr.cofins_cst:
-                    errors.append(u'%s - CST do Cofins' % prod)
+                    errors.append('%s - CST do Cofins' % prod)
 
         return errors
 

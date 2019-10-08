@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-# © 2016 Danimar Ribeiro <danimaribeiro@gmail.com>, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import re
 import pytz
 import time
@@ -35,21 +31,21 @@ class InvoiceEletronicItem(models.Model):
     danfe_name = fields.Char(string="Danfe Betha", size=100, readonly=True)
 
     codigo_tributacao_municipio = fields.Char(
-        string=u"Cód. Tribut. Munic.", size=20, readonly=True,
+        string="Cód. Tribut. Munic.", size=20, readonly=True,
         help="Código de Tributação no Munípio", states=STATE)
 
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
     enforce_iss_betha = fields.Selection(
-        [('1', u"1 - Exigível"),
-         ('2', u"2 - Não incidência"),
-         ('3', u"3 - Isenção"),
-         ('4', u"4 - Exportação"),
-         ('5', u"5 - Imunidade"),
-         ('6', u"6 - Suspensa por Decisão Judicial"),
-         ('7', u"7 - Suspensa por Processo Admin."),
-        ], u"ISS Exigibilidade", default='1', readonly=True, states=STATE)
+        [('1', "1 - Exigível"),
+         ('2', "2 - Não incidência"),
+         ('3', "3 - Isenção"),
+         ('4', "4 - Exportação"),
+         ('5', "5 - Imunidade"),
+         ('6', "6 - Suspensa por Decisão Judicial"),
+         ('7', "7 - Suspensa por Processo Admin."),
+        ], "ISS Exigibilidade", default='1', readonly=True, states=STATE)
 
     @api.multi
     def _hook_validation(self):
@@ -57,22 +53,22 @@ class InvoiceEletronic(models.Model):
         if self.model == '004':
             issqn_codigo = ''
 #             if not self.company_id.inscr_mun:
-#                 errors.append(u'Inscrição municipal obrigatória')
+#                 errors.append('Inscrição municipal obrigatória')
             if not self.company_id.cnae_main_id.code:
-                errors.append(u'CNAE Principal da empresa obrigatório')
+                errors.append('CNAE Principal da empresa obrigatório')
             for eletr in self.eletronic_item_ids:
-                prod = u"Produto: %s - %s" % (eletr.product_id.default_code,
+                prod = "Produto: %s - %s" % (eletr.product_id.default_code,
                                               eletr.product_id.name)
                 if eletr.tipo_produto == 'product':
                     errors.append(
-                        u'Esse documento permite apenas serviços - %s' % prod)
+                        'Esse documento permite apenas serviços - %s' % prod)
                 if eletr.tipo_produto == 'service':
                     if not eletr.issqn_codigo:
-                        errors.append(u'%s - Código de Serviço' % prod)
+                        errors.append('%s - Código de Serviço' % prod)
                     if not issqn_codigo:
                         issqn_codigo = eletr.issqn_codigo
                     if issqn_codigo != eletr.issqn_codigo:
-                        errors.append(u'%s - Apenas itens com o mesmo código \
+                        errors.append('%s - Apenas itens com o mesmo código \
                                       de serviço podem ser enviados' % prod)
 
         return errors
@@ -343,7 +339,7 @@ class InvoiceEletronic(models.Model):
             self.codigo_retorno = '100'
             self.url_danfe = False
             self.danfe = False
-            self.mensagem_retorno = u'Nota Fiscal de Serviço Cancelada'
+            self.mensagem_retorno = 'Nota Fiscal de Serviço Cancelada'
         else:
             retorno = cancel['object'].ListaMensagemRetorno.MensagemRetorno
             # E79 - Nota já está cancelada
@@ -352,7 +348,7 @@ class InvoiceEletronic(models.Model):
                 self.url_danfe = False
                 self.danfe = False
                 self.codigo_retorno = '100'
-                self.mensagem_retorno = u'Nota Fiscal de Serviço Cancelada'
+                self.mensagem_retorno = 'Nota Fiscal de Serviço Cancelada'
 
             self.env['invoice.eletronic.event'].create({
                 'code': retorno.Codigo,

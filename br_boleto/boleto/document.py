@@ -1,8 +1,3 @@
-# © 2012-2015 KMEE (http://www.kmee.com.br)
-# @author Luis Felipe Miléo <mileo@kmee.com.br>
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
-
 import re
 import io
 import logging
@@ -43,8 +38,8 @@ class Boleto:
         boleto_type = order_line.payment_mode_id.boleto_type
         if boleto_type:
             return dict_boleto[boleto_type][0](order_line, nosso_numero)
-        raise BoletoException(u'Configure o tipo de boleto no modo de '
-                              u'pagamento')
+        raise BoletoException('Configure o tipo de boleto no modo de '
+                              'pagamento')
 
     @staticmethod
     def getBoletoClass(order_line):
@@ -218,10 +213,10 @@ class BoletoCecred(Boleto):
         self.boleto.nosso_numero = self.nosso_numero
 
     def getAccountNumber(self):
-        return u"%s-%s" % (self.account_number, self.account_digit)
+        return "%s-%s" % (self.account_number, self.account_digit)
 
     def getBranchNNumber(self):
-        return u"%s-%s" % (self.branch_number, self.branch_digit)
+        return "%s-%s" % (self.branch_number, self.branch_digit)
 
 
 class BoletoHsbc(Boleto):
@@ -288,16 +283,16 @@ class BoletoSicoob(Boleto):
 
 
 dict_boleto = {
-    u'1': (BoletoBB, 'Banco do Brasil'),
-    u'2': (BoletoBanrisul, 'Banrisul'),
-    u'3': (BoletoBradesco, 'Bradesco'),
-    u'4': (BoletoCaixa, u'Caixa Econômica'),
-    u'5': (BoletoHsbc, 'HSBC'),
-    u'6': (BoletoItau, 'Itaú'),
-    u'7': (BoletoSantander, 'Santander'),
-    u'8': (BoletoSicredi, 'Sicredi'),
-    u'9': (BoletoSicoob, 'Sicoob'),
-    u'10': (BoletoCecred, 'Cecred'),
+    '1': (BoletoBB, 'Banco do Brasil'),
+    '2': (BoletoBanrisul, 'Banrisul'),
+    '3': (BoletoBradesco, 'Bradesco'),
+    '4': (BoletoCaixa, 'Caixa Econômica'),
+    '5': (BoletoHsbc, 'HSBC'),
+    '6': (BoletoItau, 'Itaú'),
+    '7': (BoletoSantander, 'Santander'),
+    '8': (BoletoSicredi, 'Sicredi'),
+    '9': (BoletoSicoob, 'Sicoob'),
+    '10': (BoletoCecred, 'Cecred'),
 }
 
 

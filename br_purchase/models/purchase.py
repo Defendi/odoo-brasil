@@ -1,6 +1,3 @@
-# © 2016 Danimar Ribeiro, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import datetime
 
 from odoo import models, fields, api
@@ -59,12 +56,12 @@ class PurchaseOrder(models.Model):
          ('2', '2 - Contratação do Frete por conta de Terceiros'),
          ('3', '3 - Transporte Próprio por conta do Remetente'),
          ('4', '4 - Transporte Próprio por conta do Destinatário'),
-         ('9', '9 - Sem Ocorrência de Transporte')], string=u"Frete", required=True, default='1', states=READONLY_STATES)
-    transportadora_id = fields.Many2one('res.partner',string=u"Transportador",states=READONLY_STATES)
-    prazo_entrega = fields.Integer(string=u"Prazo Entrega", default=0,states=READONLY_STATES)
-    vol_especie = fields.Char(string=u"Espécie Volumes",states=READONLY_STATES)
-    volumes_total = fields.Integer(string=u"Volumes", default=0,states=READONLY_STATES)
-    peso_liquido = fields.Float(string=u"Peso Liquido", default=0.0, digits=(12,3),states=READONLY_STATES)
+         ('9', '9 - Sem Ocorrência de Transporte')], string="Frete", required=True, default='1', states=READONLY_STATES)
+    transportadora_id = fields.Many2one('res.partner',string="Transportador",states=READONLY_STATES)
+    prazo_entrega = fields.Integer(string="Prazo Entrega", default=0,states=READONLY_STATES)
+    vol_especie = fields.Char(string="Espécie Volumes",states=READONLY_STATES)
+    volumes_total = fields.Integer(string="Volumes", default=0,states=READONLY_STATES)
+    peso_liquido = fields.Float(string="Peso Liquido", default=0.0, digits=(12,3),states=READONLY_STATES)
 
     total_bruto = fields.Float(
         string='Total Bruto ( = )', readonly=True, compute='_amount_all',
@@ -160,25 +157,25 @@ class PurchaseOrderLine(models.Model):
     icms_cst_normal = fields.Char(string="CST ICMS", size=5)
     icms_csosn_simples = fields.Char(string="CSOSN ICMS", size=5)
     icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Benificio Fiscal")
-    icms_st_aliquota_mva = fields.Float(string=u'Alíquota MVA (%)',
+    icms_st_aliquota_mva = fields.Float(string='Alíquota MVA (%)',
                                         digits=dp.get_precision('Account'))
     aliquota_icms_proprio = fields.Float(
-        string=u'Alíquota ICMS Próprio (%)',
+        string='Alíquota ICMS Próprio (%)',
         digits=dp.get_precision('Account'))
     incluir_ipi_base = fields.Boolean(string="Incluir IPI na Base ICMS")
     icms_aliquota_reducao_base = fields.Float(
-        string=u'Redução Base ICMS (%)', digits=dp.get_precision('Account'))
+        string='Redução Base ICMS (%)', digits=dp.get_precision('Account'))
     icms_st_aliquota_reducao_base = fields.Float(
-        string=u'Redução Base ICMS ST(%)', digits=dp.get_precision('Account'))
+        string='Redução Base ICMS ST(%)', digits=dp.get_precision('Account'))
     icms_st_aliquota_deducao = fields.Float(
-        string=u"% Dedução", help=u"Alíquota interna ou interestadual aplicada \
+        string="% Dedução", help="Alíquota interna ou interestadual aplicada \
          sobre o valor da operação para deduzir do ICMS ST - Para empresas \
          do Simples Nacional", digits=dp.get_precision('Account'))
     tem_difal = fields.Boolean(string="Possui Difal")
 
     ipi_cst = fields.Char(string='CST IPI', size=5)
     ipi_reducao_bc = fields.Float(
-        string=u'Redução Base IPI (%)', digits=dp.get_precision('Account'))
+        string='Redução Base IPI (%)', digits=dp.get_precision('Account'))
 
     pis_cst = fields.Char(string='CST PIS', size=5)
     cofins_cst = fields.Char(string='CST COFINS', size=5)
@@ -190,7 +187,7 @@ class PurchaseOrderLine(models.Model):
         default=0.0)
 
     valor_desconto = fields.Float(
-        compute='_compute_amount', string=u'Vlr. Desc. (-)', store=True,
+        compute='_compute_amount', string='Vlr. Desc. (-)', store=True,
         digits=dp.get_precision('Sale Price'))
     valor_bruto = fields.Float(
         compute='_compute_amount', string='Vlr. Bruto', store=True,

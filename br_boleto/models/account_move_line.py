@@ -1,15 +1,11 @@
-# © 2016 Danimar Ribeiro, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
-    boleto_emitido = fields.Boolean(string=u"Emitido")
-    nosso_numero = fields.Char(string=u"Nosso Número", size=30)
+    boleto_emitido = fields.Boolean(string="Emitido")
+    nosso_numero = fields.Char(string="Nosso Número", size=30)
     boleto = fields.Boolean(related="payment_mode_id.boleto")
 
     @api.multi

@@ -1,8 +1,5 @@
-# © 2009 Renato Lima - Akretion
-# © 2016 Danimar Ribeiro, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
 import logging
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons import decimal_precision as dp
@@ -111,27 +108,27 @@ class AccountInvoice(models.Model):
         compute='_compute_payables')
 
     issuer = fields.Selection(
-        [('0', 'Terceiros'), ('1', u'Emissão própria')], 'Emitente',
+        [('0', 'Terceiros'), ('1', 'Emissão própria')], 'Emitente',
         default='1', readonly=True, states={'draft': [('readonly', False)]})
     
     vendor_number = fields.Char(
-        u'Número NF Entrada', size=18, readonly=True,
+        'Número NF Entrada', size=18, readonly=True,
         states={'draft': [('readonly', False)]},
-        help=u"Número da Nota Fiscal do Fornecedor", copy=False)
+        help="Número da Nota Fiscal do Fornecedor", copy=False)
     
     vendor_serie = fields.Char(
-        u'Série NF Entrada', size=12, readonly=True,
+        'Série NF Entrada', size=12, readonly=True,
         states={'draft': [('readonly', False)]},
-        help=u"Série do número da Nota Fiscal do Fornecedor",copy=False)
+        help="Série do número da Nota Fiscal do Fornecedor",copy=False)
 
     product_serie_id = fields.Many2one(
-        'br_account.document.serie', string=u'Série produtos',
+        'br_account.document.serie', string='Série produtos',
         domain="[('fiscal_document_id', '=', product_document_id),\
         ('company_id','=',company_id)]", readonly=True,
         states={'draft': [('readonly', False)]})
 
     product_document_nr = fields.Integer(
-        string=u'Número Doc', readonly=True, 
+        string='Número Doc', readonly=True, 
         states={'draft': [('readonly', False)]},
         copy=False, default=0)
 
@@ -141,16 +138,16 @@ class AccountInvoice(models.Model):
     
     product_is_eletronic = fields.Boolean(
         related='product_document_id.electronic', type='boolean',
-        store=True, string=u'NF/CT Eletrônico', readonly=True)
+        store=True, string='NF/CT Eletrônico', readonly=True)
 
     service_serie_id = fields.Many2one(
-        'br_account.document.serie', string=u'Série serviços',
+        'br_account.document.serie', string='Série serviços',
         domain="[('fiscal_document_id', '=', service_document_id),\
         ('company_id','=',company_id)]", readonly=True,
         states={'draft': [('readonly', False)]})
     
     service_document_nr = fields.Integer(
-        string=u'Número Doc', readonly=True, 
+        string='Número Doc', readonly=True, 
         states={'draft': [('readonly', False)]},
         copy=False, default=0)
     
@@ -160,17 +157,17 @@ class AccountInvoice(models.Model):
 
     service_is_eletronic = fields.Boolean(
         related='product_document_id.electronic', type='boolean',
-        store=True, string=u'NFS Eletrônico', readonly=True)
+        store=True, string='NFS Eletrônico', readonly=True)
 
     fiscal_document_related_ids = fields.One2many(
         'br_account.document.related', 'invoice_id',
         'Documento Fiscal Relacionado', readonly=True,
         states={'draft': [('readonly', False)]})
     fiscal_observation_ids = fields.Many2many(
-        'br_account.fiscal.observation', string=u"Observações Fiscais",
+        'br_account.fiscal.observation', string="Observações Fiscais",
         readonly=True, states={'draft': [('readonly', False)]})
     fiscal_comment = fields.Text(
-        u'Observação Fiscal', readonly=True,
+        'Observação Fiscal', readonly=True,
         states={'draft': [('readonly', False)]})
 
     total_bruto = fields.Float(
@@ -194,7 +191,7 @@ class AccountInvoice(models.Model):
         digits=dp.get_precision('Account'))
     valor_icms_fcp_uf_dest = fields.Float(
         string="Total ICMS FCP", store=True, compute='_compute_amount',
-        help=u'Total total do ICMS relativo Fundo de Combate à Pobreza (FCP) \
+        help='Total total do ICMS relativo Fundo de Combate à Pobreza (FCP) \
         da UF de destino')
     valor_icms_uf_dest = fields.Float(
         string="ICMS Destino", store=True, compute='_compute_amount',
@@ -274,10 +271,10 @@ class AccountInvoice(models.Model):
         string='INSS Retido', store=True,
         digits=dp.get_precision('Account'), compute='_compute_amount')
     outros_base = fields.Float(
-        string=u'Base Outras Retenções', store=True,
+        string='Base Outras Retenções', store=True,
         digits=dp.get_precision('Account'), compute='_compute_amount')
     outros_value = fields.Float(
-        string=u'Valor Outras Retenções', store=True,
+        string='Valor Outras Retenções', store=True,
         digits=dp.get_precision('Account'), compute='_compute_amount')
     outros_retention = fields.Float(
         string='Outras Retido', store=True,
@@ -319,7 +316,7 @@ class AccountInvoice(models.Model):
                                                       ('partner_id','=',inv.partner_id.id),
                                                       ('vendor_serie','=',inv.vendor_serie),
                                                       ('vendor_number','=',inv.vendor_number)]):
-                        raise UserError(u'Não é possível ter mais que uma fatura com o mesmo número de um único fornecedor.')
+                        raise UserError('Não é possível ter mais que uma fatura com o mesmo número de um único fornecedor.')
         return True
 
     @api.onchange('account_analitic_id')
@@ -350,7 +347,7 @@ class AccountInvoice(models.Model):
 
     @api.onchange('issuer')
     def _onchange_issuer(self):
-        if self.issuer == '0' and self.type in (u'in_invoice', u'in_refund'):
+        if self.issuer == '0' and self.type in ('in_invoice', 'in_refund'):
             self.fiscal_document_id = None
             self.document_serie_id = None
 
