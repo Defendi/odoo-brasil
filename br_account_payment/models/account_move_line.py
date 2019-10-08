@@ -25,7 +25,7 @@ class AccountMoveLine(models.Model):
     payment_mode_id = fields.Many2one('l10n_br.payment.mode', string="Modo de pagamento")
     l10n_br_order_line_id = fields.Many2one('payment.order.line', string='Linha de Pagamento')
     change_date_maturity_ids = fields.One2many("account.move.line.change.date.maturity", "move_id", string="Mudanças de Vencimento", readonly=True)
-    reconcile = fields.Boolean(related="account_id.reconcile")
+    acc_is_reconcile = fields.Boolean(related="account_id.reconcile")
 
     @api.multi
     def action_register_payment(self):
