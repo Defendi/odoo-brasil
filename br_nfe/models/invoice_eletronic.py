@@ -379,13 +379,17 @@ class InvoiceEletronic(models.Model):
                 'pCOFINS': "%.02f" % item.cofins_aliquota,
                 'vCOFINS': "%.02f" % item.cofins_valor
             },
-            'II': {
-                'vBC': "%.02f" % item.ii_base_calculo,
-                'vDespAd': "%.02f" % item.ii_valor_despesas,
-                'vII': "%.02f" % item.ii_valor,
-                'vIOF': "%.02f" % item.ii_valor_iof
-            },
         }
+        if len(item.import_declaration_ids) > 0:
+            imposto.update({        
+                'II': {
+                    'vBC': "%.02f" % item.ii_base_calculo,
+                    'vDespAd': "%.02f" % item.ii_valor_despesas,
+                    'vII': "%.02f" % item.ii_valor,
+                    'vIOF': "%.02f" % item.ii_valor_iof
+                }
+            })
+
         if item.tipo_produto == 'service':
             retencoes = item.pis_valor_retencao + \
                 item.cofins_valor_retencao + item.inss_valor_retencao + \
