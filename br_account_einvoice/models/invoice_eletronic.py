@@ -47,12 +47,9 @@ class InvoiceEletronic(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
 
-    code = fields.Char(
-        'Código', size=100, readonly=True, states=STATE)
-    name = fields.Char(
-        'Nome', size=100, readonly=True, states=STATE)
-    company_id = fields.Many2one(
-        'res.company', 'Empresa', readonly=True, states=STATE)
+    code = fields.Char('Código', size=100, readonly=True, states=STATE)
+    name = fields.Char('Nome', size=100, readonly=True, states=STATE)
+    company_id = fields.Many2one('res.company', 'Empresa', readonly=True, states=STATE)
     state = fields.Selection(
         [('draft', 'Provisório'),
          ('edit', 'Editar'),
@@ -60,14 +57,10 @@ class InvoiceEletronic(models.Model):
          ('done', 'Enviado'),
          ('cancel', 'Cancelado')],
         string='State', default='draft', readonly=True, states=STATE)
-    tipo_operacao = fields.Selection(
-        [('entrada', 'Entrada'),
-         ('saida', 'Saída')],
+    tipo_operacao = fields.Selection([('entrada', 'Entrada'),('saida', 'Saída')],
         string='State', default='saida', readonly=True, states=STATE,
         track_visibility='always')
-    schedule_user_id = fields.Many2one(
-        'res.users', string="Agendado por", readonly=True,
-        track_visibility='always')
+    schedule_user_id = fields.Many2one('res.users', string="Agendado por", readonly=True,track_visibility='always')
     model = fields.Selection(
         [('55', '55 - NFe'),
          ('65', '65 - NFCe'),
@@ -225,6 +218,20 @@ class InvoiceEletronic(models.Model):
 
     email_sent = fields.Boolean(string="Email enviado", default=False,
                                 readonly=True, states=STATE)
+
+    @api.onchange('partner_id','tipo_operacao')
+    def _on_change_partner_id(self):
+        if self.state == 'edit' and bool(self.partner_id):
+            self.partner_shipping_id = self.partner_id
+            if self.tipo_operacao == 'saida':
+                self.fiscal_position_id = self.partner_id.property_account_position_id
+                self.payment_term_id = self.partner_id.property_payment_term_id
+                self.payment_mode_id = self.partner_id.property_payment_mode_id
+            else:
+                self.partner_id.property_purchase_fiscal_position_id
+                self.payment_term_id = self.partner_id.property_supplier_payment_term_id
+                
+
 
     def _create_attachment(self, prefix, event, data):
         file_name = '%s-%s.xml' % (

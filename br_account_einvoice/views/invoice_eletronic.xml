@@ -169,13 +169,13 @@
                 <form string="Documento Eletrônico">
                     <header>
                         <button name="action_send_eletronic_invoice" states="draft" string="Enviar Agora" type="object" class="oe_highlight"/>
-                        <button name="action_back_to_draft" states="edit,error" string="Repetir" type="object"/>
+                        <button name="action_back_to_draft" states="edit,error" string="Validar" type="object"/>
                         <button name="action_edit_edoc" states="draft,error" string="Habilitar Edição" type="object" groups="br_account_einvoice.group_edit_edoc"/>
                         <button name="action_cancel_document" confirm="Confirma o cancelamento do documento?" states="done" string="Cancelar" type="object"/>
                         <button name="send_email_nfe" string="Reenviar Email" type="object" attrs="{'invisible': [('state', '!=', 'done')]}" />
-                        <field name="state" widget="statusbar" statusbar_visible="draft,done" />
+                        <field name="state" widget="statusbar" statusbar_visible="edit,draft,done" />
                     </header>
-                    <div name="alertas" class="alert alert-info" role="alert" style="margin-bottom:0px;">
+                    <div name="alertas" class="alert alert-info" role="alert" style="margin-bottom:0px;" attrs="{'invisible': [('state', '=', 'edit')]}">
                         <div class="row">
                             <div class="col-md-6 col-md-offset-1">
                                 <b>Situação: </b><field name="codigo_retorno" class="oe_inline" readonly="1"/><br />
