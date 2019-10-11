@@ -34,6 +34,21 @@
             </field>
         </field>
     </record>
+
+    <!-- view_br_nfe_invoice_line_form  -->
+    <record model="ir.ui.view" id="view_nfse_account_invoice_line_form">
+        <field name="name">br_account.invoice.line.form</field>
+        <field name="model">account.invoice.line</field>
+        <field name="inherit_id" ref="br_account.view_br_account_invoice_line_form" />
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+        	<field name="service_type_id" position="after">
+        		<field name="country_id" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>	
+        		<field name="state_id" domain="[('country_id','=',country_id)]" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>	
+        		<field name="city_id" domain="[('state_id','=',state_id)]" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>	
+        	</field>
+        </field>
+    </record>
     
     <!--
     
