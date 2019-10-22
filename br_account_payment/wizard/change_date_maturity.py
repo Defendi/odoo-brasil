@@ -9,7 +9,7 @@ class AccountMoveLineChangeDateMaturity(models.TransientModel):
     _name = 'account.move.line.change.date.maturity'
     _description = 'Histórico de Mudança na Data de Vencimento'
     
-    move_id = fields.Many2one('account.move.line', string="Movimento Contábil", readonly=True, required=True)
+    move_id = fields.Many2one('account.move.line', string="Movimento Contábil", readonly=True, required=True, ondelete='cascade', index=True)
     user_id = fields.Many2one('res.users', 'Responsável', default=lambda self: self.env.user)
     can_do = fields.Boolean('Pode fazer', default=False)
     date_maturity = fields.Date(string='De')
