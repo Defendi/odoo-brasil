@@ -340,7 +340,8 @@ class PuchaseOrderLine(models.Model):
     def _compute_amount(self):
         for line in self:
 #             price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-            price = line.price_unit - (line.valor_desconto or 0.0)
+            desc_unit = line.valor_desconto / line.product_qty if line.product_qty > 0.0 else 0.0
+            price = line.price_unit - desc_unit
             ctx = line._prepare_tax_context()
             tax_ids = line.taxes_id.with_context(**ctx)
             taxes = tax_ids.compute_all(
