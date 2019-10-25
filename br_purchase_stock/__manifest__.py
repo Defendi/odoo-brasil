@@ -10,6 +10,7 @@
     'website': 'http://www.trustcode.com.br',
     'version': '11.0.1.1.0',
     'depends': [
+        'purchase',
         'stock',
         'br_purchase', 
         'br_stock_account'
