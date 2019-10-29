@@ -84,6 +84,12 @@ class SaleOrder(models.Model):
     @api.multi
     def action_confirm(self):
         for order in self:
+            if not bool(self.fiscal_position_id):
+                raise UserError(
+                    _("A venda precisa ter uma posição fiscal. \
+                      Informe no campo Posição Fiscal qual é a \
+                      forma dessa venda."))
+                 
             prec = order.currency_id.decimal_places
             itens = order.order_line
             frete = round(sum(x.valor_frete for x in itens), prec)
