@@ -23,7 +23,7 @@
                 <field name="metodo_pagamento" />
             </field>
             <page name="totais" position="after">
-                <page name="transporte" string="Transportes" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}">
+                <page name="transporte" string="Frete" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}">
                     <group>
                         <group>
                             <field name="modalidade_frete" />

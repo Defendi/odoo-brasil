@@ -6,6 +6,7 @@ class AccountMoveLine(models.Model):
 
     boleto_emitido = fields.Boolean(string="Emitido")
     nosso_numero = fields.Char(string="Nosso Número", size=30)
+    boleto_date = fields.Date(string='Data Emissão')
     boleto = fields.Boolean(related="payment_mode_id.boleto")
 
     @api.multi
