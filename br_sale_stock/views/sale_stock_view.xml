@@ -19,6 +19,22 @@
                 <field name="total_seguro" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                 <field name="total_frete" widget='monetary' options="{'currency_field': 'currency_id'}" />
             </field>
+        	<xpath expr="//notebook/page[1]" position="after">
+        		<page string="Frete">
+        			<group>
+        				<group>
+        					<field name="freight_responsibility"/>
+        					<field name="shipping_supplier_id" options="{'no_quick_create': '1'}"/>
+        					<field name="freight_estimated" attrs="{'invisible': [('freight_responsibility', 'in', ('1','2','4','9'))]}"/>
+        					<field name="delivery_time"/>
+        					<field name="vol_especie"/>
+        					<field name="volumes_total"/>
+        					<field name="peso_bruto"/>
+        					<field name="peso_liquido"/>
+         				</group>
+        			</group>
+        		</page>
+        	</xpath>
         </field>
     </record>
 </odoo>

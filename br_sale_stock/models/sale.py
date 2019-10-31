@@ -9,6 +9,9 @@ from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
 
+EDITONLY_STATES = {
+    'draft': [('readonly', False)]
+}
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -80,6 +83,33 @@ class SaleOrder(models.Model):
         string='Frete ( + )', default=0.00, digits=dp.get_precision('Account'),
         readonly=True, states={'draft': [('readonly', False)],
                                'sent': [('readonly', False)]})
+
+    #transporte
+    shipping_supplier_id = fields.Many2one('res.partner', 'Transportadora', readonly=True, states=EDITONLY_STATES, oldname='transp_id')
+    freight_responsibility = fields.Selection([('0', '0 - Contratação do Frete por conta do Remetente (CIF)'),
+         ('1', '1 - Contratação do Frete por conta do Destinatário (FOB)'),
+         ('2', '2 - Contratação do Frete por conta de Terceiros'),
+         ('3', '3 - Transporte Próprio por conta do Remetente'),
+         ('4', '4 - Transporte Próprio por conta do Destinatário'),
+         ('9', '9 - Sem Ocorrência de Transporte')], string="Frete", required=True, default='1', readonly=True, states=EDITONLY_STATES)
+    freight_estimated = fields.Float(string="Vl Frete Estimado", readonly=True, states=EDITONLY_STATES, oldname='frete_estimado')
+    delivery_time = fields.Integer(string="Prazo Entrega", default=0, readonly=True, states=EDITONLY_STATES, oldname='prazo_entrega')
+    vol_especie = fields.Char(string="Espécie Volume",readonly=True, states=EDITONLY_STATES)
+    volumes_total = fields.Integer(string="Nº Volumes", default=0,readonly=True, states=EDITONLY_STATES)
+    peso_bruto = fields.Float(string="Peso Bruto (Kg)", default=0.0, digits=(12,3), readonly=True, states=EDITONLY_STATES)
+    peso_liquido = fields.Float(string="Peso Liquido (Kg)", default=0.0, digits=(12,3), readonly=True, states=EDITONLY_STATES)
+
+    @api.multi
+    def _prepare_invoice(self):
+        res = super(SaleOrder, self)._prepare_invoice()
+        res['shipping_supplier_id'] = self.shipping_supplier_id.id
+        res['freight_responsibility'] = self.freight_responsibility
+        #res['goods_delivery_date'] = self. 
+        res['weight'] = self.peso_bruto
+        res['weight_net'] = self.peso_liquido
+        res['kind_of_packages'] = self.vol_especie
+        res['number_of_packages'] = self.volumes_total
+        return res
 
     @api.multi
     def action_confirm(self):
