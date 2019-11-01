@@ -18,6 +18,7 @@
         'security/ir.model.access.csv',
         'reports/sale_order.xml',
         'views/sale_stock_view.xml',
+        'security/security.xml',
     ],
     'auto_install': True,
 }

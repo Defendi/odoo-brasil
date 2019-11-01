@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+    <record id="group_extra_values" model="res.groups">
+        <field name="name">Valores Adicionais</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+</data></openerp>
