@@ -52,37 +52,6 @@ class PurchaseOrder(models.Model):
                 amount += line.valor_bruto
         return amount
 
-#     @api.onchange('total_despesas', 'total_seguro',
-#                   'total_frete', 'total_despesas_aduana')
-#     def _onchange_despesas_frete_seguro(self):
-#         for order in self:
-#             amount = order.calc_total_amount()
-#             sub_frete = order.total_frete
-#             sub_seguro = order.total_seguro
-#             sub_aduana = order.total_despesas_aduana
-#             sub_desp = order.total_despesas
-#             for l in order.order_line:
-#                 if l.product_id.fiscal_type == 'service':
-#                     continue
-#                 else:
-#                     frete, seguro, despesas, aduana = order.calc_rateio(
-#                         l, amount)
-#                     sub_frete -= round(frete, 2)
-#                     sub_seguro -= round(seguro, 2)
-#                     sub_aduana -= round(aduana, 2)
-#                     sub_desp -= round(despesas, 2)
-#             if order.order_line:
-#                 order.order_line[0].update({
-#                     'valor_seguro':
-#                         order.order_line[0].valor_seguro + sub_seguro,
-#                     'valor_frete':
-#                         order.order_line[0].valor_frete + sub_frete,
-#                     'outras_despesas':
-#                         order.order_line[0].outras_despesas + sub_desp,
-#                     'valor_aduana':
-#                         order.order_line[0].valor_aduana + sub_aduana
-#                     })
-
     total_despesas = fields.Float(compute='_get_despesa', 
                                   inverse='_set_despesa',
                                   string='Despesas ( + )', default=0.00,
@@ -154,7 +123,8 @@ class PurchaseOrder(models.Model):
                 somaItem = 0.0
                 x = 1
                 for l in record.order_line:
-                    percentual = self._calc_ratio(l.valor_bruto, amount)
+                    vlBruto = float("%.2f" % (l.product_qty * l.price_unit))
+                    percentual = self._calc_ratio(vlBruto, amount)
                     if x >= len(record.order_line):
                         vl = vlDespesas - somaItem
                     else:
@@ -187,7 +157,8 @@ class PurchaseOrder(models.Model):
                 somaItem = 0.0
                 x = 1
                 for l in record.order_line:
-                    percentual = self._calc_ratio(l.valor_bruto, amount)
+                    vlBruto = float("%.2f" % (l.product_qty * l.price_unit))
+                    percentual = self._calc_ratio(vlBruto, amount)
                     if x >= len(record.order_line):
                         vl = vlDespesas - somaItem
                     else:
@@ -220,7 +191,8 @@ class PurchaseOrder(models.Model):
                 somaItem = 0.0
                 x = 1
                 for l in record.order_line:
-                    percentual = self._calc_ratio(l.valor_bruto, amount)
+                    vlBruto = float("%.2f" % (l.product_qty * l.price_unit))
+                    percentual = self._calc_ratio(vlBruto, amount)
                     if x >= len(record.order_line):
                         vl = vlSeguro - somaItem
                     else:
@@ -253,7 +225,8 @@ class PurchaseOrder(models.Model):
                 somaItem = 0.0
                 x = 1
                 for l in record.order_line:
-                    percentual = self._calc_ratio(l.valor_bruto, amount)
+                    vlBruto = float("%.2f" % (l.product_qty * l.price_unit))
+                    percentual = self._calc_ratio(vlBruto, amount)
                     if x >= len(record.order_line):
                         vl = vlFrete - somaItem
                     else:
@@ -287,7 +260,8 @@ class PurchaseOrder(models.Model):
                 somaItem = 0.0
                 x = 1
                 for l in record.order_line:
-                    percentual = self._calc_ratio(l.valor_bruto, amount)
+                    vlBruto = float("%.2f" % (l.product_qty * l.price_unit))
+                    percentual = self._calc_ratio(vlBruto, amount)
                     if x >= len(record.order_line):
                         vl = vlDesconto - somaItem
                     else:
