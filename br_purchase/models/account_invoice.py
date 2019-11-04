@@ -129,12 +129,14 @@ class AccountInvoice(models.Model):
         self.kind_of_packages = self.purchase_id.vol_especie
         self.number_of_packages = self.purchase_id.volumes_total
         self.account_analitic_id = self.purchase_id.account_analytic_id.id
-        super(AccountInvoice, self).purchase_order_change()
         tagsin = []
         for tag in self.purchase_id.analytic_tag_ids:
             tagsin.append(tag.id)
         self.analytic_tag_ids = [(6,0,tagsin)]
-        return {}
+        
+        # Deve sempre ser o último
+        res = super(AccountInvoice, self).purchase_order_change()
+        return res
 
 
 class AccountInvoiceLine(models.Model):

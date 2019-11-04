@@ -8,6 +8,8 @@ from random import SystemRandom
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
+from _ctypes import resize
+from openupgradelib.openupgrade import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -261,6 +263,9 @@ class AccountInvoice(models.Model):
             raise UserError(_("Invoice must be in draft state in order to validate it."))
         if to_open_invoices.filtered(lambda inv: float_compare(inv.amount_total, 0.0, precision_rounding=inv.currency_id.rounding) == -1):
             raise UserError(_("You cannot validate an invoice with a negative total amount. You should create a credit note instead."))
+        if to_open_invoices.filtered(lambda inv: inv.type == 'in_invoice' and inv.issuer == '0' and (not bool(inv.vendor_number) or not bool(inv.vendor_serie))):
+            raise UserError(_("Informe o número/série do documento de entrada."))
+        
         res = to_open_invoices.invoice_validate()
         to_open_invoices.action_date_assign()
         to_open_invoices.action_move_create()

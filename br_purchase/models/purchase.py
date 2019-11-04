@@ -29,20 +29,6 @@ class PurchaseOrder(models.Model):
                                    for l in order.order_line),
             })
 
-    @api.multi
-    def _prepare_invoice(self):
-        res = super(PurchaseOrder, self)._prepare_invoice()
-        if self.fiscal_position_id and self.fiscal_position_id.account_id:
-            res['account_id'] = self.fiscal_position_id.account_id.id
-        if self.fiscal_position_id and self.fiscal_position_id.journal_id:
-            res['journal_id'] = self.fiscal_position_id.journal_id.id
-        res['shipping_supplier_id'] = self.transportadora_id.id
-        tagsin = []
-        for tag in self.order_line.analytic_tag_ids:
-            tagsin.append(tag.id)
-        res['analytic_tag_ids'] = [(6,0,tagsin)]
-        return res
-
     def _get_deadline_order(self):
         tm = self.env['res.config.settings'].search([],limit=1,order="id desc")
         days = 0
