@@ -8,8 +8,6 @@ from random import SystemRandom
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
-from _ctypes import resize
-from openupgradelib.openupgrade import UserError
 
 _logger = logging.getLogger(__name__)
 
