@@ -148,6 +148,8 @@ class PurchaseOrderLine(models.Model):
                 'valor_liquido': valor_bruto - desconto,
             })
 
+    account_analytic_id = fields.Many2one('account.analytic.account', string='Analytic Account')
+
     fiscal_position_type = fields.Selection(
         [('saida', 'Saída'), ('entrada', 'Entrada'),
          ('import', 'Entrada Importação')],
@@ -279,3 +281,18 @@ class PurchaseOrderLine(models.Model):
                                               order.company_id.currency_id,
                                               round=False)
         return price
+
+    @api.onchange('product_id')
+    def onchange_product_id(self):
+        res = super(PurchaseOrderLine, self).onchange_product_id()
+        if self.product_id:
+            idsx = [(6,0,self.order_id.analytic_tag_ids.ids)]
+            self.analytic_tag_ids = idsx
+            self.account_analytic_id = self.order_id.account_analytic_id
+        return res
+
+
+    @api.onchange('account_analytic_id')
+    def onchange_analytic_id(self):
+        if self.account_analytic_id != self.order_id.account_analytic_id:
+            self.analytic_tag_ids = [(6,0,self.account_analytic_id.tag_ids)]
