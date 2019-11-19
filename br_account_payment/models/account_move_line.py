@@ -6,7 +6,7 @@ class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
     @api.multi
-    @api.depends('debit', 'credit', 'user_type_id', 'amount_residual')
+    @api.depends('name','debit', 'credit', 'user_type_id', 'amount_residual','full_reconcile_id')
     def _compute_payment_value(self):
         for item in self:
             item.payment_value = item.debit if item.user_type_id.type == 'receivable' else item.credit * -1
