@@ -304,7 +304,8 @@ class AccountInvoice(models.Model):
                                           copy=True, readonly=True, states={'draft': [('readonly', False)]})
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', 
                                         copy=True, readonly=True, states={'draft': [('readonly', False)]})
-
+    
+    product_id = fields.Many2one('product.product', related='invoice_line_ids.product_id', string='Produto')
 
     @api.multi
     @api.constrains('type', 'issuer', 'partner_id', 'vendor_serie', 'vendor_number')

@@ -219,6 +219,8 @@ class InvoiceEletronic(models.Model):
     email_sent = fields.Boolean(string="Email enviado", default=False,
                                 readonly=True, states=STATE)
 
+    product_id = fields.Many2one('product.product', related='eletronic_item_ids.product_id', string='Produto')
+
     @api.onchange('partner_id','tipo_operacao')
     def _on_change_partner_id(self):
         if self.state == 'edit' and bool(self.partner_id):
