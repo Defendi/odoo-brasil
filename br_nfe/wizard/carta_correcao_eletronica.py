@@ -1,9 +1,11 @@
 import re
-import pytz
+#import pytz
 import base64
 import logging
 
 from datetime import datetime
+from dateutil import tz
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
@@ -57,9 +59,10 @@ class WizardCartaCorrecaoEletronica(models.TransientModel):
     def send_letter(self):
         self.valida_carta_correcao_eletronica()
 
-        tz = pytz.timezone(self.env.user.partner_id.tz) or pytz.utc
+        from_zone = tz.gettz('UTC')
+        to_zone = tz.gettz(self.env.user.partner_id.tz or 'America/Sao_Paulo')
         dt_evento = datetime.utcnow()
-        dt_evento = pytz.utc.localize(dt_evento).astimezone(tz)
+        dt_evento = dt_evento.replace(tzinfo=from_zone).astimezone(to_zone)
 
         carta = {
             'idLote': self.id,
