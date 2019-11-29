@@ -325,6 +325,18 @@ class AccountInvoice(models.Model):
                     edoc.sudo().unlink()
         return res
 
+    @api.multi
+    def unlink(self):
+        for invoice in self:
+            if invoice. state in ('draft','cancel') and \
+               invoice.product_document_id.electronic and \
+               len(invoice.product_serie_id) > 0 and \
+               invoice.product_document_nr > 0 and \
+               not invoice.has_inutilized(invoice.product_serie_id,invoice.product_document_nr):
+                raise UserError('Foi definido um documento eletronico de produto para essa fatura.\nEsse número foi inutilizado?\nPS. Caso você não utilize mais esse número não esqueça de inutilizá-lo.')
+            if invoice.service_document_id.electronic and len(invoice.service_serie_id) > 0 and invoice.service_document_nr > 0:
+                raise UserError('Foi definido um documento eletronico de serviço para essa fatura.\nNão é possível excluir uma fatura que foi utilizada um documento eletrônico.')
+        return super(AccountInvoice, self).unlink()
 
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'

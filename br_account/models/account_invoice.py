@@ -156,7 +156,7 @@ class AccountInvoice(models.Model):
         readonly=True, states={'draft': [('readonly', False)]})
 
     service_is_eletronic = fields.Boolean(
-        related='product_document_id.electronic', type='boolean',
+        related='service_document_id.electronic', type='boolean',
         store=True, string='NFS Eletrônico', readonly=True)
 
     fiscal_document_related_ids = fields.One2many(
@@ -338,6 +338,7 @@ class AccountInvoice(models.Model):
             [('fiscal_document_id', '=', self.product_document_id.id),
              ('active','=', True)], limit=1, order='code')
         self.product_serie_id = series and series[0].id or False
+        self.product_document_nr = 0
 
     @api.onchange('service_document_id')
     def _onchange_service_document_id(self):
@@ -345,6 +346,7 @@ class AccountInvoice(models.Model):
             [('fiscal_document_id', '=', self.service_document_id.id),
              ('active','=', True)], limit=1, order='code')
         self.service_serie_id = series and series[0].id or False
+        self.service_document_nr = 0
 
     @api.onchange('issuer')
     def _onchange_issuer(self):
@@ -522,4 +524,13 @@ class AccountInvoice(models.Model):
                     'numero': doc.numero}
             related = (0, False, vals)
             related_vals.append(related)
-        return related_vals
+        return related_vals 
+
+    def has_inutilized(self,serie,number):
+        inv_inutilized = self.env['invoice.eletronic.inutilized'].search([
+            ('serie', '=', serie.id),('numeration_start','>=',number),('numeration_end','<=',number)], limit=1)
+        if len(inv_inutilized) > 0:
+            return True
+        else:
+            return False
+        
