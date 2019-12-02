@@ -17,6 +17,7 @@
         'Carlos Alberto Cipriano Korovsky <carlos.korovsky@uktech.com.br',
     ],
     'depends': [
+        'account',
         'br_account',
     ],
     'data': [
@@ -33,6 +34,7 @@
         'security/account_security.xml',
         'wizard/payment_cnab_import.xml',
         'wizard/change_date_maturity_view.xml',
+        'wizard/payment_move_line.xml'
     ],
     'installable': True,
     'application': True,

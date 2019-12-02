@@ -23,7 +23,7 @@
         	<field name="date_maturity" position="after">
         		<field name="boleto" invisible="1"/>
         	</field>
-            <button name="action_register_payment" position="after">
+            <button name="action_register_payment_move_line" position="after">
                 <button name="open_wizard_print_boleto" type="object" string="BOLETO" class="btn btn-success btn-xs" attrs="{'invisible': ['|',('reconciled', '!=', False),'|',('amount_residual', '&lt;=', 0.0),('boleto', '=', True)]}"/>
             </button>
         </field>

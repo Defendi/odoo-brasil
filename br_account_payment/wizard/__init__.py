@@ -3,3 +3,4 @@
 
 from . import payment_cnab_import
 from . import change_date_maturity
+from . import payment_move_line
