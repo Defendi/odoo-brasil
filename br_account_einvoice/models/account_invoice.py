@@ -42,6 +42,9 @@ class AccountInvoice(models.Model):
         help="""Unique number of the invoice, computed
             automatically when the invoice is created.""")
 
+    document_number = fields.Integer(related='invoice_eletronic_ids.numero', string='E-Doc Número')
+
+
     @api.multi
     def action_view_edocs(self):
         if self.total_edocs == 1:

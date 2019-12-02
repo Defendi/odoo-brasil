@@ -18,6 +18,19 @@
             </div>
         </field>
     </record>
+    <record id="view_br_account_einvoice_filter" model="ir.ui.view">
+		<field name="name">br_account_einvoice.invoice.filter</field>
+		<field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+		<field name="arch" type="xml">
+			<field name="number" position="replace">
+				<field name="number" string="Invoice" filter_domain="['|','|','|','|','|','|',('number','ilike',self),('origin','ilike',self),('reference', 'ilike', self),('partner_id', 'child_of', self), ('product_document_nr', 'ilike', self), ('service_document_nr', 'ilike', self), ('vendor_number', 'ilike', self)]"/>
+			</field>
+			<field name="date" position="after">
+				<field name="document_number"/>
+			</field>
+		</field>
+	</record>
 
     <record id="view_br_account_einvoice_supllier_invoice_form" model="ir.ui.view">
         <field name="name">br_account_einvoice_supplier_invoice_form</field>
