@@ -2,6 +2,7 @@ import datetime
 from datetime import date
 import openerp.addons.decimal_precision as dp
 from openerp import api, fields, models
+from odoo.tools import float_is_zero
 
 class CashFlowReport(models.TransientModel):
     _name = 'account.cash.flow'
@@ -25,7 +26,8 @@ class CashFlowReport(models.TransientModel):
                         payables += line.amount
                     if not line.liquidity:
                         balance_period += line.amount
-            balance += item.start_amount
+            if item.simulated:
+                balance += item.start_amount
 
             item.start_balance = start_balance
             item.total_payables = payables
@@ -35,6 +37,7 @@ class CashFlowReport(models.TransientModel):
 
     ignore_outstanding = fields.Boolean(string="Ignorar Vencidos?")
     account_ids = fields.Many2many('account.account', string="Filtrar Contas")
+    simulated = fields.Boolean(string="Simulado?", default=False)
     start_date = fields.Date(string="Start Date", default=False)
     end_date = fields.Date(
         string="End Date", required=True,
@@ -182,27 +185,39 @@ class CashFlowReport(models.TransientModel):
 
     @api.multi
     def calculate_liquidity(self):
-        domain = [('user_type_id.type', '=', 'liquidity')]
-        if self.account_ids:
-            domain += [('id', 'in', self.account_ids.ids)]
-        accs = self.env['account.account'].search(domain)
         liquidity_lines = []
-        for acc in accs:
-            self.env.cr.execute(
-                "select sum(debit - credit) as val from account_move_line aml \
-                inner join account_move am on aml.move_id = am.id \
-                where account_id = %s and am.state = 'posted'", (acc.id, ))
-            total = self.env.cr.fetchone()
-            if total[0]:
-                liquidity_lines.append({
-                    'name': '%s - %s' % (acc.code, acc.name),
-                    'cashflow_id': self.id,
-                    'account_id': acc.id,
-                    'debit': 0,
-                    'credit': total[0],
-                    'amount': total[0],
-                    'liquidity': True,
-                })
+        if not self.simulated:
+            domain = [('user_type_id.type', '=', 'liquidity')]
+            if self.account_ids:
+                domain += [('id', 'in', self.account_ids.ids)]
+            accs = self.env['account.account'].search(domain)
+            for acc in accs:
+                self.env.cr.execute(
+                    "select sum(debit - credit) as val from account_move_line aml \
+                    inner join account_move am on aml.move_id = am.id \
+                    where account_id = %s and am.state = 'posted'", (acc.id, ))
+                total = self.env.cr.fetchone()
+                if total[0]:
+                    liquidity_lines.append({
+                        'name': '%s - %s' % (acc.code, acc.name),
+                        'cashflow_id': self.id,
+                        'account_id': acc.id,
+                        'debit': 0,
+                        'credit': total[0],
+                        'amount': total[0],
+                        'liquidity': True,
+                    })
+        else:
+            liquidity_lines.append({
+                'name': 'Valor Inicial',
+                'cashflow_id': self.id,
+                'account_id': False,
+                'debit': 0,
+                'credit': self.start_amount,
+                'amount': self.start_amount,
+                'liquidity': True,
+            })
+            
         return liquidity_lines
 
     @api.multi
@@ -217,8 +232,12 @@ class CashFlowReport(models.TransientModel):
             ('company_id', '=', self.env.user.company_id.id),
             ('date_maturity', '<=', self.end_date),
         ]
-        if self.ignore_outstanding:
-            domain += [('date_maturity', '>=', date.today())]
+        if not self.simulated:
+            if self.ignore_outstanding:
+                domain += [('date_maturity', '>=', date.today())]
+        elif self.start_date:
+            domain += [('date_maturity', '>=', self.start_date)]
+        
         moveline_ids = moveline_obj.search(domain,order='date_maturity')
 
         moves = []
@@ -232,7 +251,7 @@ class CashFlowReport(models.TransientModel):
             else:
                 if amount_deb != 0.0 or amount_cred != 0.0:
                     moves.append({
-                        'name': 'Saldo Anterior',
+                        'name': 'Saldo Anterior ***',
                         'cashflow_id': self.id,
                         'partner_id': False,
                         'journal_id': False,
@@ -273,7 +292,7 @@ class CashFlowReport(models.TransientModel):
     @api.multi
     def action_calculate_report(self):
         self.write({'line_ids': [(5, 0, 0)]})
-        balance = self.start_amount
+        balance = self.start_amount if self.simulated else 0.0
         liquidity_lines = self.calculate_liquidity()
         move_lines = self.calculate_moves()
 

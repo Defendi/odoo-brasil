@@ -102,6 +102,15 @@
 	                            </tbody>
 	                        </table>
 						</t>
+                        <t t-if="docs[0].simulated">
+	                        <table class="table">
+	                            <tbody>
+	                                <tr>
+	                                    <td>*** Atenção: Saldo de caixa, bancos e anterior foi apurado pelo usuário e pode não refletir a realidade.</td>
+	                                </tr>
+	                            </tbody>
+	                        </table>
+	                    </t>
                     </div>
                 </t>
             </t>

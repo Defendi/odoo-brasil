@@ -10,20 +10,19 @@ class CashFlowWizard(models.TransientModel):
     _name = 'account.cash.flow.wizard'
     _description = """Assistente de Fluxo de Caixa"""
 
-    start_date = fields.Date(string="Start Date", default=False)
-    end_date = fields.Date(string="End Date", required=True,
-        default=fields.date.today() + datetime.timedelta(6 * 365 / 12))
-    start_amount = fields.Float(string="Initial value",
-                                digits=dp.get_precision('Account'))
+    simulated = fields.Boolean(string="Simulado?", default=False)
+    start_date = fields.Date(string="Start Date", default=False, help="""Data inicial de caixa quando a liquidez é simulada pelo valor inicial.""")
+    end_date = fields.Date(string="End Date", required=True, default=fields.date.today() + datetime.timedelta(6 * 365 / 12), help='Data final do demonstrativo de caixa')
+    start_amount = fields.Float(string="Initial value",digits=dp.get_precision('Account'), default=0.0)
     account_ids = fields.Many2many('account.account', string="Filtrar Contas")
-    print_report = fields.Boolean(string="Imprimir")
-    print_graphic = fields.Boolean(string="Gráfico", default=False)
-    ignore_outstanding = fields.Boolean(string="Ignorar Vencidos?")
+    print_report = fields.Boolean(string="Grade?", default=False)
+    print_graphic = fields.Boolean(string="Gráfico?", default=False)
+    ignore_outstanding = fields.Boolean(string="Ignorar Vencidos?", default=False)
     report_nature = fields.Selection([('synthetic','Sintético'),('analytic','Analítico')],string='Natureza', default='synthetic')
     
-
     def _prepare_vals(self):
         return {
+            'simulated': self.simulated,
             'start_date': self.start_date,
             'end_date': self.end_date,
             'start_amount': self.start_amount,

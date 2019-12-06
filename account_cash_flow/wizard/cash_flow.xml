@@ -9,21 +9,21 @@
                 <form string="Generate Cash Flow">
                     <group>
                     	<group>
+                    		<field name="simulated" />
+	                        <field name="start_amount" attrs="{'invisible': [('simulated','=',False)]}"/>
                     		<field name="start_date"/>
 	                        <field name="end_date"/>
-	                        <field name="start_amount"/>
-	                        <field name="ignore_outstanding"/>
+   	                        <field name="account_ids" widget="many2many_tags" attrs="{'invisible': [('simulated','=',True)]}" domain="[('internal_type', '=', 'liquidity')]"/>
 	                    </group>
 	                    <group>
-   	                       <field name="account_ids" widget="many2many_tags" domain="[('internal_type', '=', 'liquidity')]"/>
 	                    	<field name="report_nature"/>
+	                        <field name="ignore_outstanding" attrs="{'invisible': [('simulated','=',True)]}"/>
 	                    	<field name="print_report"/>
-	                    	<field name="print_graphic"/>
+	                    	<field name="print_graphic" attrs="{'invisible': [('print_report','=', True)]}"/>
 	                    </group>
                     </group>
                     <footer>
-                        <button name="button_calculate"  string="Generate" type="object"
-                            class="oe_highlight" />
+                        <button name="button_calculate"  string="Generate" type="object" class="oe_highlight" />
                     </footer>
                 </form>
             </field>
