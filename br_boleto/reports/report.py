@@ -32,8 +32,7 @@ class IrActionsReport(models.Model):
             move_line_ids = self.env['account.move.line'].browse(res_ids)
         else:
             raise UserError(_('Parâmetros inválidos'))
-        move_line_ids = move_line_ids.filtered(
-            lambda x: x.payment_mode_id.boleto)
+        move_line_ids = move_line_ids.filtered(lambda x: x.payment_mode_id.boleto and x.amount_residual > 0.0)
         order_line_ids = self.env['payment.order.line'].action_register_boleto(
             move_line_ids)
         boleto_list = order_line_ids.generate_boleto_list()

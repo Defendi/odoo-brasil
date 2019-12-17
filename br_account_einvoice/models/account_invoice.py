@@ -121,6 +121,7 @@ class AccountInvoice(models.Model):
             'nr_pedido_compra': line.nr_pedido_compra, 
             # - ICMS -
             'icms_cst': line.icms_cst,
+            'incluir_ipi_base': line.incluir_ipi_base,
             'icms_aliquota': line.icms_aliquota,
             'icms_tipo_base': line.icms_tipo_base,
             'icms_aliquota_reducao_base': line.icms_aliquota_reducao_base,

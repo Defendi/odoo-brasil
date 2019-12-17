@@ -16,13 +16,15 @@ class PaymentOrderLine(models.Model):
         payment_order = self.env['payment.order'].search([
             ('state', '=', 'draft'),
             ('payment_mode_id', '=', payment_mode.id)], limit=1)
+        if len(payment_mode.journal_id) == 0:
+            raise UserError('Indique o diário no "Modo de Pagamento".')
         order_dict = {
             'name': u'%s' % order_name,
             'user_id': self.env.user.id,
             'payment_mode_id': move_line.payment_mode_id.id,
             'state': 'draft',
             'currency_id': move_line.company_currency_id.id,
-            'company_id': payment_mode.journal_id.company_id.id,
+            'company_id': payment_mode.journal_id.company_id.id or payment_mode.company_id.id,
             'journal_id': payment_mode.journal_id.id,
             'src_bank_account_id': payment_mode.journal_id.bank_account_id.id,
         }
@@ -81,5 +83,7 @@ class PaymentOrderLine(models.Model):
                 raise UserError(_('Modo de pagamento não é boleto!'))
             if not item.payment_mode_id.boleto:
                 raise UserError(_('Modo de pagamento não é boleto!'))
+            if item.amount_total <= 0.01:
+                raise UserError(_('Valor do documento não é maior que $ 0.00'))
         return self.env.ref(
             'br_boleto.action_boleto_payment_order_line').report_action(self)

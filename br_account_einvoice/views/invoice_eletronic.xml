@@ -9,15 +9,17 @@
                 <form string="Item Documento">
                     <notebook>
                         <page string="Dados do produto">
+							<field name="invoice_eletronic_id" /> <!-- invisible="1" />  -->
+                           	<field name="fiscal_position_id" /> <!-- invisible="1" />  --> 
+                           	<field name="state" /> <!-- invisible="1" />  --> 
                             <group>
                                 <group>
-                                    <field name="state" invisible="1" />
                                     <field name="product_id" />
                                     <field name="uom_id" />
                                     <field name="quantidade" />
                                     <field name="preco_unitario" />
-                                    <field name="valor_bruto" />
                                     <field name="desconto" />
+                                    <field name="valor_bruto" />
                                     <field name="seguro" />
                                     <field name="frete" />
                                     <field name="outras_despesas" />
@@ -25,7 +27,6 @@
                                 </group>
                                 <group>
                                 	<field name="code"/>
-                                	
                                     <field name="tipo_produto" />
                                     <field name="cfop" />
                                     <field name="ncm" />
@@ -52,6 +53,7 @@
                                     <field name="icms_valor_desonerado" />
                                 </group>
                                 <group>
+                                	<field name="incluir_ipi_base"/>
                                     <field name="icms_base_calculo"/>
                                     <field name="icms_aliquota_reducao_base"/>
                                     <field name="icms_aliquota" />
@@ -187,16 +189,16 @@
                         <group>
                             <group>
                                 <field name="model"/>
-                                <field name="invoice_id"/>
-                                <field name="partner_id"/>
+                                <field name="invoice_id" options="{'no_create': True}"/>
+                                <field name="partner_id" options="{'no_quick_create': True}"/>
                                 <field name="partner_shipping_id"/>
                                 <field name="data_agendada"/>
-                                <field name="schedule_user_id" />
+                                <field name="schedule_user_id"/>
                             </group>
                             <group>
                                 <field name="tipo_operacao" />
-                                <field name="payment_term_id"/>
-                                <field name="fiscal_position_id"/>
+                                <field name="payment_term_id" options="{'no_quick_create': True}"/>
+                                <field name="fiscal_position_id" options="{'no_quick_create': True}"/>
                                 <field name="email_sent" />
                             </group>
                         </group>
@@ -206,9 +208,9 @@
                                     <group>
                                         <field name="code"/>
                                         <field name="name"/>
-                                        <field name="company_id"/>
-                                        <field name="currency_id" invisible="1"/>
-                                        <field name="serie"/>
+                                        <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                                        <field name="currency_id"/> <!-- invisible="1"/>  -->
+                                        <field name="serie" options="{'no_quick_create': True}"/>
                                         <field name="serie_documento"/>
                                         <field name="numero"/>
                                         <field name="numero_controle"/>
@@ -225,9 +227,11 @@
                             </page>
                             <page name="itens" string="Itens">
                                 <group>
-                                    <field name="eletronic_item_ids" nolabel="1">
+                                    <field name="eletronic_item_ids" nolabel="1" context="{'default_invoice_eletronic_id': id}">
                                         <tree name="eletronic_items">
+                                        	<field name="sequence" widget="handle" />
                                             <field name="state" invisible="1" />
+                                            <field name="invoice_eletronic_id" invisible="1" />
                                             <field name="product_id" />
                                             <field name="uom_id" />
                                             <field name="cfop" />

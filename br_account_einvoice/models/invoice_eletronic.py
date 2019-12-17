@@ -13,6 +13,7 @@ from odoo.addons.br_account.models.cst import CST_IPI
 from odoo.addons.br_account.models.cst import CST_PIS_COFINS
 from odoo.addons.br_account.models.cst import ORIGEM_PROD
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
+from odoo.tools import float_is_zero, float_compare, pycompat
 
 _logger = logging.getLogger(__name__)
 
@@ -47,9 +48,18 @@ class InvoiceEletronic(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
 
+    def _compute_display_name(self):
+        for doc in self:
+            if bool(doc.name):
+                doc.display_name = doc.name
+            else:
+                doc.display_name = "Documento Eletrônico Novo"
+
+    display_name = fields.Char("Name", compute="_compute_display_name")
     code = fields.Char('Código', size=100, readonly=True, states=STATE)
     name = fields.Char('Nome', size=100, readonly=True, states=STATE)
-    company_id = fields.Many2one('res.company', 'Empresa', readonly=True, states=STATE)
+    company_id = fields.Many2one('res.company', 'Empresa', readonly=True, states=STATE, default=lambda self: self.env.user.company_id.id)
+    currency_id = fields.Many2one('res.currency', related='company_id.currency_id',string="Company Currency",readonly=True)
     state = fields.Selection(
         [('draft', 'Provisório'),
          ('edit', 'Editar'),
@@ -60,7 +70,7 @@ class InvoiceEletronic(models.Model):
     tipo_operacao = fields.Selection([('entrada', 'Entrada'),('saida', 'Saída')],
         string='State', default='saida', readonly=True, states=STATE,
         track_visibility='always')
-    schedule_user_id = fields.Many2one('res.users', string="Agendado por", readonly=True,track_visibility='always')
+    schedule_user_id = fields.Many2one('res.users', string="Agendado por", readonly=True,track_visibility='always',default=lambda self: self.env.user.id)
     model = fields.Selection(
         [('55', '55 - NFe'),
          ('65', '65 - NFCe'),
@@ -73,48 +83,20 @@ class InvoiceEletronic(models.Model):
          ('012', 'NFS-e - Florianópolis'),
          ('203', 'NFS-e - Itajaí')],
         string='Modelo', readonly=True, states=STATE)
-    serie = fields.Many2one(
-        'br_account.document.serie', string='Série',
-        readonly=True, states=STATE)
+    serie = fields.Many2one('br_account.document.serie', string='Série',readonly=True, states=STATE)
     serie_documento = fields.Char(string='Série Documento', size=6, readonly=True, states=STATE)
-    numero = fields.Integer(
-        string='Número', readonly=True, states=STATE)
-    numero_controle = fields.Integer(
-        string='Número de Controle', readonly=True, states=STATE)
-    data_agendada = fields.Date(
-        string='Data agendada',
-        readonly=True,
-        default=fields.Date.today,
-        states=STATE)
-    data_emissao = fields.Datetime(
-        string='Data emissão', readonly=True, states=STATE)
-#     data_fatura = fields.Datetime(
-#         string='Data Entrada/Saída', readonly=True, states=STATE)
-    data_autorizacao = fields.Char(
-        string='Data de autorização', size=30, readonly=True, states=STATE)
-    ambiente = fields.Selection(
-        [('homologacao', 'Homologação'),
-         ('producao', 'Produção')],
-        string='Ambiente', readonly=True, states=STATE)
-    finalidade_emissao = fields.Selection(
-        [('1', '1 - Normal'),
-         ('2', '2 - Complementar'),
-         ('3', '3 - Ajuste'),
-         ('4', '4 - Devolução')],
-        string='Finalidade', help="Finalidade da emissão de NFe",
-        readonly=True, states=STATE)
-    invoice_id = fields.Many2one(
-        'account.invoice', string='Fatura', readonly=True, states=STATE)
-    partner_id = fields.Many2one(
-        'res.partner', string='Parceiro', readonly=True, states=STATE)
-    commercial_partner_id = fields.Many2one(
-        'res.partner', string='Commercial Entity',
-        related='partner_id.commercial_partner_id', store=True)
-    partner_shipping_id = fields.Many2one(
-        'res.partner', string='Entrega', readonly=True, states=STATE)
-    payment_term_id = fields.Many2one(
-        'account.payment.term', string='Condição pagamento',
-        readonly=True, states=STATE)
+    numero = fields.Integer(string='Número Documento', readonly=True, states=STATE)
+    numero_controle = fields.Integer(string='Número de Controle', readonly=True, states=STATE)
+    data_agendada = fields.Date(string='Data agendada',readonly=True,default=fields.Date.today,states=STATE)
+    data_emissao = fields.Datetime(string='Data emissão', readonly=True, states=STATE)
+    data_autorizacao = fields.Char(string='Data de autorização', size=30, readonly=True, states=STATE)
+    ambiente = fields.Selection([('homologacao', 'Homologação'),('producao', 'Produção')],string='Ambiente', readonly=True, states=STATE)
+    finalidade_emissao = fields.Selection([('1', '1 - Normal'),('2', '2 - Complementar'),('3', '3 - Ajuste'),('4', '4 - Devolução')],string='Finalidade', help="Finalidade da emissão de NFe",readonly=True, states=STATE)
+    invoice_id = fields.Many2one('account.invoice', string='Fatura', readonly=True, states=STATE)
+    partner_id = fields.Many2one('res.partner', string='Parceiro', readonly=True, states=STATE)
+    commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity',related='partner_id.commercial_partner_id', store=True)
+    partner_shipping_id = fields.Many2one('res.partner', string='Entrega', readonly=True, states=STATE)
+    payment_term_id = fields.Many2one('account.payment.term', string='Condição pagamento',readonly=True, states=STATE)
     fiscal_position_id = fields.Many2one(
         'account.fiscal.position', string='Posição Fiscal',
         readonly=True, states=STATE)
@@ -192,9 +174,6 @@ class InvoiceEletronic(models.Model):
         string="Outras Retenções", help="Outras retenções na Fonte",
         readonly=True, states=STATE)
 
-    currency_id = fields.Many2one(
-        'res.currency', related='company_id.currency_id',
-        string="Company Currency")
     valor_final = fields.Monetary(
         string='Valor Final', readonly=True, states=STATE)
 
@@ -221,8 +200,57 @@ class InvoiceEletronic(models.Model):
 
     product_id = fields.Many2one('product.product', related='eletronic_item_ids.product_id', string='Produto')
 
-    @api.onchange('partner_id','tipo_operacao')
-    def _on_change_partner_id(self):
+    @api.onchange('invoice_id')
+    def _on_change_invoice(self):
+        if self.state == 'edit' and bool(self.invoice_id):
+            self.code = self.invoice_id.display_name
+            self.partner_id = self.invoice_id.partner_id
+            self.fiscal_position_id = self.invoice_id.fiscal_position_id
+            self.company_id = self.invoice_id.company_id if self.invoice_id.company_id else self.env.user.company_id
+            self.ambiente = 'producao' if self.company_id.tipo_ambiente == '1' else 'homologacao'
+            self.schedule_user_id = self.env.user.id
+            self.valor_icms = self.invoice_id.icms_value
+            self.valor_icmsst = self.invoice_id.icms_st_value
+            self.valor_ipi = self.invoice_id.ipi_value
+            self.valor_pis = self.invoice_id.pis_value
+            self.valor_cofins = self.invoice_id.cofins_value
+            self.valor_ii = self.invoice_id.ii_value
+            self.valor_bruto = self.invoice_id.total_bruto
+            self.valor_desconto = self.invoice_id.total_desconto
+            self.valor_final = self.invoice_id.amount_total
+            self.valor_bc_icms = self.invoice_id.icms_base
+            self.valor_bc_icmsst = self.invoice_id.icms_st_base
+            self.valor_servicos = self.invoice_id.issqn_base
+            self.valor_bc_issqn = self.invoice_id.issqn_base
+            self.valor_issqn = self.invoice_id.issqn_value
+            self.valor_estimado_tributos = self.invoice_id.total_tributos_estimados
+            self.valor_retencao_issqn = self.invoice_id.issqn_retention
+            self.valor_retencao_pis = self.invoice_id.pis_retention
+            self.valor_retencao_cofins = self.invoice_id.cofins_retention
+            self.valor_bc_irrf = self.invoice_id.irrf_base
+            self.valor_retencao_irrf = self.invoice_id.irrf_retention
+            self.valor_bc_csll = self.invoice_id.csll_base
+            self.valor_retencao_csll = self.invoice_id.csll_retention
+            self.valor_bc_inss = self.invoice_id.inss_base
+            self.valor_retencao_inss = self.invoice_id.inss_retention
+            self.valor_bc_outras_ret = self.invoice_id.outros_base
+            self.valor_retencao_outras = self.invoice_id.outros_retention
+            if self.invoice_id.type == 'out_invoice':
+                self.tipo_operacao = 'saida'
+                self.finalidade_emissao = '1'
+                if self.invoice_id.product_is_eletronic:
+                    self.model = self.invoice_id.product_document_id.code
+                    self.serie = self.invoice_id.product_serie_id
+                elif self.invoice_id.service_is_eletronic:
+                    self.model = self.invoice_id.service_document_id.code
+                    self.serie = self.invoice_id.service_serie_id
+            else:
+                self.tipo_operacao = 'entrada'
+        else:
+            self.code = False
+
+    @api.onchange('partner_id')
+    def _on_change_partner(self):
         if self.state == 'edit' and bool(self.partner_id):
             self.partner_shipping_id = self.partner_id
             if self.tipo_operacao == 'saida':
@@ -232,8 +260,21 @@ class InvoiceEletronic(models.Model):
             else:
                 self.partner_id.property_purchase_fiscal_position_id
                 self.payment_term_id = self.partner_id.property_supplier_payment_term_id
-                
 
+    @api.onchange('serie')
+    def _on_change_serie(self):
+        if self.state == 'edit' and bool(self.serie):
+            if self.serie.fiscal_document_id.electronic:
+#                 if not self.serie.fiscal_document_id.nfse_eletronic:
+                self.serie_documento = self.serie.code
+                self.model = self.serie.fiscal_document_id.code
+                self.name = self.serie.fiscal_document_id.name
+
+    @api.onchange('fiscal_position_id')
+    def _on_change_fiscal_position(self):
+        for doc in self:
+            if doc.state == 'edit':
+                doc.eletronic_item_ids._on_change_valor_produto()
 
     def _create_attachment(self, prefix, event, data):
         file_name = '%s-%s.xml' % (
@@ -595,21 +636,17 @@ class InvoiceEletronicEvent(models.Model):
 class InvoiceEletronicItem(models.Model):
     _name = 'invoice.eletronic.item'
     _description = """Item do Documento Eletrônico"""
-
+    _order = "invoice_eletronic_id,sequence,id"
+    
     code = fields.Text('Código', readonly=True, states=STATE)
     name = fields.Text('Nome', readonly=True, states=STATE)
-    company_id = fields.Many2one(
-        'res.company', 'Empresa', index=True, readonly=True, states=STATE)
-    invoice_eletronic_id = fields.Many2one(
-        'invoice.eletronic', string='Documento', readonly=True, states=STATE)
-    currency_id = fields.Many2one(
-        'res.currency', related='company_id.currency_id',
-        string="Company Currency")
-    state = fields.Selection(
-        related='invoice_eletronic_id.state', string="State")
-
-    product_id = fields.Many2one(
-        'product.product', string='Produto', readonly=True, states=STATE)
+    sequence = fields.Integer(default=10,help="Gives the sequence of this line when displaying the invoice.")
+    company_id = fields.Many2one('res.company', 'Empresa', index=True, readonly=True, states=STATE)
+    invoice_eletronic_id = fields.Many2one('invoice.eletronic', string='Documento', ondelete='cascade', index=True)
+    currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True, string="Company Currency")
+    fiscal_position_id = fields.Many2one('account.fiscal.position', related='invoice_eletronic_id.fiscal_position_id', string='Posição Fiscal', readonly=True)
+    state = fields.Selection(related='invoice_eletronic_id.state', string="State", readonly=True)
+    product_id = fields.Many2one('product.product', string='Produto', readonly=True, states=STATE)
     tipo_produto = fields.Selection(
         [('product', 'Produto'),
          ('service', 'Serviço')],
@@ -626,46 +663,31 @@ class InvoiceEletronicItem(models.Model):
         string='Preço Unitário', digits=dp.get_precision('Product Price'),
         readonly=True, states=STATE)
     item_pedido_compra = fields.Char(
-        string='Item PDC',help="Número do Item do Pedido de Compra do seu Cliente.")
+        string='Item PDC',help="Número do Item do Pedido de Compra do seu Cliente.",readonly=True, states=STATE)
     nr_pedido_compra   = fields.Char(
-        string='Número PDC',help="Número do Pedido de Compra do seu Cliente.")
-    frete = fields.Monetary(
-        string='Frete', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    seguro = fields.Monetary(
-        string='Seguro', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    desconto = fields.Monetary(
-        string='Desconto', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    outras_despesas = fields.Monetary(
-        string='Outras despesas', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
+        string='Número PDC',help="Número do Pedido de Compra do seu Cliente.", readonly=True, states=STATE)
+    frete = fields.Monetary(string='Frete', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    seguro = fields.Monetary(string='Seguro', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    desconto = fields.Monetary(string='Desconto', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    outras_despesas = fields.Monetary(string='Outras despesas', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    tributos_estimados = fields.Monetary(string='Valor Estimado Tributos', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    valor_bruto = fields.Monetary(string='Valor Bruto', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    valor_liquido = fields.Monetary(string='Valor Líquido', digits=dp.get_precision('Account'),readonly=True, states=STATE)
 
-    tributos_estimados = fields.Monetary(
-        string='Valor Estimado Tributos', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-
-    valor_bruto = fields.Monetary(
-        string='Valor Bruto', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    valor_liquido = fields.Monetary(
-        string='Valor Líquido', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    indicador_total = fields.Selection(
-        [('0', '0 - Não'), ('1', '1 - Sim')],
-        string="Compõe Total da Nota?", default='1',
-        readonly=True, states=STATE)
+    indicador_total = fields.Selection([('0', '0 - Não'), ('1', '1 - Sim')],string="Compõe Total da Nota?", default='1',readonly=True, states=STATE)
 
     origem = fields.Selection(
         ORIGEM_PROD, string='Origem Mercadoria', readonly=True, states=STATE)
     icms_cst = fields.Selection(
         CST_ICMS + CSOSN_SIMPLES, string='Situação Tributária',
         readonly=True, states=STATE)
+    
     icms_aliquota = fields.Float(
         string='Alíquota', digits=dp.get_precision('Account'),
         readonly=True, states=STATE)
-    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Cod.Benf.Fiscal")
+    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Cod.Benf.Fiscal",readonly=True, states=STATE)
+    
+    incluir_ipi_base = fields.Boolean(string="Incl. Valor IPI?", help="Se marcado o valor do IPI inclui a base de cálculo")
     
     icms_tipo_base = fields.Selection(
         [('0', '0 - Margem Valor Agregado (%)'),
@@ -869,4 +891,192 @@ class InvoiceEletronicItem(models.Model):
     account_invoice_line_id = fields.Many2one(
         string="Account Invoice Line",
         comodel_name="account.invoice.line",
+        readonly=True, states=STATE
         )
+
+
+    @api.onchange('product_id')
+    def _on_change_product_id(self):
+        if self.product_id and self.state == 'edit':
+            self.code = self.product_id.code
+            self.name = self.product_id.name
+            self.tipo_produto = self.product_id.fiscal_type
+            self.uom_id = self.product_id.uom_id
+            self.preco_unitario = self.product_id.lst_price
+            self.ncm = self.product_id.fiscal_classification_id.code
+            self.origem = self.product_id.origin
+            self.cest = self.product_id.cest
+
+    @api.onchange('quantidade','preco_unitario','desconto','seguro','frete','outras_despesas') 
+    def _on_change_valor_produto(self): 
+        if self.state == 'edit':
+            valor_bruto = (self.quantidade * self.preco_unitario) - self.desconto
+            valor_liquido = (valor_bruto + self.seguro + self.frete + self.outras_despesas)
+            self.update({
+                'valor_bruto': valor_bruto,
+                'valor_liquido': valor_liquido,
+            })
+            self._set_tributos_estimados()
+            
+            if self.product_id and self.fiscal_position_id:
+                taxes = self.fiscal_position_id.map_tax_extra_values(self.invoice_eletronic_id.company_id, 
+                                                                    self.product_id, 
+                                                                    self.invoice_eletronic_id.partner_id)
+                vals = self._update_tax_from_fiscal_position(taxes)
+                self.update(vals)
+                ctx = self._prepare_tax_context()
+                
+
+    @api.onchange('valor_bruto') 
+    def _on_change_valor_bruto(self):
+        if self.state == 'edit' and self.quantidade > 0.0:
+            preco_unitario = float("%.2f" % ((self.valor_bruto + self.desconto) / self.quantidade))
+            if float_compare(preco_unitario, self.preco_unitario,2) != 0:
+                valor_bruto = (preco_unitario * self.quantidade) - self.desconto 
+                if float_compare(valor_bruto, self.valor_bruto, 2) != 0:
+                    desconto = self.desconto + (valor_bruto - self.valor_bruto)
+                    self.update({
+                        'preco_unitario': preco_unitario,
+                        'desconto': desconto,
+                    })
+                else:
+                    self.update({
+                        'preco_unitario': preco_unitario,
+                    })
+
+    @api.onchange('valor_liquido') 
+    def _on_change_valor_liquido(self):
+        if self.state == 'edit':
+            valor_bruto = self.valor_liquido - (self.seguro + self.frete + self.outras_despesas)
+            if float_compare(valor_bruto,self.valor_bruto,2) != 0:
+                self.update({
+                    'valor_bruto': valor_bruto,
+                })
+
+    def _set_tributos_estimados(self):
+        tributos_estimados = 0.0
+        if self.tipo_produto == 'service':
+            service = self.product_id.service_type_id
+            tributos_estimados += self.valor_bruto * (service.federal_nacional / 100)
+            tributos_estimados += self.valor_bruto * (service.estadual_imposto / 100)
+            tributos_estimados += self.valor_bruto * (service.municipal_imposto / 100)
+        else:
+            ncm = self.product_id.fiscal_classification_id
+            federal = ncm.federal_nacional if self.origem in ('0', '3', '4', '5', '8') else ncm.federal_importado
+            tributos_estimados += self.valor_bruto * (federal / 100)
+            tributos_estimados += self.valor_bruto * (ncm.estadual_imposto / 100)
+            tributos_estimados += self.valor_bruto * (ncm.municipal_imposto / 100)
+        self.update({
+            'tributos_estimados': tributos_estimados,
+        })
+        
+    def _update_tax_from_ncm(self):
+        res = {}
+        if self.product_id:
+            ncm = self.product_id.fiscal_classification_id
+            if ncm:
+                res['icms_st_aliquota_mva'] = ncm.icms_st_aliquota_mva
+                res['icms_st_aliquota_reducao_base'] = ncm.icms_st_aliquota_reducao_base
+                res['icms_st_aliquota'] = ncm.tax_icms_st_id.amount
+                res['ipi_cst'] = ncm.ipi_cst
+                res['ipi_reducao_bc'] = ncm.ipi_reducao_bc
+                res['ipi_aliquota'] = ncm.tax_ipi_id.amount
+        return res
+
+    def _update_tax_from_fiscal_position(self,taxes):
+        res = self._update_tax_from_ncm()
+        icms_rule = taxes.get('icms_rule_id',False)
+        pis_rule = taxes.get('pis_rule_id',False)
+        cofins_rule = taxes.get('cofins_rule_id',False)
+        ipi_rule = taxes.get('ipi_rule_id',False)
+#             ii_rule = taxes.get('',False)
+#             issqn_rule = taxes.get('',False)
+#             irrf_rule = taxes.get('',False)
+#             inss_rule = taxes.get('',False)
+#             other_tax_rule = taxes.get('',False)
+#             csll_rule = taxes.get('',False)
+            
+        if ipi_rule:
+            res['ipi_cst'] = ipi_rule.cst_ipi
+            res['ipi_aliquota'] = ipi_rule.tax_id.amount
+            res['ipi_base_calculo'] = self.valor_bruto if res['ipi_aliquota'] > 0.0 else 0.0
+            res['ipi_reducao_bc'] = ipi_rule.reducao_ipi
+            res['ipi_valor'] = 0.0 # Calcular
+            
+        if icms_rule:
+            # ICMS
+            res['cfop'] = icms_rule.cfop_id.code
+            if icms_rule.cst_icms:
+                res['icms_cst'] = icms_rule.cst_icms
+            elif icms_rule.csosn_icms:
+                res['icms_cst'] = icms_rule.csosn_icms
+            res['icms_tipo_base'] = '3'
+            res['icms_benef'] = icms_rule.icms_benef.id
+            res['icms_aliquota'] = icms_rule.tax_id.amount
+            res['icms_aliquota_reducao_base'] = icms_rule.reducao_icms
+            res['icms_base_calculo'] = 0.0 # calcular
+            res['icms_valor'] = 0.0 # calcular
+
+            # ICMS Crédito
+            res['icms_aliquota_credito'] = 0.0
+            res['icms_valor_credito'] = 0.0
+            
+            # ICMS Diferido
+            res['icms_aliquota_diferimento'] = icms_rule.icms_aliquota_diferimento
+            res['icms_valor_diferido'] = 0.0 # Calcular
+            res['icms_valor_diferido_dif'] = 0.0 # Calcular 
+
+            # ICMS Desonerado
+            res['icms_motivo_desoneracao'] = False # Verificar
+            res['icms_valor_desonerado'] = 0 # Verificar
+
+            # ICMS ST
+            res['icms_st_tipo_base'] = '3'
+            res['icms_st_aliquota_mva'] = icms_rule.aliquota_mva
+            res['icms_st_aliquota'] = icms_rule.tax_icms_st_id.amount
+            res['icms_st_base_calculo'] = 0.0 # Calcular
+            res['icms_st_aliquota_reducao_base'] = icms_rule.reducao_icms_st
+            res['icms_st_valor'] = 0.0 # Calcular
+            res['icms_st_bc_ret_ant'] = 0.0 # Verificar
+            res['icms_st_ali_sup_cons'] = 0.0 # Verificar
+            res['icms_st_substituto'] = 0.0 # Verificar
+            res['icms_st_ret_ant'] = 0.0 # Verificar
+            res['icms_st_bc_dest'] = 0.0 # Verificar
+            res['icms_st_dest'] = 0.0 # Verificar
+            
+        if pis_rule:
+            res['pis_cst'] = pis_rule.cst_pis
+            res['pis_aliquota'] = pis_rule.tax_id.amount
+            res['pis_base_calculo'] = self.valor_bruto if res['pis_aliquota'] > 0.0 else 0.0
+            res['pis_valor'] = 0.0 # Calcular
+            res['pis_valor_retencao'] = 0.0 # Verificar
+                
+        if cofins_rule:
+            res['cofins_cst'] = cofins_rule.cst_cofins
+            res['cofins_aliquota'] = cofins_rule.tax_id.amount
+            res['cofins_base_calculo'] = self.valor_bruto if res['pis_aliquota'] > 0.0 else 0.0
+            res['cofins_valor'] = 0.0 # Calcular
+            res['cofins_valor_retencao'] = 0.0 # Verificar
+
+        return res
+
+    def _prepare_tax_context(self):
+        return {
+            'incluir_ipi_base': self.incluir_ipi_base,
+            'icms_st_aliquota_mva': self.icms_st_aliquota_mva,
+            'icms_aliquota_reducao_base': self.icms_aliquota_reducao_base,
+            'icms_st_aliquota_reducao_base': self.icms_st_aliquota_reducao_base,
+            'icms_aliquota_diferimento': self.icms_aliquota_diferimento,
+            #'icms_st_aliquota_deducao': self.icms_st_aliquota_deducao,
+            'ipi_reducao_bc': self.ipi_reducao_bc,
+            'icms_base_calculo': self.icms_base_calculo,
+            'ipi_base_calculo': self.ipi_base_calculo,
+            'pis_base_calculo': self.pis_base_calculo,
+            'cofins_base_calculo': self.cofins_base_calculo,
+            'ii_base_calculo': self.ii_base_calculo,
+            #'issqn_base_calculo': self.issqn_base_calculo,
+            #'icms_aliquota_inter_part': self.icms_aliquota_inter_part,
+            #'l10n_br_issqn_deduction': self.l10n_br_issqn_deduction,
+        }
+       
+

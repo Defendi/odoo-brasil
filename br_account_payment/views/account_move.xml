@@ -25,7 +25,7 @@
                 <field name="payment_date" readonly="1"/>
             </field>
             <field name="invoice_id" position="after">
-                <field name="payment_mode_id" readonly="1"/>
+                <field name="payment_mode_id"/>
             </field>
             <field name="invoice_id" position="attributes">
             	<attribute name="readonly">1</attribute>

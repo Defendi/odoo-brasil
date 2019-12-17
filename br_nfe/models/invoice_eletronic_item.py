@@ -45,3 +45,19 @@ class InvoiceEletronicItem(models.Model):
     icms_fcp_uf_dest = fields.Monetary(
         string='Valor FCP', readonly=True, states=STATE)
     informacao_adicional = fields.Text(string="Informação Adicional")
+
+    def _update_tax_from_fiscal_position(self,taxes):
+        res = super(InvoiceEletronicItem,self)._update_tax_from_fiscal_position(taxes)
+        icms_rule = taxes.get('icms_rule_id',False)
+        if icms_rule:
+            res['tem_difal'] = icms_rule.tem_difal
+            res['icms_bc_uf_dest'] = 0.0 # Calcular
+            res['icms_aliquota_fcp_uf_dest'] = icms_rule.tax_icms_fcp_id.amount if icms_rule.tax_icms_fcp_id else 0.0
+            res['icms_aliquota_uf_dest'] = 0.0
+            res['icms_aliquota_interestadual'] = icms_rule.tax_icms_inter_id.amount if icms_rule.tax_icms_inter_id else 0.0
+            res['icms_aliquota_inter_part'] = 100.0
+            res['icms_uf_remet'] = 0.0
+            res['icms_uf_dest'] = 0.0 # Calcular
+            res['icms_fcp_uf_dest'] = 0.0 # Calcular
+        res['informacao_adicional'] = False # Verificar 
+        return res

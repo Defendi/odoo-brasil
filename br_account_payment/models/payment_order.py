@@ -112,6 +112,11 @@ class PaymentOrder(models.Model):
     file_number = fields.Integer(u'Número sequencial do arquivo', readonly=1)
     data_emissao_cnab = fields.Datetime('Data de Emissão do CNAB')
 
+    @api.onchange('payment_mode_id')
+    def _onchange_payment_mode_id(self):
+        for paymod in self:
+            paymod.src_bank_account_id = paymod.journal_id.bank_account_id
+
     def _get_next_code(self):
         sequence_id = self.env['ir.sequence'].sudo().search(
             [('code', '=', 'l10n_br_.payment.cnab.sequential'),

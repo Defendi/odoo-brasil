@@ -26,6 +26,12 @@ class InvoiceEletronicItem(models.Model):
     country_id = fields.Many2one('res.country', string='País retenção', ondelete='restrict')
     state_id = fields.Many2one("res.country.state", string='UF retenção', ondelete='restrict')
     city_id = fields.Many2one('res.state.city', 'Município retenção', ondelete='restrict')
+    issqn_tipo = fields.Selection([('N', 'Normal'),
+                                   ('R', 'Retida'),
+                                   ('S', 'Substituta'),
+                                   ('I', 'Isenta')],
+                                  string='Tipo do ISSQN',
+                                  required=True, default='N')
 
     @api.onchange('issqn_tipo')
     def _onchange_issqn_tipo(self):

@@ -19,30 +19,18 @@ class PaymentOrder(models.Model):
                 _('Ordem de Cobrança não possui Linhas de Cobrança!'))
         self.data_emissao_cnab = datetime.now()
         self.file_number = self.env['ir.sequence'].next_by_code('cnab.nsa')
-        
-        for order in self:
-            if order.line_ids.filtered(
+        for order_id in self:
+            if order_id.line_ids.filtered(
                lambda x: x.state in ('processed', 'rejected', 'paid')):
                 raise UserError(
                     _('Arquivo já enviado e processado pelo banco!'))
+            if len(order_id.src_bank_account_id) == 0:
+                raise UserError(
+                    _('Informe a Conta Bancária na Ordem de Cobrança'))
 
-            bank = order.payment_mode_id.bank_account_id
-            if not bank:
-                raise UserError(u'Informe a Conta Bancária no "Modo de Pagamento"')
-            if not bank.acc_number or not bank.bra_number or not bank.acc_number_dig:
-                return {
-                    'name': u'Confirme os Dados da Conta Bancária',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': bank._name,
-                    'res_id': bank.id,
-                    'type': 'ir.actions.act_window',
-                    'target': 'new',
-                }
-
-            cnab = Cnab.get_cnab(order.src_bank_account_id.bank_bic, '240')()
-            remessa = cnab.remessa(order)
-            order.line_ids.write({'state': 'sent'})
+            cnab = Cnab.get_cnab(order_id.src_bank_account_id.bank_bic, '240')()
+            remessa = cnab.remessa(order_id)
+            order_id.line_ids.write({'state': 'sent'})
 
             self.name = self._get_next_code()
             self.cnab_file = base64.b64encode(remessa.encode('UTF-8'))
@@ -53,7 +41,7 @@ class PaymentOrder(models.Model):
                 'datas_fname': self.name,
                 'description': 'Arquivo CNAB 240',
                 'res_model': 'payment.order',
-                'res_id': order.id
+                'res_id': order_id
             })
 
 
@@ -136,7 +124,7 @@ class PaymentOrderLine(models.Model):
             'partner_id': self.partner_id.id,
             'debit': float(
                 cnab_vals['valor_titulo'] + cnab_vals['titulo_acrescimos'] -
-                cnab_vals['titulo_desconto'] - cnab_vals['valor_tarifas']
+                cnab_vals['titulo_desconto']
                 ),
             'credit': 0.0,
             'currency_id': self.currency_id.id,
@@ -162,6 +150,16 @@ class PaymentOrderLine(models.Model):
             if not account_id:
                 raise UserError(
                     _('Configure a conta de tarifas bancárias'))
+            aml_tarifa = {
+                'name': 'Tarifas bancárias',
+                'move_id': move.id,
+                'partner_id': self.partner_id.id,
+                'debit': 0.0,
+                'credit': float(cnab_vals['valor_tarifas']),
+                'currency_id': self.currency_id.id,
+                'account_id': self.journal_id.default_debit_account_id.id,
+            }
+            aml_obj.create(aml_tarifa)
             ext_line = {
                 'name': 'Tarifas bancárias (boleto)',
                 'move_id': move.id,
