@@ -24,11 +24,9 @@ class PaymentOrder(models.Model):
                lambda x: x.state in ('processed', 'rejected', 'paid')):
                 raise UserError(
                     _('Arquivo já enviado e processado pelo banco!'))
-            if len(order_id.src_bank_account_id) == 0:
-                raise UserError(
-                    _('Informe a Conta Bancária na Ordem de Cobrança'))
 
-            cnab = Cnab.get_cnab(order_id.src_bank_account_id.bank_bic, '240')()
+            cnab = Cnab.get_cnab(
+                order_id.src_bank_account_id.bank_bic, '240')()
             remessa = cnab.remessa(order_id)
             order_id.line_ids.write({'state': 'sent'})
 

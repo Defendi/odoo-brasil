@@ -117,7 +117,7 @@ class CnabRetorno(models.Model):
             if evento.move_id: 
                 evento.state = 'done'
                  
-        arquivo = processador_cnab.with_context(journal_id = self.journal_id)._parse_cnab(base64.b64decode(self.cnab_file))
+        arquivo = processador_cnab.with_context(journal_id = self.journal_id)._parse_ofx(base64.b64decode(self.cnab_file))
         
         moeda, account_number, vals_bank_statement, move_lines_data, cnab_lines = \
             processador_cnab.with_context(journal_id=self.journal_id)._get_bankstatment(arquivo, self.journal_id, self)

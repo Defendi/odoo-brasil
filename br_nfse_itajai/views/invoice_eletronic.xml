@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_br_nfse_invoice_eletronic_form" model="ir.ui.view">
+        <field name="name">view.br_nfse.invoice.eletronic.form</field>
+        <field name="model">invoice.eletronic</field>
+        <field name="inherit_id" ref="br_account_einvoice.br_account_invoice_eletronic_form"/>
+        <field name="arch" type="xml">
+            <field name="finalidade_emissao" position="after">
+                <field name="enforce_iss_betha" />
+            </field>
+        </field>
+    </record>
+
+    <record id="view_br_nfse_betha_invoice_eletronic_item_form" model="ir.ui.view">
+        <field name="name">br_nfse.betha.invoice.eletronic.item.form</field>
+        <field name="model">invoice.eletronic.item</field>
+        <field name="inherit_id" ref="br_account_einvoice.invoice_eletronic_item_form" />
+        <field name="arch" type="xml">
+            <field name="issqn_codigo" position="after">
+        		<field name="codigo_tributacao_municipio" />	
+            </field>
+        </field>
+    </record>
+
+</odoo>

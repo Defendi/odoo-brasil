@@ -7,10 +7,12 @@
         <field name="arch" type="xml">
             <form string='Retorno do CNAB'>
                 <header>
+                	<!-- 
                     <button name="importar_arquivo_cnab" type="object" string="Importar" class="btn btn-primary" attrs="{'invisible': [('state', 'in', ('processado','close'))]}"/>
                     <button name="cancelar_arquivo_cnab" type="object" string="Cancelar" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'processado')]}"/>
                     <button name="reprocessar_arquivo_cnab" type="object" string="Reprocessar" class="btn btn-primary" attrs="{'invisible': [('state', '!=', 'processado')]}"/>
                     <button name="set_close" type="object" string="Fechar" class="oe_highlight" confirm="Quer mesmo fechar esse retorno?" attrs="{'invisible': [('state', '!=', 'processado')]}"/>
+                     -->
                     <field name="state" widget="statusbar" nolabel="1" />
                 </header>
                 <sheet>

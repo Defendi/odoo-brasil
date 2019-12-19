@@ -7,7 +7,6 @@ from odoo import fields, models
 
 class l10nBrPaymentApprove(models.TransientModel):
     _name = 'l10n_br_payment.approve'
-    _description = """Assitente de Aprovação de Pagamento"""
 
     name = fields.Char(string="Nome")
 

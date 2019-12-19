@@ -8,7 +8,6 @@ from odoo.exceptions import UserError
 
 class L10nBrPaymentManualReconcile(models.TransientModel):
     _name = 'l10n_br_payment.manual.reconcile'
-    _description = """Assitente de Reconciliamento"""
 
     name = fields.Char(string="Nome")
     confirmation = fields.Selection([

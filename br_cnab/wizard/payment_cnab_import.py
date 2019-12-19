@@ -52,6 +52,29 @@ class L10nBrPaymentCnabImport(models.TransientModel):
             'move_id': payment_line and payment_line.move_id.id,
         })
 
+    def _create_line(self, statement, vals, payment_line=None):
+        name = "%s - %s" % (vals['numero_documento'], vals['sacado_nome'])
+        if payment_line:
+            name = payment_line.name
+
+        self.env['l10n_br.payment.statement.line'].sudo().create({
+            'date': vals['vencimento_titulo'],
+            'effective_date': vals['data_ocorrencia'],
+            'nosso_numero': vals['nosso_numero'],
+            'name': name,
+            'amount': vals['titulo_pago'],
+            'amount_fee': vals['titulo_acrescimos'],
+            'discount': vals['titulo_desconto'],
+            'original_amount': vals['valor_titulo'],
+            'bank_fee': vals['valor_tarifas'],
+            'cnab_code': vals['cnab_code'],
+            'cnab_message': vals['cnab_message'],
+            'statement_id': statement.id,
+            'ignored': False,
+            'partner_id': payment_line and payment_line.partner_id.id,
+            'move_id': payment_line and payment_line.move_id.id,
+        })
+
     def do_import(self, cnab_file):
         if self.cnab_type != 'receivable':
             return super(L10nBrPaymentCnabImport, self).do_import(cnab_file)
