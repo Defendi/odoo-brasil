@@ -1,9 +1,9 @@
 import re
-#import pytz
+import time
 import base64
 import logging
 
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from dateutil import tz
 
 from odoo import api, fields, models, _
@@ -59,10 +59,18 @@ class WizardCartaCorrecaoEletronica(models.TransientModel):
     def send_letter(self):
         self.valida_carta_correcao_eletronica()
 
-        from_zone = tz.gettz('UTC')
-        to_zone = tz.gettz(self.env.user.partner_id.tz or 'America/Sao_Paulo')
-        dt_evento = datetime.utcnow()
-        dt_evento = dt_evento.replace(tzinfo=from_zone).astimezone(to_zone)
+        diferenca = timedelta(hours=-3)
+        if (time.timezone / 3600.0) == 0.0:
+            # Data do Evento quando a Hora do sistema está em UTC
+            dt_evento = datetime.now(timezone(diferenca)).replace(microsecond=0).isoformat()
+        else:
+            # Data do Evento quando a Hora do sistema está em America/Sao_paulo
+            dt_evento = datetime.utcnow().replace(microsecond=0).replace(tzinfo=timezone(diferenca)).isoformat()
+
+#         from_zone = tz.gettz('UTC')
+#         to_zone = tz.gettz(self.env.user.partner_id.tz or 'America/Sao_Paulo')
+#         dt_evento = datetime.utcnow()
+#         dt_evento = dt_evento.replace(tzinfo=from_zone).astimezone(to_zone)
 
         carta = {
             'idLote': self.id,
@@ -75,7 +83,7 @@ class WizardCartaCorrecaoEletronica(models.TransientModel):
                     "[^0-9]", "", self.eletronic_doc_id.company_id.cnpj_cpf),
                 'cOrgao':  self.eletronic_doc_id.company_id.state_id.ibge_code,
                 'tpAmb': self.eletronic_doc_id.company_id.tipo_ambiente,
-                'dhEvento':  dt_evento.strftime('%Y-%m-%dT%H:%M:%S-03:00'),
+                'dhEvento': dt_evento, # dt_evento.strftime('%Y-%m-%dT%H:%M:%S-03:00'),
                 'chNFe': self.eletronic_doc_id.chave_nfe,
                 'xCorrecao': self.correcao,
                 'tpEvento': '110110',

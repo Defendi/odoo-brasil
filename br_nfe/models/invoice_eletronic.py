@@ -3,11 +3,13 @@
 
 import re
 import io
+import pytz
+import time
 import base64
 import logging
 import hashlib
 from lxml import etree
-from pytz import timezone
+from datetime import datetime, timezone, timedelta
 from odoo import api, fields, models, _
 from datetime import datetime
 from odoo.exceptions import UserError
@@ -467,7 +469,7 @@ class InvoiceEletronic(models.Model):
         if self.model not in ('55', '65'):
             return res
 
-        tz = timezone(self.env.user.tz)
+        tz = pytz.timezone(self.env.user.tz)
         dt_emissao = datetime.now(tz).replace(microsecond=0).isoformat()
         dt_saida = fields.Datetime.from_string(self.data_entrada_saida)
         if dt_saida:
@@ -976,7 +978,7 @@ class InvoiceEletronic(models.Model):
            'done', 'denied', 'cancel'):
             return
 
-        tz = timezone(self.env.user.tz)
+        tz = pytz.timezone(self.env.user.tz)
         _logger.info('Sending NF-e (%s) (%.2f) - %s' % (
             self.numero, self.valor_final, self.partner_id.name))
         self.write({
@@ -1147,8 +1149,13 @@ class InvoiceEletronic(models.Model):
         id_canc = "ID110111%s%02d" % (
             self.chave_nfe, self.sequencial_evento)
 
-        tz = timezone(self.env.user.tz)
-        dt_evento = datetime.now(tz).replace(microsecond=0).isoformat()
+#         tz = timezone(self.env.user.tz)
+#         dt_evento = datetime.now(tz).replace(microsecond=0).isoformat()
+        diferenca = timedelta(hours=-3)
+        if (time.timezone / 3600.0) == 0.0:
+            dt_evento = datetime.now(timezone(diferenca)).replace(microsecond=0).isoformat()
+        else:
+            dt_evento = datetime.utcnow().replace(microsecond=0).replace(tzinfo=timezone(diferenca)).isoformat()
 
         cancelamento = {
             'idLote': self.id,

@@ -231,13 +231,90 @@
                                         <tree name="eletronic_items">
                                         	<field name="sequence" widget="handle" />
                                             <field name="state" invisible="1" />
-                                            <field name="invoice_eletronic_id" invisible="1" />
+                                            <field name="invoice_eletronic_id" invisible="1"/>
+				                           	<field name="fiscal_position_id" /> <!-- invisible="1" />  --> 
                                             <field name="product_id" />
+				                            <field name="name"/>
                                             <field name="uom_id" />
                                             <field name="cfop" />
                                             <field name="quantidade" />
                                             <field name="preco_unitario" />
                                             <field name="valor_liquido" />
+                                    		<field name="desconto" invisible="1"/>
+                                    		<field name="valor_bruto" invisible="1"/>
+                                    		<field name="seguro" invisible="1"/>
+                                    		<field name="frete" invisible="1"/>
+                                    		<field name="outras_despesas" invisible="1"/>
+                                			<field name="code"/>
+                                    		<field name="tipo_produto" invisible="1"/>
+                                    		<field name="cfop" invisible="1"/>
+                                    		<field name="ncm" invisible="1"/>
+                                    		<field name="tributos_estimados" invisible="1"/>
+                                    		<field name="indicador_total" invisible="1"/>
+                                    		<field name="item_pedido_compra" invisible="1"/>
+                                    		<field name="nr_pedido_compra" invisible="1"/>
+                                    		<field name="icms_cst" invisible="1"/>
+                                    		<field name="origem" invisible="1"/>
+                                    		<field name="icms_benef" invisible="1"/>
+                                    		<field name="icms_tipo_base" invisible="1"/>
+                                    		<field name="icms_aliquota_diferimento" invisible="1"/>
+                                    		<field name="icms_valor_diferido" invisible="1"/>
+                                    		<field name="icms_motivo_desoneracao" invisible="1"/>
+                                    		<field name="icms_valor_desonerado" invisible="1"/>
+		                                	<field name="incluir_ipi_base" invisible="1"/>
+		                                    <field name="icms_base_calculo" invisible="1"/>
+		                                    <field name="icms_aliquota_reducao_base" invisible="1"/>
+		                                    <field name="icms_aliquota"  invisible="1"/>
+		                                    <field name="icms_valor" invisible="1"/>
+		                                    <field name="icms_aliquota_credito"  invisible="1"/>
+		                                    <field name="icms_valor_credito"  invisible="1"/>
+		                                    <field name="icms_st_tipo_base" invisible="1"/>
+		                                    <field name="icms_st_aliquota_mva" invisible="1"/>
+		                                    <field name="icms_st_base_calculo" invisible="1"/>
+		                                    <field name="icms_st_aliquota_reducao_base" invisible="1"/>
+		                                    <field name="icms_st_aliquota"  invisible="1"/>
+		                                    <field name="icms_st_valor" invisible="1"/>
+		                                    <field name="icms_st_bc_ret_ant" invisible="1"/>
+		                                    <field name="icms_st_ali_sup_cons" invisible="1"/>
+		                                    <field name="icms_st_substituto" invisible="1"/>
+		                                    <field name="icms_st_ret_ant" invisible="1"/>
+		                                    <field name="icms_st_bc_dest" invisible="1"/>
+		                                    <field name="icms_st_dest" invisible="1"/>
+		                                	<field name="issqn_base_calculo" invisible="1"/>
+		                                	<field name="issqn_aliquota" invisible="1"/>
+		                                	<field name="issqn_codigo"  invisible="1"/>
+		                                	<field name="issqn_valor" invisible="1"/>
+		                                	<field name="issqn_valor_retencao" invisible="1"/>
+		                                    <field name="csll_base_calculo" invisible="1"/>
+		                                    <field name="csll_aliquota" invisible="1"/>
+		                                    <field name="csll_valor_retencao" invisible="1"/>
+		                                    <field name="irrf_base_calculo" invisible="1"/>
+		                                    <field name="irrf_aliquota" invisible="1"/>
+		                                    <field name="irrf_valor_retencao" invisible="1"/>
+		                                    <field name="inss_base_calculo" invisible="1"/>
+		                                    <field name="inss_aliquota" invisible="1"/>
+		                                    <field name="inss_valor_retencao" invisible="1"/>
+		                                    <field name="ipi_cst"  invisible="1"/>
+		                                    <field name="ipi_valor"  invisible="1"/>
+		                                    <field name="ipi_base_calculo" invisible="1"/>
+		                                    <field name="ipi_reducao_bc"  invisible="1"/>
+		                                    <field name="ipi_aliquota"  invisible="1"/>
+		                                    <field name="ipi_valor" invisible="1"/>
+		                                    <field name="pis_cst"  invisible="1"/>
+		                                    <field name="pis_base_calculo" invisible="1"/>
+		                                    <field name="pis_aliquota" invisible="1"/>
+		                                    <field name="pis_valor" invisible="1"/>
+		                                    <field name="pis_valor_retencao"  invisible="1"/>
+		                                    <field name="cofins_cst" invisible="1"/>
+		                                    <field name="cofins_base_calculo" invisible="1"/>
+		                                    <field name="cofins_aliquota" invisible="1"/>
+		                                    <field name="cofins_valor" invisible="1"/>
+		                                    <field name="cofins_valor_retencao" invisible="1"/>
+		                                	<field name="ii_base_calculo" invisible="1"/>
+		                                	<field name="ii_aliquota" invisible="1"/>
+		                                	<field name="ii_valor_despesas" invisible="1"/>
+		                                	<field name="ii_valor_iof" invisible="1"/>
+		                                	<field name="ii_valor" invisible="1"/>
                                         </tree>
                                     </field>
                                 </group>

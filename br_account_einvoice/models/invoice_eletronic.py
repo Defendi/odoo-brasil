@@ -272,9 +272,10 @@ class InvoiceEletronic(models.Model):
 
     @api.onchange('fiscal_position_id')
     def _on_change_fiscal_position(self):
+        pass
         for doc in self:
             if doc.state == 'edit':
-                doc.eletronic_item_ids._on_change_valor_produto()
+                doc.eletronic_item_ids._on_change_fiscal_position()
 
     def _create_attachment(self, prefix, event, data):
         file_name = '%s-%s.xml' % (
@@ -645,6 +646,7 @@ class InvoiceEletronicItem(models.Model):
     invoice_eletronic_id = fields.Many2one('invoice.eletronic', string='Documento', ondelete='cascade', index=True)
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True, string="Company Currency")
     fiscal_position_id = fields.Many2one('account.fiscal.position', related='invoice_eletronic_id.fiscal_position_id', string='Posição Fiscal', readonly=True)
+    partner_id = fields.Many2one('res.partner', related='invoice_eletronic_id.partner_id', string='Destinatário', readonly=True)
     state = fields.Selection(related='invoice_eletronic_id.state', string="State", readonly=True)
     product_id = fields.Many2one('product.product', string='Produto', readonly=True, states=STATE)
     tipo_produto = fields.Selection(
@@ -894,7 +896,6 @@ class InvoiceEletronicItem(models.Model):
         readonly=True, states=STATE
         )
 
-
     @api.onchange('product_id')
     def _on_change_product_id(self):
         if self.product_id and self.state == 'edit':
@@ -906,26 +907,53 @@ class InvoiceEletronicItem(models.Model):
             self.ncm = self.product_id.fiscal_classification_id.code
             self.origem = self.product_id.origin
             self.cest = self.product_id.cest
+            self._on_change_fiscal_position()
+
+    @api.onchange('fiscal_position_id')
+    def _on_change_fiscal_position(self):
+        if self.product_id and self.fiscal_position_id and self.state == 'edit':
+            vals = self._compute_map_tax()
+            self.update(vals)
 
     @api.onchange('quantidade','preco_unitario','desconto','seguro','frete','outras_despesas') 
-    def _on_change_valor_produto(self): 
+    def _on_change_preco(self): 
         if self.state == 'edit':
             valor_bruto = (self.quantidade * self.preco_unitario) - self.desconto
             valor_liquido = (valor_bruto + self.seguro + self.frete + self.outras_despesas)
-            self.update({
-                'valor_bruto': valor_bruto,
-                'valor_liquido': valor_liquido,
-            })
-            self._set_tributos_estimados()
+            vals = {'valor_bruto': valor_bruto,'valor_liquido': valor_liquido}
+            vals.update(self.compute_tributos_estimados(valor_bruto))
+            # IPI
+            vals.update(self.compute_ipi(valor_liquido))
+            # ICMS
+            vals.update(self.compute_icms(valor_liquido,vals['ipi_valor']))
             
-            if self.product_id and self.fiscal_position_id:
-                taxes = self.fiscal_position_id.map_tax_extra_values(self.invoice_eletronic_id.company_id, 
-                                                                    self.product_id, 
-                                                                    self.invoice_eletronic_id.partner_id)
-                vals = self._update_tax_from_fiscal_position(taxes)
-                self.update(vals)
-                ctx = self._prepare_tax_context()
+            self.update(vals)
+            
+
+            
+#     @api.onchange('product_id') 
+#     def _on_change_produto(self): 
+#         if self.product_id and self.fiscal_position_id:
+#             map_tax = self.fiscal_position_id.map_tax_extra_values(self.invoice_eletronic_id.company_id, 
+#                                                                    self.product_id, 
+#                                                                    self.invoice_eletronic_id.partner_id)
+#             vals = self._update_tax_from_fiscal_position(map_tax)
+#             self.update(vals)
+#         self._on_change_valor_produto()
                 
+#                 
+#                 ctx = self._prepare_tax_context()
+#                 taxes = taxes_ids.with_context(**ctx).compute_all(
+#                     valor_bruto, self.currency_id, self.quantidade, product=self.product_id,
+#                     partner=self.partner_id)
+#  
+#                 icms = ([x for x in taxes['taxes']
+#                          if x['domain'] == 'icms']) if taxes else []
+# 
+#                 self.update({
+#                     'icms_base_calculo': sum([x['base'] for x in icms]),
+#                     'icms_valor': sum([x['amount'] for x in icms])
+#                 })
 
     @api.onchange('valor_bruto') 
     def _on_change_valor_bruto(self):
@@ -944,7 +972,7 @@ class InvoiceEletronicItem(models.Model):
                         'preco_unitario': preco_unitario,
                     })
 
-    @api.onchange('valor_liquido') 
+    @api.onchange('valor_bruto') 
     def _on_change_valor_liquido(self):
         if self.state == 'edit':
             valor_bruto = self.valor_liquido - (self.seguro + self.frete + self.outras_despesas)
@@ -953,22 +981,52 @@ class InvoiceEletronicItem(models.Model):
                     'valor_bruto': valor_bruto,
                 })
 
-    def _set_tributos_estimados(self):
+    def compute_ipi(self,valor_liquido):
+        res = {}
+        if self.state == 'edit':
+            res['ipi_base_calculo'] = 0.0
+            if self.ipi_cst in ('00','49','50','99'):
+                res['ipi_base_calculo'] = (valor_liquido + self.frete + self.seguro + self.outras_despesas) * (1 - (self.ipi_reducao_bc / 100.0))
+            res['ipi_valor'] = res['ipi_base_calculo'] * (self.ipi_aliquota / 100)
+        return res
+
+    def compute_icms(self,valor_liquido,valor_ipi):
+        res = {}
+        if self.state == 'edit':
+            res['icms_base_calculo'] = 0.0
+            if self.icms_cst in ('00','10','20','51','70','90'):
+                base_icms = valor_liquido
+                if self.incluir_ipi_base:
+                    base_icms += valor_ipi
+                base_icms += self.frete + self.seguro + self.outras_despesas
+                res['icms_base_calculo'] = base_icms * (1 - (self.icms_aliquota_reducao_base / 100.0))
+            res['icms_valor'] = res['icms_base_calculo'] * (self.icms_aliquota / 100.0)
+        return res
+    
+    def compute_map_tax(self):
+        res = {}
+        if self.product_id and self.fiscal_position_id:
+            map_tax = self.fiscal_position_id.map_tax_extra_values(self.invoice_eletronic_id.company_id, 
+                                                                   self.product_id, 
+                                                                   self.invoice_eletronic_id.partner_id)
+            res.update(self._update_tax_from_fiscal_position(map_tax))
+        return res
+
+    def compute_tributos_estimados(self,valor_bruto):
         tributos_estimados = 0.0
-        if self.tipo_produto == 'service':
-            service = self.product_id.service_type_id
-            tributos_estimados += self.valor_bruto * (service.federal_nacional / 100)
-            tributos_estimados += self.valor_bruto * (service.estadual_imposto / 100)
-            tributos_estimados += self.valor_bruto * (service.municipal_imposto / 100)
-        else:
-            ncm = self.product_id.fiscal_classification_id
-            federal = ncm.federal_nacional if self.origem in ('0', '3', '4', '5', '8') else ncm.federal_importado
-            tributos_estimados += self.valor_bruto * (federal / 100)
-            tributos_estimados += self.valor_bruto * (ncm.estadual_imposto / 100)
-            tributos_estimados += self.valor_bruto * (ncm.municipal_imposto / 100)
-        self.update({
-            'tributos_estimados': tributos_estimados,
-        })
+        if self.product_id:
+            if self.tipo_produto == 'service':
+                service = self.product_id.service_type_id
+                tributos_estimados += valor_bruto * (service.federal_nacional / 100)
+                tributos_estimados += valor_bruto * (service.estadual_imposto / 100)
+                tributos_estimados += valor_bruto * (service.municipal_imposto / 100)
+            else:
+                ncm = self.product_id.fiscal_classification_id
+                federal = ncm.federal_nacional if self.origem in ('0', '3', '4', '5', '8') else ncm.federal_importado
+                tributos_estimados += valor_bruto * (federal / 100)
+                tributos_estimados += valor_bruto * (ncm.estadual_imposto / 100)
+                tributos_estimados += valor_bruto * (ncm.municipal_imposto / 100)
+        return {'tributos_estimados': tributos_estimados}
         
     def _update_tax_from_ncm(self):
         res = {}
@@ -984,6 +1042,7 @@ class InvoiceEletronicItem(models.Model):
         return res
 
     def _update_tax_from_fiscal_position(self,taxes):
+#         taxes_ids = self.env['account.tax']
         res = self._update_tax_from_ncm()
         icms_rule = taxes.get('icms_rule_id',False)
         pis_rule = taxes.get('pis_rule_id',False)
@@ -1014,69 +1073,70 @@ class InvoiceEletronicItem(models.Model):
             res['icms_benef'] = icms_rule.icms_benef.id
             res['icms_aliquota'] = icms_rule.tax_id.amount
             res['icms_aliquota_reducao_base'] = icms_rule.reducao_icms
-            res['icms_base_calculo'] = 0.0 # calcular
-            res['icms_valor'] = 0.0 # calcular
+#             res['icms_base_calculo'] = 0.0 # calcular
+#             res['icms_valor'] = 0.0 # calcular
 
             # ICMS Crédito
-            res['icms_aliquota_credito'] = 0.0
-            res['icms_valor_credito'] = 0.0
+#             res['icms_aliquota_credito'] = 0.0
+#             res['icms_valor_credito'] = 0.0
             
             # ICMS Diferido
             res['icms_aliquota_diferimento'] = icms_rule.icms_aliquota_diferimento
-            res['icms_valor_diferido'] = 0.0 # Calcular
-            res['icms_valor_diferido_dif'] = 0.0 # Calcular 
+#             res['icms_valor_diferido'] = 0.0 # Calcular
+#             res['icms_valor_diferido_dif'] = 0.0 # Calcular 
 
             # ICMS Desonerado
-            res['icms_motivo_desoneracao'] = False # Verificar
-            res['icms_valor_desonerado'] = 0 # Verificar
+#             res['icms_motivo_desoneracao'] = False # Verificar
+#             res['icms_valor_desonerado'] = 0 # Verificar
 
             # ICMS ST
             res['icms_st_tipo_base'] = '3'
             res['icms_st_aliquota_mva'] = icms_rule.aliquota_mva
             res['icms_st_aliquota'] = icms_rule.tax_icms_st_id.amount
-            res['icms_st_base_calculo'] = 0.0 # Calcular
+#             res['icms_st_base_calculo'] = 0.0 # Calcular
             res['icms_st_aliquota_reducao_base'] = icms_rule.reducao_icms_st
-            res['icms_st_valor'] = 0.0 # Calcular
-            res['icms_st_bc_ret_ant'] = 0.0 # Verificar
-            res['icms_st_ali_sup_cons'] = 0.0 # Verificar
-            res['icms_st_substituto'] = 0.0 # Verificar
-            res['icms_st_ret_ant'] = 0.0 # Verificar
-            res['icms_st_bc_dest'] = 0.0 # Verificar
-            res['icms_st_dest'] = 0.0 # Verificar
+#             res['icms_st_valor'] = 0.0 # Calcular
+#             res['icms_st_bc_ret_ant'] = 0.0 # Verificar
+#             res['icms_st_ali_sup_cons'] = 0.0 # Verificar
+#             res['icms_st_substituto'] = 0.0 # Verificar
+#             res['icms_st_ret_ant'] = 0.0 # Verificar
+#             res['icms_st_bc_dest'] = 0.0 # Verificar
+#             res['icms_st_dest'] = 0.0 # Verificar
             
         if pis_rule:
             res['pis_cst'] = pis_rule.cst_pis
             res['pis_aliquota'] = pis_rule.tax_id.amount
             res['pis_base_calculo'] = self.valor_bruto if res['pis_aliquota'] > 0.0 else 0.0
-            res['pis_valor'] = 0.0 # Calcular
-            res['pis_valor_retencao'] = 0.0 # Verificar
+#             res['pis_valor'] = 0.0 # Calcular
+#             res['pis_valor_retencao'] = 0.0 # Verificar
                 
         if cofins_rule:
             res['cofins_cst'] = cofins_rule.cst_cofins
             res['cofins_aliquota'] = cofins_rule.tax_id.amount
             res['cofins_base_calculo'] = self.valor_bruto if res['pis_aliquota'] > 0.0 else 0.0
-            res['cofins_valor'] = 0.0 # Calcular
-            res['cofins_valor_retencao'] = 0.0 # Verificar
+#             res['cofins_valor'] = 0.0 # Calcular
+#             res['cofins_valor_retencao'] = 0.0 # Verificar
 
+#         res['taxes_ids'] = taxes_ids
         return res
 
-    def _prepare_tax_context(self):
-        return {
-            'incluir_ipi_base': self.incluir_ipi_base,
-            'icms_st_aliquota_mva': self.icms_st_aliquota_mva,
-            'icms_aliquota_reducao_base': self.icms_aliquota_reducao_base,
-            'icms_st_aliquota_reducao_base': self.icms_st_aliquota_reducao_base,
-            'icms_aliquota_diferimento': self.icms_aliquota_diferimento,
-            #'icms_st_aliquota_deducao': self.icms_st_aliquota_deducao,
-            'ipi_reducao_bc': self.ipi_reducao_bc,
-            'icms_base_calculo': self.icms_base_calculo,
-            'ipi_base_calculo': self.ipi_base_calculo,
-            'pis_base_calculo': self.pis_base_calculo,
-            'cofins_base_calculo': self.cofins_base_calculo,
-            'ii_base_calculo': self.ii_base_calculo,
-            #'issqn_base_calculo': self.issqn_base_calculo,
-            #'icms_aliquota_inter_part': self.icms_aliquota_inter_part,
-            #'l10n_br_issqn_deduction': self.l10n_br_issqn_deduction,
-        }
+#     def _prepare_tax_context(self):
+#         return {
+#             'incluir_ipi_base': self.incluir_ipi_base,
+#             'icms_st_aliquota_mva': self.icms_st_aliquota_mva,
+#             'icms_aliquota_reducao_base': self.icms_aliquota_reducao_base,
+#             'icms_st_aliquota_reducao_base': self.icms_st_aliquota_reducao_base,
+#             'icms_aliquota_diferimento': self.icms_aliquota_diferimento,
+#             #'icms_st_aliquota_deducao': self.icms_st_aliquota_deducao,
+#             'ipi_reducao_bc': self.ipi_reducao_bc,
+#             'icms_base_calculo': self.icms_base_calculo,
+#             'ipi_base_calculo': self.ipi_base_calculo,
+#             'pis_base_calculo': self.pis_base_calculo,
+#             'cofins_base_calculo': self.cofins_base_calculo,
+#             'ii_base_calculo': self.ii_base_calculo,
+#             #'issqn_base_calculo': self.issqn_base_calculo,
+#             #'icms_aliquota_inter_part': self.icms_aliquota_inter_part,
+#             #'l10n_br_issqn_deduction': self.l10n_br_issqn_deduction,
+#         }
        
 
