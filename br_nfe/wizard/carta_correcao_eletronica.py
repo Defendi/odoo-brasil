@@ -65,7 +65,7 @@ class WizardCartaCorrecaoEletronica(models.TransientModel):
             dt_evento = datetime.now(timezone(diferenca)).replace(microsecond=0).isoformat()
         else:
             # Data do Evento quando a Hora do sistema está em America/Sao_paulo
-            dt_evento = datetime.utcnow().replace(microsecond=0).replace(tzinfo=timezone(diferenca)).isoformat()
+            dt_evento = datetime.now().replace(microsecond=0).replace(tzinfo=timezone(diferenca)).isoformat()
 
 #         from_zone = tz.gettz('UTC')
 #         to_zone = tz.gettz(self.env.user.partner_id.tz or 'America/Sao_Paulo')
