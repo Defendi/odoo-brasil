@@ -26,7 +26,7 @@ class CashFlowReport(models.TransientModel):
                         payables += line.amount
                     if not line.liquidity:
                         balance_period += line.amount
-            if item.simulated:
+            if not item.simulated:
                 balance += item.start_amount
 
             item.start_balance = start_balance
@@ -212,8 +212,8 @@ class CashFlowReport(models.TransientModel):
                 'name': 'Valor Inicial',
                 'cashflow_id': self.id,
                 'account_id': False,
-                'debit': 0,
-                'credit': self.start_amount,
+                'debit': self.start_amount if self.start_amount < 0.0 else 0.0,
+                'credit': self.start_amount if self.start_amount > 0.0 else 0.0,
                 'amount': self.start_amount,
                 'liquidity': True,
             })
@@ -292,7 +292,7 @@ class CashFlowReport(models.TransientModel):
     @api.multi
     def action_calculate_report(self):
         self.write({'line_ids': [(5, 0, 0)]})
-        balance = self.start_amount if self.simulated else 0.0
+        balance = self.start_amount if not self.simulated else 0.0
         liquidity_lines = self.calculate_liquidity()
         move_lines = self.calculate_moves()
 
