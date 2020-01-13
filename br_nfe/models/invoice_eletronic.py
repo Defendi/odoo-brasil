@@ -1155,7 +1155,7 @@ class InvoiceEletronic(models.Model):
         if (time.timezone / 3600.0) == 0.0:
             dt_evento = datetime.now(timezone(diferenca)).replace(microsecond=0).isoformat()
         else:
-            dt_evento = datetime.utcnow().replace(microsecond=0).replace(tzinfo=timezone(diferenca)).isoformat()
+            dt_evento = datetime.now().replace(microsecond=0).replace(tzinfo=timezone(diferenca)).isoformat()
 
         cancelamento = {
             'idLote': self.id,
