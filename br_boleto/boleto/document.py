@@ -78,6 +78,8 @@ class Boleto:
         self.boleto.quantidade = '1'
         # Importante - Número documento deve ser o identificador único da linha
         self.boleto.numero_documento = order_line.identifier
+        if order_line.move_id.narration:
+            self.boleto.demonstrativo = order_line.move_id.narration.split("\n")
 
     def _payment_mode(self, payment_mode_id):
         """
