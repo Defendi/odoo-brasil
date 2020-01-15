@@ -13,25 +13,21 @@ class L10nBrPaymentCnabImport(models.TransientModel):
     _name = 'l10n_br.payment.cnab.import'
     _description = """Importador CNAB"""
 
-    cnab_type = fields.Selection(
-        [('receivable', 'Recebíveis'), ('payable', 'Pagáveis')])
-    cnab_file = fields.Binary(
-        string='Arquivo', help='Arquivo de retorno do tipo CNAB 240')
-
-    journal_id = fields.Many2one(
-        'account.journal', string="Diário Contábil",
-        domain=[('type', '=', 'bank')],
-        help="Diário Contábil a ser utilizado na importação do CNAB.")
+    cnab_type = fields.Selection([('receivable', 'Recebíveis'), ('payable', 'Pagáveis')])
+    cnab_file = fields.Binary(string='Arquivo', help='Arquivo de retorno do tipo CNAB 240')
+    journal_id = fields.Many2one('account.journal', string="Diário Contábil", domain=[('type', '=', 'bank')], help="Diário Contábil a ser utilizado na importação do CNAB.")
+    force_journal = fields.Boolean(string='Forçar Diário', default=True, help='Força o diário como o extrato mesmo não sendo da mesma conta bancária.')
 
     def validate_journal(self, acc_number, bra_number):
         account = self.journal_id.bank_account_id
-        if acc_number != int(account.acc_number):
-            raise UserError(
-                _('A conta não é a mesma do extrato.\nDiário: %s\nExtrato: %s')
-                % (int(account.acc_number), acc_number))
-        if bra_number != int(account.bra_number):
-            raise UserError(
-                _('A agência não é a mesma do extrato: %s') % bra_number)
+        if not self.force_journal:
+            if acc_number != int(account.acc_number):
+                raise UserError(
+                    _('A conta não é a mesma do extrato.\nDiário: %s\nExtrato: %s')
+                    % (int(account.acc_number), acc_number))
+            if bra_number != int(account.bra_number):
+                raise UserError(
+                    _('A agência não é a mesma do extrato: %s') % bra_number)
 
     def _get_account(self, cnab_file):
         return 0, 0

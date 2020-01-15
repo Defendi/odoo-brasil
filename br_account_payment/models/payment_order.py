@@ -45,6 +45,7 @@ class PaymentOrderLine(models.Model):
                               ("processed", "Processado"),
                               ("rejected", "Rejeitado"),
                               ("paid", "Pago"),
+                              ("down", "Baixado"),
                               ("cancelled", "Cancelado")],
                              string="Situação",
                              default="draft", track_visibility='onchange')

@@ -80,7 +80,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_cancel_line" type="object" string="Cancelar" groups="account.group_account_manager" />
+                    <button name="action_cancel_line" states="draft,approved,sent,processed,rejected" 
+                            confirm="Deseja realmente cancelar o pagamento?" type="object" string="Cancelar" groups="account.group_account_manager" />
                     <field name="state" widget="statusbar" nolabel="1"/>
                 </header>
                 <sheet>

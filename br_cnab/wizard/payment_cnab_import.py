@@ -83,6 +83,8 @@ class L10nBrPaymentCnabImport(models.TransientModel):
         bank = get_bank(self.journal_id.bank_id.bic)
         arquivo = Arquivo(bank, arquivo=stream)
         sequence = self.journal_id.l10n_br_sequence_statements
+        if len(sequence) == 0:
+            raise UserError('Informe a sequencia no diário %s' % self.journal_id.name)
         statement = None
 
         for lote in arquivo.lotes:
@@ -111,10 +113,22 @@ class L10nBrPaymentCnabImport(models.TransientModel):
                 else:
                     nosso_numero = evento.nosso_numero
 
-                payment_line = self.env['payment.order.line'].search(
-                    [('nosso_numero', '=', int(nosso_numero)),
-                     ('src_bank_account_id', '=',
-                      self.journal_id.bank_account_id.id)])
+                if self.force_journal:
+                    payment_line = self.env['payment.order.line'].search([
+                        ('nosso_numero', '=', int(nosso_numero)),
+                        ('src_bank_account_id', '=', False)])
+                    if len(payment_line) != 1:
+                        cnab_acc_number, cnab_bra_number = self._get_account(cnab_file)
+                        bank_account_id = self.env['res.partner.bank'].search([
+                            ('acc_number','=',str(cnab_acc_number)),('bra_number','=',str(cnab_bra_number))])
+                        payment_line = self.env['payment.order.line'].search([
+                            ('nosso_numero', '=', int(nosso_numero)),
+                            ('src_bank_account_id', '=', bank_account_id.id)])
+                    
+                else:
+                    payment_line = self.env['payment.order.line'].search([
+                        ('nosso_numero', '=', int(nosso_numero)),
+                        ('src_bank_account_id', '=',self.journal_id.bank_account_id.id)])
 
                 due_date = date.today()
                 effective_date = None

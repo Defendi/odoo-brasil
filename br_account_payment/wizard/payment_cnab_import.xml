@@ -9,6 +9,7 @@
             <group>
                 <field name="cnab_type" required="True"/>
                 <field name="journal_id" required="True"/>
+                <field name="force_journal" required="True"/>
                 <field name="cnab_file" required="True"/>
             </group>
             <footer>
