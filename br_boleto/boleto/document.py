@@ -49,6 +49,7 @@ class Boleto:
     def __init__(self, order_line, nosso_numero):
         self._cedente(order_line.company_id)
         self._sacado(order_line.partner_id)
+        self._avalista(order_line.sacador_id)
         self._order_line(order_line)
         self.nosso_numero = nosso_numero
 
@@ -126,6 +127,18 @@ class Boleto:
         self.boleto.sacado_nome = partner.legal_name\
             if partner.company_type == 'company' else partner.name
         self.boleto.sacado_documento = partner.cnpj_cpf
+
+    def _avalista(self, partner):
+        """
+        :param partner:
+        :return:
+        """
+        self.boleto.sacador_nome = False
+        self.boleto.sacador_documento = False
+        if partner:
+            self.boleto.sacador_nome = partner.legal_name\
+                if partner.company_type == 'company' else partner.name
+            self.boleto.sacador_documento = partner.cnpj_cpf
 
     @classmethod
     def get_pdfs(cls, boleto_list):

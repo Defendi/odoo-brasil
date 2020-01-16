@@ -145,29 +145,30 @@ class PaymentOrderLine(models.Model):
             aml_obj.create(ext_line)
         if cnab_vals['valor_tarifas'] > Decimal(0):
             account_id = self.journal_id.company_id.l10n_br_bankfee_account_id
-            if not account_id:
-                raise UserError(
-                    _('Configure a conta de tarifas bancárias'))
-            aml_tarifa = {
-                'name': 'Tarifas bancárias',
-                'move_id': move.id,
-                'partner_id': self.partner_id.id,
-                'debit': 0.0,
-                'credit': float(cnab_vals['valor_tarifas']),
-                'currency_id': self.currency_id.id,
-                'account_id': self.journal_id.default_debit_account_id.id,
-            }
-            aml_obj.create(aml_tarifa)
-            ext_line = {
-                'name': 'Tarifas bancárias (boleto)',
-                'move_id': move.id,
-                'partner_id': self.partner_id.id,
-                'debit': float(cnab_vals['valor_tarifas']),
-                'credit': 0.0,
-                'currency_id': self.currency_id.id,
-                'account_id': account_id.id,
-            }
-            aml_obj.create(ext_line)
+#             if not account_id:
+#                 raise UserError(
+#                     _('Configure a conta de tarifas bancárias'))
+            if account_id:
+                aml_tarifa = {
+                    'name': 'Tarifas bancárias',
+                    'move_id': move.id,
+                    'partner_id': self.partner_id.id,
+                    'debit': 0.0,
+                    'credit': float(cnab_vals['valor_tarifas']),
+                    'currency_id': self.currency_id.id,
+                    'account_id': self.journal_id.default_debit_account_id.id,
+                }
+                aml_obj.create(aml_tarifa)
+                ext_line = {
+                    'name': 'Tarifas bancárias (boleto)',
+                    'move_id': move.id,
+                    'partner_id': self.partner_id.id,
+                    'debit': float(cnab_vals['valor_tarifas']),
+                    'credit': 0.0,
+                    'currency_id': self.currency_id.id,
+                    'account_id': account_id.id,
+                }
+                aml_obj.create(ext_line)
 
         counterpart_aml = aml_obj.create(counterpart_aml_dict)
         aml_obj.create(liquidity_aml_dict)

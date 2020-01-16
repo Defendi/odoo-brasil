@@ -31,6 +31,7 @@
         'views/payment_order.xml',
         'views/res_settings.xml',
         'views/payment_statement.xml',
+        'views/res_partner_view.xml',
         'security/account_security.xml',
         'wizard/payment_cnab_import.xml',
         'wizard/change_date_maturity_view.xml',

@@ -26,7 +26,7 @@ class PaymentOrderLine(models.Model):
             'currency_id': move_line.company_currency_id.id,
             'company_id': payment_mode.journal_id.company_id.id or payment_mode.company_id.id,
             'journal_id': payment_mode.journal_id.id,
-            'src_bank_account_id': payment_mode.journal_id.bank_account_id.id,
+            'src_bank_account_id': payment_mode.journal_id.bank_account_id.id
         }
         if not payment_order:
             payment_order = payment_order.create(order_dict)
@@ -46,6 +46,7 @@ class PaymentOrderLine(models.Model):
                 'payment_mode_id': move_line.payment_mode_id.id,
                 'date_maturity': move_line.date_maturity,
                 'partner_id': move_line.partner_id.id,
+                'sacador_id': move_line.partner_id.sacador_id.id if move_line.partner_id.sacador_id else False,
                 'emission_date': move_line.date,
                 'amount_total': move_line.amount_residual,
                 'name': "%s/%s" % (move_line.move_id.name, move_line.name),

@@ -28,6 +28,7 @@ class PaymentOrderLine(models.Model):
         'account.move.line', string='Item de Diário')
     partner_id = fields.Many2one(
         'res.partner', string="Parceiro", readonly=True)
+    sacador_id = fields.Many2one('res.partner', string='Sacador/Avalista')
     journal_id = fields.Many2one('account.journal', string="Diário")
     move_id = fields.Many2one('account.move', string="Lançamento de Diário",
                               related='move_line_id.move_id', readonly=True)
@@ -63,6 +64,12 @@ class PaymentOrderLine(models.Model):
     @api.multi
     def action_cancel_line(self):
         self.write({'state': 'cancelled'})
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        for line in self:
+            if len(line.partner_id) and len(self.partner_id.sacador_id) > 0:
+                line.sacador_id = self.partner_id.sacador_id
 
 
 class PaymentOrder(models.Model):

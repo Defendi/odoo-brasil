@@ -114,17 +114,18 @@ class L10nBrPaymentCnabImport(models.TransientModel):
                     nosso_numero = evento.nosso_numero
 
                 if self.force_journal:
+                    cnab_acc_number, cnab_bra_number = self._get_account(cnab_file)
+                    bank_account_id = self.env['res.partner.bank'].search([('acc_number','=',str(cnab_acc_number)),('bra_number','=',str(cnab_bra_number))])
+                    #journal_id = self.env['account.journal'].search([('bank_account_id','=',bank_account_id.id)],limit=1)
                     payment_line = self.env['payment.order.line'].search([
                         ('nosso_numero', '=', int(nosso_numero)),
                         ('src_bank_account_id', '=', False)])
                     if len(payment_line) != 1:
-                        cnab_acc_number, cnab_bra_number = self._get_account(cnab_file)
-                        bank_account_id = self.env['res.partner.bank'].search([
-                            ('acc_number','=',str(cnab_acc_number)),('bra_number','=',str(cnab_bra_number))])
                         payment_line = self.env['payment.order.line'].search([
                             ('nosso_numero', '=', int(nosso_numero)),
                             ('src_bank_account_id', '=', bank_account_id.id)])
-                    
+                    if len(payment_line) > 0:
+                        payment_line.journal_id = self.journal_id
                 else:
                     payment_line = self.env['payment.order.line'].search([
                         ('nosso_numero', '=', int(nosso_numero)),
