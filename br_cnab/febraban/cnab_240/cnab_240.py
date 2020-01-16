@@ -137,7 +137,7 @@ class Cnab240(Cnab):
         # Dígito verificador de agencia e conta
         # Era cedente_agencia_conta_dv agora é cedente_dv_ag_cc
 
-        return {
+        res = {
             'controle_banco': int(self.order.src_bank_account_id.bank_bic),
             'cedente_agencia': int(self.order.src_bank_account_id.bra_number),
             'cedente_conta': int(self.order.src_bank_account_id.acc_number),
@@ -199,7 +199,15 @@ class Cnab240(Cnab):
             'cobranca_carteira': int(
                 self.order.payment_mode_id.boleto_carteira[:2]),
         }
-
+        
+        if len(line.sacador_id) > 0:
+            res.update({
+                'sacador_inscricao_tipo': 2 if line.sacador_id.company_type == 'company' else 1,
+                'sacador_inscricao_numero': re.sub('[^0-9]', '', line.sacador_id.cnpj_cpf),
+                'sacador_nome': line.sacador_id.legal_name if line.sacador_id.company_type == 'company' else line.sacador_id.name,
+            })
+        return res
+    
     def remessa(self, order):
         cobrancasimples_valor_titulos = 0
         self.order = order
