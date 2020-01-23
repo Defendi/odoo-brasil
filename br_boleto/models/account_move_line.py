@@ -53,3 +53,30 @@ class AccountMoveLine(models.Model):
                 'default_move_line_id': self.id,
             }
         })
+
+    def verifica_sacado(self):
+        res = []
+        if self.partner_id:
+            sacado = self.partner_id
+            if not sacado.street:
+                res.append("Indique a rua.")
+            if not sacado.number:
+                res.append("Indique o número.")
+            if not sacado.city_id:
+                res.append("Indique a cidade.")
+            if not sacado.state_id:
+                res.append("Indique o Estado.")
+            if sacado.company_type == 'company':
+                if not sacado.legal_name:
+                    res.append("Indique a Razão Social.")
+                if not sacado.cnpj_cpf:
+                    res.append("Indique o CNPJ da empresa.")
+            else:
+                if not sacado.name:
+                    res.append("Indique o Nome.")
+                if not sacado.cnpj_cpf:
+                    res.append("Indique o CPF da pessoa.")
+        else:
+            res.append(u"Indique o sacado.")
+        return res
+
