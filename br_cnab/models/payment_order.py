@@ -52,14 +52,19 @@ ENTRADA_REJEITADA = '3333'
 class PaymentOrderLine(models.Model):
     _inherit = 'payment.order.line'
 
+
     def process_receivable_line(self, statement_id, cnab_vals):
         self.ensure_one()
         state = message = payment_move = None
         ignored = False
         if cnab_vals['cnab_code'] == TITULO_LIQUIDADO:
             state = 'paid'
-            payment_move = self.register_receivable_payment(cnab_vals)
-
+            try:
+                payment_move = self.register_receivable_payment(cnab_vals)
+            except:
+                state = 'draft'
+                ignored = True
+                cnab_vals['cnab_code'] = 'ERRO NÃO PROCESSADO'
         elif cnab_vals['cnab_code'] == ENTRADA_CONFIRMADA:
             state = 'processed'
 
