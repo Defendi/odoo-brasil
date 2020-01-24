@@ -7,6 +7,7 @@
 
 from ..cnab_240 import Cnab240
 from datetime import datetime
+from decimal import Decimal
 
 
 class Itau240(Cnab240):
@@ -42,6 +43,8 @@ class Itau240(Cnab240):
         vals['codigo_multa'] = int(vals['codigo_multa'])
         vals['data_multa'] = str(vals['data_multa']).zfill(8)
         vals['juros_multa'] = vals['juros_multa']
+        juros_dia = line.move_line_id.debit * (self.order.payment_mode_id.late_payment_interest / 100 / 30)
+        vals['juros_mora_taxa'] = Decimal(str(juros_dia)).quantize(Decimal('1.00'))
         return vals
 
     def dv_nosso_numero(self, agencia, conta, carteira, nosso_numero):
