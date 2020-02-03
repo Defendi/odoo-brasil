@@ -6,7 +6,7 @@
     'summary': """Validação e campos extras para geração do SPED
     Mantido por Trustcode""",
     'description': 'Base Sped Brasil',
-    'version': '11.0.1.0.0',
+    'version': '11.0.1.0.1',
     'sequence': 2,
     'category': 'account',
     'author': 'Trustcode',
@@ -18,10 +18,12 @@
     'depends': [
         'br_nfe',
         'mrp',
+        'product',
     ],
     'data': [
         'security/ir.model.access.csv',
         'views/product.xml',
     ],
     'application': True,
+    'post_init_hook': 'post_init',
 }
