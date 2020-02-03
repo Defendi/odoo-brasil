@@ -11,13 +11,6 @@ class AccountPayment(models.Model):
     total_moves = fields.Integer(
         'Linha(s)', compute='_compute_open_moves')
 
-    @api.model
-    def default_get(self, fields):
-        rec = super(AccountPayment, self).default_get(fields)
-        if self.env.context.get('default_move_line_id', False):
-            rec['amount'] = self.env.context.get('default_amount', rec.get('amount', 0.0))
-        return rec
-
     @api.depends('partner_id', 'partner_type')
     def _compute_open_moves(self):
         for item in self:
