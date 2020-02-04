@@ -25,6 +25,7 @@ class AccountInvoice(models.Model):
         self.valor_icms_uf_remet = sum(l.icms_uf_remet for l in lines)
         self.valor_icms_uf_dest = sum(l.icms_uf_dest for l in lines)
         self.valor_icms_fcp_uf_dest = sum(l.icms_fcp_uf_dest for l in lines)
+        self.valor_icms_credito = sum(l.icms_valor_credito for l in lines)
         self.issqn_base = sum(l.issqn_base_calculo for l in lines)
         self.issqn_value = sum(abs(l.issqn_valor) for l in lines)
         self.ipi_base = sum(l.ipi_base_calculo for l in lines)
@@ -76,6 +77,8 @@ class AccountInvoice(models.Model):
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
         self.amount_total_company_signed = self.amount_total * sign
         self.amount_total_signed = self.amount_total * sign
+        self.taxa_icms_credito = (self.valor_icms_credito / (self.total_bruto - self.total_desconto)) * 100 \
+                                if (self.total_bruto - self.total_desconto) > 0.0 else 0.0 
 
     @api.one
     @api.depends('move_id.line_ids')
@@ -200,6 +203,12 @@ class AccountInvoice(models.Model):
     valor_icms_uf_remet = fields.Float(
         string="ICMS Remetente", store=True, compute='_compute_amount',
         help='Valor total do ICMS Interestadual para a UF do Remetente')
+    valor_icms_credito = fields.Float(string="Total ICMS Crédito", 
+        store=True, compute='_compute_amount', digits=dp.get_precision('Account'),
+        help='Valor total do crédito de ICMS do Simples Nacional')
+    taxa_icms_credito = fields.Float(string="Taxa ICMS Crédito", 
+        store=True, compute='_compute_amount', digits=(12,2),
+        help='Taxa total do crédito de ICMS do Simples Nacional')
     issqn_base = fields.Float(
         string='Base ISSQN', store=True,
         digits=dp.get_precision('Account'), compute='_compute_amount')
@@ -477,7 +486,6 @@ class AccountInvoice(models.Model):
     @api.model
     def tax_line_move_line_get(self):
         res = super(AccountInvoice, self).tax_line_move_line_get()
-
         done_taxes = []
         for tax_line in sorted(self.tax_line_ids, key=lambda x: -x.sequence):
             if tax_line.amount and tax_line.tax_id.deduced_account_id:

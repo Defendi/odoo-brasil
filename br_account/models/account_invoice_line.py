@@ -332,7 +332,7 @@ class AccountInvoiceLine(models.Model):
     # ICMS Simples Nacional
     # =========================================================================
     icms_csosn_simples = fields.Selection(CSOSN_SIMPLES, string="CSOSN ICMS")
-    icms_aliquota_credito = fields.Float("% Cŕedito ICMS")
+    icms_aliquota_credito = fields.Float("% Crédito ICMS")
     icms_valor_credito = fields.Float(
         "Valor de Crédito", compute='_compute_price', store=True)
     icms_st_aliquota_deducao = fields.Float(
