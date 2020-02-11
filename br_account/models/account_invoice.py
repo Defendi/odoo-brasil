@@ -364,6 +364,10 @@ class AccountInvoice(models.Model):
             self.fiscal_document_id = None
             self.document_serie_id = None
 
+    def button_recalculate(self):
+        for inv in self:
+            inv._onchange_br_account_fiscal_position_id()
+
     @api.onchange('fiscal_position_id')
     def _onchange_br_account_fiscal_position_id(self):
         if self.fiscal_position_id and self.fiscal_position_id.account_id:

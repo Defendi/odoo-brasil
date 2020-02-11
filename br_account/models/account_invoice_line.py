@@ -131,6 +131,7 @@ class AccountInvoiceLine(models.Model):
             base_icms_credito = 0.0
  
         price_subtotal_signed = price_subtotal_signed * sign
+        dif_icms_dif = (self.icms_valor - self.icms_valor_diferido)
         self.update({
             'price_total': taxes['total_included'] if taxes else subtotal,
             'price_tax': taxes['total_included'] - taxes['total_excluded']
@@ -168,7 +169,7 @@ class AccountInvoiceLine(models.Model):
             'irrf_valor': sum([x['amount'] for x in irrf]),
             'outros_base_calculo': sum([x['base'] for x in outros]),
             'outros_valor': sum([x['amount'] for x in outros]),
-            'icms_valor_diferido_dif': self.icms_valor_diferido - self.icms_valor,
+            'icms_valor_diferido_dif': dif_icms_dif*-1 if dif_icms_dif < 0 else dif_icms_dif,
         })
 
     @api.multi

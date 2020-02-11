@@ -20,7 +20,11 @@
             </xpath>
             <field name="fiscal_position_id" position="replace"></field>
             <field name="payment_term_id" position="after">
-                <field name="fiscal_position_id" domain="['|', ('fiscal_type', '=', None), ('fiscal_type', '=', 'saida')]" options="{'no_create': True, 'no_create_edit': True}"/>
+                <label for="fiscal_position_id"/>
+                <div>
+	                <field name="fiscal_position_id" class="oe_inline" domain="['|', ('fiscal_type', '=', None), ('fiscal_type', '=', 'saida')]" options="{'no_create': True, 'no_create_edit': True}"/>
+					<button name="button_recalculate" type="object" class="fa fa-refresh oe_edit_only" states="draft"/>	                
+                </div>
             	<field name="account_analitic_id" groups="analytic.group_analytic_accounting" options="{'no_create': True, 'no_create_edit': True}"/>
             	<field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
             </field>

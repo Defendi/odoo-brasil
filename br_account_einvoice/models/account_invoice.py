@@ -274,6 +274,9 @@ class AccountInvoice(models.Model):
         to_open_invoices.invoice_prepare_edoc()
         return res 
 
+    @api.multi
+    def invoice_enumerate(self):
+        pass
 
     @api.multi
     def invoice_validate(self):
