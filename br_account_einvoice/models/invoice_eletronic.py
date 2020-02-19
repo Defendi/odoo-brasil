@@ -200,6 +200,13 @@ class InvoiceEletronic(models.Model):
 
     product_id = fields.Many2one('product.product', related='eletronic_item_ids.product_id', string='Produto')
 
+    @api.onchange('model')
+    def _on_change_model(self):
+        if self.model in ['55','65']:
+            company = self.env.user.company_id
+            self.ambiente = 'producao' if company.tipo_ambiente == '1' else 'homologacao'
+            
+
     @api.onchange('invoice_id')
     def _on_change_invoice(self):
         if self.state == 'edit' and bool(self.invoice_id):
@@ -252,11 +259,21 @@ class InvoiceEletronic(models.Model):
     @api.onchange('partner_id')
     def _on_change_partner(self):
         if self.state == 'edit' and bool(self.partner_id):
+            company = self.env.user.company_id
             self.partner_shipping_id = self.partner_id
             if self.tipo_operacao == 'saida':
                 self.fiscal_position_id = self.partner_id.property_account_position_id
                 self.payment_term_id = self.partner_id.property_payment_term_id
                 self.payment_mode_id = self.partner_id.property_payment_mode_id
+                self.data_emissao = fields.date.today()
+                self.finalidade_emissao = '1'
+                if company.state_id.id == self.partner_id.state_id.id:
+                    self.ind_dest = '1'
+                elif company.country_id.id != self.partner_id.country_id.id:
+                    self.ind_dest = '3'
+                else:
+                    self.ind_dest = '1'
+                self.ind_ie_dest = self.partner_id.indicador_ie_dest
             else:
                 self.partner_id.property_purchase_fiscal_position_id
                 self.payment_term_id = self.partner_id.property_supplier_payment_term_id
@@ -272,10 +289,11 @@ class InvoiceEletronic(models.Model):
 
     @api.onchange('fiscal_position_id')
     def _on_change_fiscal_position(self):
-        pass
         for doc in self:
-            if doc.state == 'edit':
-                doc.eletronic_item_ids._on_change_fiscal_position()
+            if doc.state == 'edit' and len(doc.fiscal_position_id) > 0:
+                if doc.model in ['55','65']:
+                    doc.serie = doc.fiscal_position_id.product_serie_id.id
+                    doc.eletronic_item_ids._on_change_fiscal_position()
 
     def _create_attachment(self, prefix, event, data):
         file_name = '%s-%s.xml' % (

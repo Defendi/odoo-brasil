@@ -66,6 +66,12 @@ class AccountInvoice(models.Model):
             vals = self.env['ir.actions.act_window'].browse(act_id).read()[0]
             return vals
 
+    @api.multi
+    def action_send_edocs(self):
+        if self.total_edocs >= 1:
+            edoc = self.env['invoice.eletronic'].search([('invoice_id', '=', self.id)], limit=1)
+            edoc.action_send_eletronic_invoice()
+
     def _return_pdf_invoice(self, doc):
         return False
 

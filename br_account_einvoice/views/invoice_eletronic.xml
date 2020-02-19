@@ -189,7 +189,7 @@
                         <group>
                             <group>
                                 <field name="model"/>
-                                <field name="invoice_id" options="{'no_create': True}"/>
+                                <field name="invoice_id" options="{'no_create': True}" attrs="{'readonly': [('model', '=', False)]}"/>
                                 <field name="partner_id" options="{'no_quick_create': True}"/>
                                 <field name="partner_shipping_id"/>
                                 <field name="data_agendada"/>

@@ -18,11 +18,12 @@
                 <div class="alert alert-success" role="alert" style="margin-bottom:0px;" attrs="{'invisible': ['|', ('invoice_model', '!=', '55'),('sending_nfe', '==', False)]}">
                     Sua <b>NFe de número <field name="nfe_number" class="oe_inline"/></b> está na fila de envio.
                     <button name="action_view_edocs" type="object" class="label label-primary"
-                        context="{ 'search_default_invoice_id': id }" string="Visualizar Fila">
+                        context="{ 'search_default_invoice_id': id }" string="Visualizar E-Doc">
                     </button>
                     ou
-                    <button name="action_view_edocs" type="object" class="label label-primary"
-                        context="{ 'search_default_invoice_id': id }" string="Enviar Agora">
+                    <button name="action_send_edocs" type="object" class="label label-primary"
+                        context="{ 'search_default_invoice_id': id }" string="Enviar Agora"
+                        confirm="Confirma o envio?">
                     </button>
                 </div>
                 <div class="alert alert-danger" role="alert" style="margin-bottom:0px;" attrs="{'invisible': ['|', ('invoice_model', '!=', '55'),('nfe_exception', '==', False)]}">
