@@ -147,11 +147,11 @@ class InvoiceEletronic(models.Model):
     # Cobrança
     numero_fatura = fields.Char(
         string="Fatura", readonly=True, states=STATE)
-    fatura_bruto = fields.Monetary(
+    fatura_bruto = fields.Float(
         string="Valor Original", readonly=True, states=STATE)
-    fatura_desconto = fields.Monetary(
+    fatura_desconto = fields.Float(
         string="Desconto", readonly=True, states=STATE)
-    fatura_liquido = fields.Monetary(
+    fatura_liquido = fields.Float(
         string="Valor Líquido", readonly=True, states=STATE)
 
     duplicata_ids = fields.One2many(
@@ -185,13 +185,13 @@ class InvoiceEletronic(models.Model):
     nfe_processada_name = fields.Char(
         string="Xml da NFe", size=100, readonly=True)
 
-    valor_icms_uf_remet = fields.Monetary(
+    valor_icms_uf_remet = fields.Float(
         string="ICMS Remetente", readonly=True, states=STATE,
         help='Valor total do ICMS Interestadual para a UF do Remetente')
-    valor_icms_uf_dest = fields.Monetary(
+    valor_icms_uf_dest = fields.Float(
         string="ICMS Destino", readonly=True, states=STATE,
         help='Valor total do ICMS Interestadual para a UF de destino')
-    valor_icms_fcp_uf_dest = fields.Monetary(
+    valor_icms_fcp_uf_dest = fields.Float(
         string="Total ICMS FCP", readonly=True, states=STATE,
         help='Total total do ICMS relativo Fundo de Combate à Pobreza (FCP) \
         da UF de destino')
@@ -214,8 +214,8 @@ class InvoiceEletronic(models.Model):
          ('90', 'Sem pagamento'),
          ('99', 'Outros')],
         string="Forma de Pagamento", default="01")
-    valor_pago = fields.Monetary(string='Valor pago')
-    troco = fields.Monetary(string='Troco')
+    valor_pago = fields.Float(string='Valor pago')
+    troco = fields.Float(string='Troco')
 
     # Documentos Relacionados
     fiscal_document_related_ids = fields.One2many(
@@ -372,13 +372,13 @@ class InvoiceEletronic(models.Model):
             'PIS': {
                 'CST': item.pis_cst,
                 'vBC': "%.02f" % item.pis_base_calculo,
-                'pPIS': "%.02f" % item.pis_aliquota,
+                'pPIS': "%.04f" % item.pis_aliquota,
                 'vPIS': "%.02f" % item.pis_valor
             },
             'COFINS': {
                 'CST': item.cofins_cst,
                 'vBC': "%.02f" % item.cofins_base_calculo,
-                'pCOFINS': "%.02f" % item.cofins_aliquota,
+                'pCOFINS': "%.04f" % item.cofins_aliquota,
                 'vCOFINS': "%.02f" % item.cofins_valor
             },
         }
@@ -386,7 +386,7 @@ class InvoiceEletronic(models.Model):
             imposto.update({        
                 'II': {
                     'vBC': "%.02f" % item.ii_base_calculo,
-                    'vDespAd': "%.02f" % item.ii_valor_despesas,
+                    'vDespAdu': "%.02f" % item.ii_valor_despesas,
                     'vII': "%.02f" % item.ii_valor,
                     'vIOF': "%.02f" % item.ii_valor_iof
                 }
@@ -422,19 +422,19 @@ class InvoiceEletronic(models.Model):
                     'CST': item.icms_cst,
                     'modBC': item.icms_tipo_base,
                     'vBC': "%.02f" % item.icms_base_calculo,
-                    'pRedBC': "%.02f" % item.icms_aliquota_reducao_base,
-                    'pICMS': "%.02f" % item.icms_aliquota,
+                    'pRedBC': "%.04f" % item.icms_aliquota_reducao_base,
+                    'pICMS': "%.04f" % item.icms_aliquota,
                     'vICMS': "%.02f" % item.icms_valor,
                     'vICMSDif': "%.02f" % item.icms_valor_diferido_dif,
                     'vICMSOp': "%.02f" % item.icms_valor_diferido,
-                    'pDif': "%.02f" % item.icms_aliquota_diferimento,
+                    'pDif': "%.04f" % item.icms_aliquota_diferimento,
                     'modBCST': item.icms_st_tipo_base,
-                    'pMVAST': "%.02f" % item.icms_st_aliquota_mva,
-                    'pRedBCST': "%.02f" % item.icms_st_aliquota_reducao_base,
+                    'pMVAST': "%.04f" % item.icms_st_aliquota_mva,
+                    'pRedBCST': "%.04f" % item.icms_st_aliquota_reducao_base,
                     'vBCST': "%.02f" % item.icms_st_base_calculo,
-                    'pICMSST': "%.02f" % item.icms_st_aliquota,
+                    'pICMSST': "%.04f" % item.icms_st_aliquota,
                     'vICMSST': "%.02f" % item.icms_st_valor,
-                    'pCredSN': "%.02f" % item.icms_aliquota_credito,
+                    'pCredSN': "%.04f" % item.icms_aliquota_credito,
                     'vCredICMSSN': "%.02f" % item.icms_valor_credito,
                     'vBCSTRet': "%.02f" % item.icms_st_bc_ret_ant,
                     'pST': "%.02f" % item.icms_st_ali_sup_cons,                            
@@ -446,7 +446,7 @@ class InvoiceEletronic(models.Model):
                     'cEnq': item.codigo_enquadramento_ipi,
                     'CST': item.ipi_cst,
                     'vBC': "%.02f" % item.ipi_base_calculo,
-                    'pIPI': "%.02f" % item.ipi_aliquota,
+                    'pIPI': "%.04f" % item.ipi_aliquota,
                     'vIPI': "%.02f" % item.ipi_valor
                 },
             })

@@ -656,18 +656,11 @@ class InvoiceEletronicItem(models.Model):
     cfop = fields.Char('CFOP', size=5, readonly=True, states=STATE)
     ncm = fields.Char('NCM', size=10, readonly=True, states=STATE)
 
-    uom_id = fields.Many2one(
-        'product.uom', string='Unidade Medida', readonly=True, states=STATE)
-    quantidade = fields.Float(
-        string='Quantidade', readonly=True, states=STATE,
-        digits=dp.get_precision('Product Unit of Measure'))
-    preco_unitario = fields.Monetary(
-        string='Preço Unitário', digits=dp.get_precision('Product Price'),
-        readonly=True, states=STATE)
-    item_pedido_compra = fields.Char(
-        string='Item PDC',help="Número do Item do Pedido de Compra do seu Cliente.",readonly=True, states=STATE)
-    nr_pedido_compra   = fields.Char(
-        string='Número PDC',help="Número do Pedido de Compra do seu Cliente.", readonly=True, states=STATE)
+    uom_id = fields.Many2one('product.uom', string='Unidade Medida', readonly=True, states=STATE)
+    quantidade = fields.Float(string='Quantidade', readonly=True, states=STATE, digits=dp.get_precision('Product Unit of Measure'))
+    preco_unitario = fields.Float(string='Preço Unitário', digits=dp.get_precision('Product Price'),readonly=True, states=STATE)
+    item_pedido_compra = fields.Char(string='Item PDC',help="Número do Item do Pedido de Compra do seu Cliente.",readonly=True, states=STATE)
+    nr_pedido_compra = fields.Char(string='Número PDC',help="Número do Pedido de Compra do seu Cliente.", readonly=True, states=STATE)
     frete = fields.Monetary(string='Frete', digits=dp.get_precision('Account'), readonly=True, states=STATE)
     seguro = fields.Monetary(string='Seguro', digits=dp.get_precision('Account'), readonly=True, states=STATE)
     desconto = fields.Monetary(string='Desconto', digits=dp.get_precision('Account'), readonly=True, states=STATE)
@@ -678,40 +671,24 @@ class InvoiceEletronicItem(models.Model):
 
     indicador_total = fields.Selection([('0', '0 - Não'), ('1', '1 - Sim')],string="Compõe Total da Nota?", default='1',readonly=True, states=STATE)
 
-    origem = fields.Selection(
-        ORIGEM_PROD, string='Origem Mercadoria', readonly=True, states=STATE)
-    icms_cst = fields.Selection(
-        CST_ICMS + CSOSN_SIMPLES, string='Situação Tributária',
-        readonly=True, states=STATE)
+    origem = fields.Selection(ORIGEM_PROD, string='Origem Mercadoria', readonly=True, states=STATE)
+    icms_cst = fields.Selection(CST_ICMS + CSOSN_SIMPLES, string='Situação Tributária',readonly=True, states=STATE)
     
-    icms_aliquota = fields.Float(
-        string='Alíquota', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Cod.Benf.Fiscal",readonly=True, states=STATE)
+    icms_aliquota = fields.Float(string='Alíquota', digits=(12,4), readonly=True, states=STATE)
+    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Cod.Benf.Fiscal", readonly=True, states=STATE)
     
     incluir_ipi_base = fields.Boolean(string="Incl. Valor IPI?", help="Se marcado o valor do IPI inclui a base de cálculo")
     
-    icms_tipo_base = fields.Selection(
-        [('0', '0 - Margem Valor Agregado (%)'),
+    icms_tipo_base = fields.Selection([('0', '0 - Margem Valor Agregado (%)'),
          ('1', '1 - Pauta (Valor)'),
          ('2', '2 - Preço Tabelado Máx. (valor)'),
          ('3', '3 - Valor da operação')],
         string='Modalidade BC do ICMS', readonly=True, states=STATE)
-    icms_base_calculo = fields.Monetary(
-        string='Base de cálculo', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_aliquota_reducao_base = fields.Float(
-        string='% Redução Base', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_valor = fields.Monetary(
-        string='Valor Total', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_valor_credito = fields.Monetary(
-        string="Valor de Cŕedito", digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_aliquota_credito = fields.Float(
-        string='% de Crédito', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
+    icms_base_calculo = fields.Float(string='Base de cálculo', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    icms_aliquota_reducao_base = fields.Float(string='% Redução Base', digits=(12,4), readonly=True, states=STATE)
+    icms_valor = fields.Float(string='Valor Total', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    icms_valor_credito = fields.Float(string="Valor de Crédito", digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    icms_aliquota_credito = fields.Float(string='% de Crédito', digitis=(12,4), readonly=True, states=STATE)
 
     icms_st_tipo_base = fields.Selection(
         [('0', '0- Preço tabelado ou máximo  sugerido'),
@@ -721,120 +698,51 @@ class InvoiceEletronicItem(models.Model):
          ('4', '4 - Margem Valor Agregado (%)'), ('5', '5 - Pauta (valor)')],
         string='Tipo Base ICMS ST', required=True, default='4',
         readonly=True, states=STATE)
-    icms_st_aliquota_mva = fields.Float(
-        string='% MVA', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_st_aliquota = fields.Float(
-        string='Alíquota', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_st_base_calculo = fields.Monetary(
-        string='Base de cálculo', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_st_aliquota_reducao_base = fields.Float(
-        string='% Redução Base', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_st_valor = fields.Monetary(
-        string='Valor Total', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_st_bc_ret_ant = fields.Monetary(string='BC Retido Fornecedor',
-                                         readonly=True, states=STATE,
-                                         help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).') 
-    icms_st_ali_sup_cons = fields.Float(string='Aliq.Sup. Consumidor', digits=dp.get_precision('Account'),
-                                        readonly=True, states=STATE,
-                                        help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')                            
-    icms_st_substituto = fields.Monetary(string='Valor Substituto', readonly=True, states=STATE,
-                                         help='Valor do ICMS Próprio do Substituto cobrado em operação anterior') 
-    icms_st_ret_ant = fields.Monetary(string='Valor Retido Fornecedor', readonly=True, states=STATE,
-                                         help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).') 
+    icms_st_aliquota_mva = fields.Float(string='% MVA', digits=(12,4),readonly=True, states=STATE)
+    icms_st_aliquota = fields.Float(string='Alíquota', digits=(12,4),readonly=True, states=STATE)
+    icms_st_base_calculo = fields.Float(string='Base de cálculo', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    icms_st_aliquota_reducao_base = fields.Float(string='% Redução Base', digits=(12,4),readonly=True, states=STATE)
+    icms_st_valor = fields.Float(string='Valor Total', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    icms_st_bc_ret_ant = fields.Float(string='BC Retido Fornecedor', digits=dp.get_precision('Account'),readonly=True, states=STATE,help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).') 
+    icms_st_ali_sup_cons = fields.Float(string='Aliq.Sup. Consumidor', digits=(12,4),readonly=True, states=STATE,help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')                            
+    icms_st_substituto = fields.Float(string='Valor Substituto', readonly=True, states=STATE, digits=dp.get_precision('Account'), help='Valor do ICMS Próprio do Substituto cobrado em operação anterior') 
+    icms_st_ret_ant = fields.Float(string='Valor Retido Fornecedor', readonly=True, states=STATE, digits=dp.get_precision('Account'),help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).') 
+    icms_st_bc_dest = fields.Float(string='BC na UF Destino', digits=dp.get_precision('Account'),readonly=True, states=STATE,help='Informar o valor da BC do ICMS ST da UF destino (v2.0)') 
+    icms_st_dest = fields.Float(string='Valor da UF Destino ', readonly=True, states=STATE, help='Informar o valor do ICMS ST da UF destino (v2.0)') 
+    icms_aliquota_diferimento = fields.Float(string='% Diferimento', digits=(12,4),readonly=True, states=STATE)
+    icms_valor_diferido = fields.Float(string='Valor Diferido', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    icms_valor_diferido_dif = fields.Float(string='Diferença Diferimento', digits=dp.get_precision('Account'),readonly=True, states=STATE)
 
-    icms_st_bc_dest = fields.Monetary(string='BC na UF Destino',
-                                         readonly=True, states=STATE,
-                                         help='Informar o valor da BC do ICMS ST da UF destino (v2.0)') 
-
-    icms_st_dest = fields.Monetary(string='Valor da UF Destino ', readonly=True, states=STATE,
-                                         help='Informar o valor do ICMS ST da UF destino (v2.0)') 
-
-    icms_aliquota_diferimento = fields.Float(
-        string='% Diferimento', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_valor_diferido = fields.Monetary(
-        string='Valor Diferido', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    icms_valor_diferido_dif = fields.Monetary(
-        string='Diferença Diferimento', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-
-    icms_motivo_desoneracao = fields.Char(
-        string='Motivo Desoneração', size=2, readonly=True, states=STATE)
-    icms_valor_desonerado = fields.Monetary(
-        string='Valor Desonerado', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
+    icms_motivo_desoneracao = fields.Char(string='Motivo Desoneração', size=2, readonly=True, states=STATE)
+    icms_valor_desonerado = fields.Float(string='Valor Desonerado', digits=dp.get_precision('Account'),readonly=True, states=STATE)
 
     # ----------- IPI -------------------
     ipi_cst = fields.Selection(CST_IPI, string='Situação tributária')
-    ipi_aliquota = fields.Float(
-        string='Alíquota', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    ipi_base_calculo = fields.Monetary(
-        string='Base de cálculo', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    ipi_reducao_bc = fields.Float(
-        string='% Redução Base', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    ipi_valor = fields.Monetary(
-        string='Valor Total', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
+    ipi_aliquota = fields.Float(string='Alíquota', digits=(12,4),readonly=True, states=STATE)
+    ipi_base_calculo = fields.Float(string='Base de cálculo', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    ipi_reducao_bc = fields.Float(string='% Redução Base', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    ipi_valor = fields.Float(string='Valor Total', digits=dp.get_precision('Account'), readonly=True, states=STATE)
 
     # ----------- II ----------------------
-    ii_base_calculo = fields.Monetary(
-        string='Base de Cálculo', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    ii_aliquota = fields.Float(
-        string='Alíquota II', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    ii_valor_despesas = fields.Monetary(
-        string='Despesas Aduaneiras', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    ii_valor = fields.Monetary(
-        string='Imposto de Importação', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    ii_valor_iof = fields.Monetary(
-        string='IOF', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
+    ii_base_calculo = fields.Float(string='Base de Cálculo', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    ii_aliquota = fields.Float(string='Alíquota II', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    ii_valor_despesas = fields.Float(string='Despesas Aduaneiras', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    ii_valor = fields.Float(string='Imposto de Importação', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    ii_valor_iof = fields.Float(string='IOF', digits=dp.get_precision('Account'),readonly=True, states=STATE)
 
     # ------------ PIS ---------------------
-    pis_cst = fields.Selection(
-        CST_PIS_COFINS, string='Situação Tributária',
-        readonly=True, states=STATE)
-    pis_aliquota = fields.Float(
-        string='Alíquota', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    pis_base_calculo = fields.Monetary(
-        string='Base de Cálculo', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    pis_valor = fields.Monetary(
-        string='Valor Total', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    pis_valor_retencao = fields.Monetary(
-        string='Valor Retido', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
+    pis_cst = fields.Selection(CST_PIS_COFINS, string='Situação Tributária',readonly=True, states=STATE)
+    pis_aliquota = fields.Float(string='Alíquota', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    pis_base_calculo = fields.Float(string='Base de Cálculo', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    pis_valor = fields.Float(string='Valor Total', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    pis_valor_retencao = fields.Float(string='Valor Retido', digits=dp.get_precision('Account'),readonly=True, states=STATE)
 
     # ------------ COFINS ------------
-    cofins_cst = fields.Selection(
-        CST_PIS_COFINS, string='Situação Tributária',
-        readonly=True, states=STATE)
-    cofins_aliquota = fields.Float(
-        string='Alíquota', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    cofins_base_calculo = fields.Monetary(
-        string='Base de Cálculo', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    cofins_valor = fields.Monetary(
-        string='Valor Total', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
-    cofins_valor_retencao = fields.Monetary(
-        string='Valor Retido', digits=dp.get_precision('Account'),
-        readonly=True, states=STATE)
+    cofins_cst = fields.Selection(CST_PIS_COFINS, string='Situação Tributária',readonly=True, states=STATE)
+    cofins_aliquota = fields.Float(string='Alíquota', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    cofins_base_calculo = fields.Float(string='Base de Cálculo', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    cofins_valor = fields.Float(string='Valor Total', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+    cofins_valor_retencao = fields.Float(string='Valor Retido', digits=dp.get_precision('Account'),readonly=True, states=STATE)
 
     # ----------- ISSQN -------------
     issqn_codigo = fields.Char(
