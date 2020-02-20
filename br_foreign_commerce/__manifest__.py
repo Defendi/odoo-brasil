@@ -16,7 +16,9 @@
     ],
     'external_dependencies': {
     },
-    'data': [],
+    'data': [
+        'views/import_declaration_view.xml',
+    ],
     'qweb': [],
     'installable': True,
     'auto_install': False,

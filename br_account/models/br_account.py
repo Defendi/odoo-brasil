@@ -209,9 +209,7 @@ class ImportDeclaration(models.Model):
     line_ids = fields.One2many(
         'br_account.import.declaration.line',
         'import_declaration_id', 'Linhas da DI')
-    additional_information = fields.Text(
-        'Informações Adicionais', readonly=True,
-        states={'draft': [('readonly', False)]})
+    additional_information = fields.Text('Informações Adicionais')
 
 
 class ImportDeclarationLine(models.Model):

@@ -129,8 +129,7 @@ class AccountFiscalPosition(models.Model):
         'account.fiscal.position.tax.rule', 'fiscal_position_id',
         string="Outras Retenções", domain=[('domain', '=', 'outros')])
     fiscal_type = fields.Selection([('saida', 'Saída'),
-                                    ('entrada', 'Entrada'),
-                                    ('import', 'Entrada Importação')],
+                                    ('entrada', 'Entrada')],
                                    string="Tipo da posição", copy=True)
 
     @api.model
