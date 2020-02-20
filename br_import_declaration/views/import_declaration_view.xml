@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<menuitem id="menu_foreign_commerce" name="Foreign Commerce" groups="account.group_account_user,account.group_account_manager,account.group_account_invoice" web_icon="account_invoicing,static/description/icon.png" sequence="50"/>
+
+	<menuitem id="menu_foreign_commerce" name="Foreign Commerce" parent="menu_finance" sequence="4" groups="account.group_account_user"/>
+	<menuitem id="menu_fc_import" name="Import" parent="menu_foreign_commerce" sequence="5"/>
+	<menuitem id="menu_fc_export" name="Export" parent="menu_foreign_commerce" sequence="5"/>
+	
+</odoo>
