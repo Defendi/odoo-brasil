@@ -243,9 +243,9 @@ class AccountInvoiceLine(models.Model):
         'Valor ICMS', required=True, compute='_compute_price', store=True,
         digits=dp.get_precision('Account'), default=0.00)
     icms_aliquota = fields.Float(
-        'Perc ICMS', digits=(12,4), default=0.00)
+        'ICMS %', digits=(12,4), default=0.00)
     icms_aliquota_reducao_base = fields.Float(
-        '% Red. Base ICMS', digits=(12,4),
+        'Red. Base ICMS %', digits=(12,4),
         default=0.00)
     icms_base_calculo_manual = fields.Float(
         'Base ICMS Manual', digits=dp.get_precision('Account'), default=0.00)
@@ -254,9 +254,9 @@ class AccountInvoiceLine(models.Model):
     # ICMS Diferido
     # =========================================================================
 
-    icms_aliquota_diferimento = fields.Float("% Diferimento", digits=(12,4))
-    icms_valor_diferido = fields.Float('Valor ICMS diferido', required=True, compute='_compute_price', store=True, digits=dp.get_precision('Account'), default=0.00)
-    icms_valor_diferido_dif = fields.Float('Valor diferenca ICMS diferido', compute='_compute_price',store=True, digits=dp.get_precision('Account'), default=0.00)
+    icms_aliquota_diferimento = fields.Float("Diferimento %", digits=(12,4), default=0.0)
+    icms_valor_diferido = fields.Float('Vl ICMS diferido', required=True, compute='_compute_price', store=True, digits=dp.get_precision('Account'), default=0.00)
+    icms_valor_diferido_dif = fields.Float('Vl diferenca ICMS diferido', compute='_compute_price',store=True, digits=dp.get_precision('Account'), default=0.00)
 
     # =========================================================================
     # ICMS Substituição
@@ -272,9 +272,9 @@ class AccountInvoiceLine(models.Model):
         'Tipo Base ICMS ST', required=True, default='4')
     icms_st_valor = fields.Float('Valor ICMS ST', required=True, compute='_compute_price', store=True, digits=dp.get_precision('Account'), default=0.00)
     icms_st_base_calculo = fields.Float('Base ICMS ST', required=True, compute='_compute_price', store=True,digits=dp.get_precision('Account'), default=0.00)
-    icms_st_aliquota = fields.Float('% ICMS ST', digits=(12,4),default=0.00)
-    icms_st_aliquota_reducao_base = fields.Float('% Red. Base ST',digits=(12,4))
-    icms_st_aliquota_mva = fields.Float('MVA Ajustado ST',digits=(12,4), default=0.00)
+    icms_st_aliquota = fields.Float('ICMS ST %', digits=(12,4),default=0.00)
+    icms_st_aliquota_reducao_base = fields.Float('Red. Base ST %',digits=(12,4),default=0.00)
+    icms_st_aliquota_mva = fields.Float('MVA Ajustado ST %',digits=(12,4), default=0.00)
     icms_st_base_calculo_manual = fields.Float('Base ICMS ST Manual', digits=(12,4),default=0.00)
     icms_st_bc_ret_ant = fields.Monetary(string='BC Retido Fornecedor',help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).') 
     icms_st_ali_sup_cons = fields.Float(string='Aliq.Sup. Consumidor', digits=(12,4),help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')                            
@@ -412,6 +412,88 @@ class AccountInvoiceLine(models.Model):
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
 
     @api.multi
+    def _clear_tax_id(self):
+        return {
+            'icms_rule_id': False,
+            'tax_icms_id': False,
+            'icms_benef': False,
+            'icms_tipo_base': '3',
+            'incluir_ipi_base': False,
+            'icms_aliquota': 0.00,
+            'icms_aliquota_reducao_base': 0.00,
+            'icms_base_calculo_manual': 0.00,
+            'icms_aliquota_diferimento': 0.0,
+            'tax_icms_st_id': False,
+            'icms_st_tipo_base': '4',
+            'icms_st_aliquota': 0.0,
+            'icms_st_aliquota_reducao_base': 0.0,
+            'icms_st_aliquota_mva': 0.0,
+            'icms_st_base_calculo_manual': 0.0,
+            'icms_st_bc_ret_ant': 0.0, 
+            'icms_st_ali_sup_cons': 0.0, 
+            'icms_st_substituto': 0.0,
+            'icms_st_ret_ant': 0.0,
+            'tem_difal': False,
+            'tax_icms_inter_id': False,
+            'tax_icms_intra_id': False,
+            'tax_icms_fcp_id': False,
+            'icms_aliquota_inter_part': 0.0,
+            'icms_aliquota_credito': 0.0,
+            'icms_st_aliquota_deducao': 0.0,
+            'issqn_rule_id': False,
+            'tax_issqn_id': False,
+            'issqn_tipo': 'N',
+            'service_type_id': False,
+            'issqn_aliquota': 0.00,
+            'issqn_valor': 0.00,
+            'l10n_br_issqn_deduction': 0.00,
+            'ipi_rule_id': False,
+            'tax_ipi_id': False,
+            'ipi_tipo': 'percent',
+            'ipi_reducao_bc': 0.00,
+            'ipi_aliquota': 0.00,
+            'ipi_cst': False,
+            'ipi_base_calculo_manual': 0.00,
+            'pis_rule_id': False,
+            'tax_pis_id': False,
+            'pis_cst': False,
+            'pis_tipo': 'percent',
+            'pis_aliquota': 0.00,
+            'pis_base_calculo_manual': 0.00,
+            'cofins_rule_id': False,
+            'tax_cofins_id': False,
+            'cofins_cst': False,
+            'cofins_tipo': 'percent',
+            'cofins_aliquota': 0.0,
+            'cofins_base_calculo_manual': 0.0,
+            'ii_rule_id': False,
+            'tax_ii_id': False,
+            'ii_base_calculo': 0.00,
+            'ii_aliquota': 0.00,
+            'ii_valor_iof': 0.00,
+            'ii_valor_despesas': 0.00,
+            'csll_rule_id': False,
+            'tax_csll_id': False,
+            'csll_aliquota': 0.00,
+            'irrf_rule_id': False,
+            'tax_irrf_id': False,
+            'irrf_aliquota': 0.00,
+            'inss_rule_id': False,
+            'tax_inss_id': False,
+            'inss_aliquota': 0.00,
+            'outros_rule_id': False,
+            'tax_outros_id': False,
+            'outros_aliquota': 0.0,
+            'invoice_line_tax_ids': [(5, 0, 0)]
+        }
+
+    @api.multi
+    def clear_tax_id(self):
+        for line in self:
+            res = self._clear_tax_id()
+            line.write(res)
+
+    @api.multi
     def _compute_tax_id(self):
         for line in self:
 #             line.update(line._clear_tax_ids())
@@ -444,7 +526,7 @@ class AccountInvoiceLine(models.Model):
         fpos = self.invoice_id.fiscal_position_id
         if fpos:
             vals = fpos.map_tax_extra_values(
-                self.company_id, self.product_id, self.invoice_id.partner_id)
+                self.company_id, self.product_id, self.invoice_id.partner_id,self.account_analytic_id)
 
             for key, value in vals.items():
                 if value and key in self._fields:
