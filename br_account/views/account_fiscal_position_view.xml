@@ -66,6 +66,9 @@
                 <group string="Classificação Fiscal">
                     <field name="product_fiscal_classification_ids" widget="many2many_tags" nolabel="1"/>
                 </group>
+                <group string="Centro Custo/Contrato" attrs="{'invisible': [('tipo_produto', '=', 'product')]}">
+                    <field name="service_analytic_ids" widget="many2many_tags" nolabel="1"/>
+                </group>
             </form>
         </field>
     </record>

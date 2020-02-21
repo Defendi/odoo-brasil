@@ -32,6 +32,10 @@ class AccountFiscalPositionTaxRule(models.Model):
                                      ('service', 'Serviço')],
                                     string="Tipo produto", default="product")
 
+    service_analytic_ids = fields.Many2many(
+        'account.analytic.account', string="Conta",
+        relation="account_analytic_account_ret_tax_rule_service_relation")
+
     product_fiscal_classification_ids = fields.Many2many(
         'product.fiscal.classification', string="Classificação Fiscal",
         relation="account_fiscal_position_tax_rule_prod_fiscal_clas_relation")
@@ -149,7 +153,7 @@ class AccountFiscalPosition(models.Model):
                             ('fiscal_type', '=', type_inv)], limit=1)
         return fpos
 
-    def _filter_rules(self, fpos_id, type_tax, partner, product, state):
+    def _filter_rules(self, fpos_id, type_tax, partner, product, state, analytic):
         rule_obj = self.env['account.fiscal.position.tax.rule']
         domain = [('fiscal_position_id', '=', fpos_id),
                   ('domain', '=', type_tax)]
@@ -162,7 +166,7 @@ class AccountFiscalPosition(models.Model):
                 # Quanto mais alto, mais adequada está a regra em relacao ao
                 # faturamento
                 rules_points[rule.id] = self._calculate_points(
-                    rule, product, state, partner)
+                    rule, product, state, partner, analytic)
 
             # Calcula o maior valor para os resultados obtidos
             greater_rule = max([(v, k) for k, v in rules_points.items()])
@@ -212,7 +216,7 @@ class AccountFiscalPosition(models.Model):
             return{}
 
     @api.model
-    def map_tax_extra_values(self, company, product, partner):
+    def map_tax_extra_values(self, company, product, partner, analytic):
         to_state = partner.state_id
 
         taxes = ('icms', 'simples', 'ipi', 'pis', 'cofins',
@@ -220,11 +224,11 @@ class AccountFiscalPosition(models.Model):
         res = {}
         for tax in taxes:
             vals = self._filter_rules(
-                self.id, tax, partner, product, to_state)
+                self.id, tax, partner, product, to_state, analytic)
             res.update({k: v for k, v in vals.items() if v})
         return res
 
-    def _calculate_points(self, rule, product, state, partner):
+    def _calculate_points(self, rule, product, state, partner, analytic):
         """Calcula a pontuação das regras. A pontuação aumenta de acordo
         com os 'matches'. Não havendo match(exceto quando o campo não está
         definido) retorna o valor -1, que posteriormente será tratado como
@@ -259,6 +263,11 @@ class AccountFiscalPosition(models.Model):
             elif len(rule.state_ids) > 0:
                 return -1
 
+            if product.fiscal_type == 'service' and bool(analytic):
+                if analytic in rule.service_analytic_ids:
+                    rule_points += 1
+                elif len(rule.service_analytic_ids) > 0:
+                    return -1
         else:
             return -1
 
