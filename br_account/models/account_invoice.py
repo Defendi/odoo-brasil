@@ -386,6 +386,7 @@ class AccountInvoice(models.Model):
         ob_ids = [x.id for x in self.fiscal_position_id.fiscal_observation_ids]
         self.fiscal_observation_ids = [(6, False, ob_ids)]
         #TODO: Fazer a alteração fiscal
+        self.invoice_line_ids._br_account_onchange_product_id()
         self.invoice_line_ids._compute_tax_id()
 
     @api.multi
