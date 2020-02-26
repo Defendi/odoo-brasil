@@ -6,8 +6,19 @@ from odoo.exceptions import UserError
 
 class ProductUom(models.Model):
     _inherit = 'product.uom'
+    _order = 'display_name'
 
-    l10n_br_description = fields.Char(string="Description", size=60)
+
+    display_name = fields.Char(compute='_compute_display_name', store=True, index=True)
+    l10n_br_description = fields.Char(string="Description", size=60, index=True)
+
+    @api.depends('name', 'l10n_br_description')
+    def _compute_display_name(self):
+        for uom in self:
+            if not uom.l10n_br_description:
+                uom.display_name = uom.name
+            else:
+                uom.display_name = uom.l10n_br_description
 
     def write(self, values):
         # Users can not update the factor if open stock moves are based on it
@@ -30,6 +41,13 @@ class ProductUom(models.Model):
                         "currently reserved."
                     ))
         return super(ProductUom, self).write(values)
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for uom in self:
+            res.append((uom.id, uom.l10n_br_description))
+        return res
 
 
 class ProductTemplate(models.Model):
