@@ -49,6 +49,15 @@ class ProductUom(models.Model):
             res.append((uom.id, uom.l10n_br_description))
         return res
 
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        args = args or []
+        if name:
+            # Be sure name_search is symetric to name_get
+            name = name.split(' / ')[-1]
+            args = ['|',('name', operator, name),('l10n_br_description', operator, name)] + args
+        return self.search(args, limit=limit).name_get()
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
