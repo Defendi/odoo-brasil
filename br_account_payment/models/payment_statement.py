@@ -1,8 +1,10 @@
 # © 2018 Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import api, fields, models
+import base64
 
+from odoo import api, fields, models
+from datetime import datetime, timedelta
 
 class L10nBrPaymentStatement(models.Model):
     _name = 'l10n_br.payment.statement'
@@ -46,6 +48,20 @@ class L10nBrPaymentStatement(models.Model):
         'l10n_br.payment.statement.line', 'statement_id',
         string='Statement lines', readonly=True, copy=True)
 
+    def _create_attachment(self, data):
+        file_name = '%s-%s.xml' % (self.name, datetime.now().strftime('%Y-%m-%d-%H-%M'))
+        if isinstance(data, bytes):
+            data = data.decode("utf-8")
+        self.env['ir.attachment'].create(
+            {
+                'name': file_name,
+                'datas': base64.b64encode(data.encode()),
+                'datas_fname': file_name,
+                'description': 'CNAB Import',
+                'res_model': 'l10n_br.payment.statement',
+                'res_id': self.id
+            })
+
 
 class L10nBrPaymentStatementLine(models.Model):
     _name = 'l10n_br.payment.statement.line'
@@ -75,3 +91,6 @@ class L10nBrPaymentStatementLine(models.Model):
         'res.company', related='statement_id.company_id',
         string='Company', store=True, readonly=True)
     ignored = fields.Boolean(string="Ignorado?", default=False)
+    paymentorderline_id = fields.Many2one('payment.order.line', string='Ordem Pagamento', readonly=True) 
+     
+    
