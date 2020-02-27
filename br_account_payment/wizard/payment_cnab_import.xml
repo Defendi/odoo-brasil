@@ -20,4 +20,48 @@
         </field>
     </record>
 
+    <record id="view_br_account_import_cnab_form" model="ir.ui.view">
+        <field name="name">br.import.cnab.240.form</field>
+        <field name="model">l10n_br.payment.cnab.import</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+		            <group>
+		                <field name="cnab_type" required="True"/>
+		                <field name="journal_id" required="True"/>
+		                <field name="force_journal" required="True"/>
+		                <field name="cnab_file" required="True"/>
+		            </group>
+		        </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_br_account_import_cnab_tree" model="ir.ui.view">
+        <field name="name">br.account.import.cnab.240.tree</field>
+        <field name="model">l10n_br.payment.cnab.import</field>
+        <field name="arch" type="xml">
+            <tree string="CNAB Importados">
+                <field name="cnab_file"/>
+                <field name="cnab_type"/>
+                <field name="force_journal"/>
+                <field name="journal_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_account_import_cnab" model="ir.actions.act_window">
+        <field name="name">CNAB Importados</field>
+        <field name="res_model">l10n_br.payment.cnab.import</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_br_account_import_cnab_tree"/>
+    </record>
+
+
+	<menuitem id="account_import_cnab_menu" parent="br_account_payment.menu_bank_payments" action="action_account_import_cnab" groups="base.group_no_one"/>
+
+
 </odoo>
