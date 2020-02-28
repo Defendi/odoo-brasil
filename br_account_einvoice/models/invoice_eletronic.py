@@ -934,7 +934,8 @@ class InvoiceEletronicItem(models.Model):
         if self.product_id and self.fiscal_position_id:
             map_tax = self.fiscal_position_id.map_tax_extra_values(self.invoice_eletronic_id.company_id, 
                                                                    self.product_id, 
-                                                                   self.invoice_eletronic_id.partner_id)
+                                                                   self.invoice_eletronic_id.partner_id,
+                                                                   False)
             res.update(self._update_tax_from_fiscal_position(map_tax))
         return res
 
