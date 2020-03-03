@@ -366,7 +366,9 @@ class AccountInvoice(models.Model):
 
     def button_recalculate(self):
         for inv in self:
+            inv.tax_line_ids = [(5, 0, 0)]
             inv._onchange_br_account_fiscal_position_id()
+            inv.compute_taxes()
 
     @api.onchange('fiscal_position_id')
     def _onchange_br_account_fiscal_position_id(self):

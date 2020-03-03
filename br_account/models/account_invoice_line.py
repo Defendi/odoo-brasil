@@ -496,7 +496,6 @@ class AccountInvoiceLine(models.Model):
     @api.multi
     def _compute_tax_id(self):
         for line in self:
-#             line.update(line._clear_tax_ids())
             line._update_tax_from_ncm()
             line._set_taxes_from_fiscal_pos()
             other_taxes = line.invoice_line_tax_ids.filtered(lambda x: not x.domain)
