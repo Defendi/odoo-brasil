@@ -12,6 +12,7 @@
                 <field name="user_id" />
                 <field name="journal_id" />
                 <field name="amount_total" />
+                <field name="company_id" invisible="1"/>
                 <field name="state" />
             </tree>
         </field>
@@ -25,6 +26,7 @@
         <field name="arch" type="xml" >
             <tree string='Ordens de Pagamento'>
               <field name="type" invisible="1" />
+              <field name="company_id" invisible="1"/>
               <field name="identifier"/>
               <field name="move_id" />
               <field name="payment_mode_id" />
