@@ -15,10 +15,11 @@ class ProductUom(models.Model):
     @api.depends('name', 'l10n_br_description')
     def _compute_display_name(self):
         for uom in self:
-            if not uom.l10n_br_description:
-                uom.display_name = uom.name
-            else:
-                uom.display_name = uom.l10n_br_description
+            uom.display_name = uom.name
+#             if not uom.l10n_br_description:
+#                 uom.display_name = uom.name
+#             else:
+#                 uom.display_name = uom.l10n_br_description
 
     def write(self, values):
         # Users can not update the factor if open stock moves are based on it
@@ -44,10 +45,10 @@ class ProductUom(models.Model):
 
     @api.multi
     def name_get(self):
-        res = []
-        for uom in self:
-            res.append((uom.id, uom.l10n_br_description))
-        return res
+        result = []
+        for rec in self:
+            result.append((rec.id, "%s - %s" % (rec.name, rec.l10n_br_description or '')))
+        return result
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
