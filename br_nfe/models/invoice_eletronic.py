@@ -253,9 +253,10 @@ class InvoiceEletronic(models.Model):
                     errors.append('{} - CFOP'.format(prod))
                 if eletr.tipo_produto == 'product':
                     if not bool(eletr.ncm):
-                        errors.append('{} - NCM'.format(prod))
+                        errors.append('{} - Sem o código NCM'.format(prod))
                     else:
-                        if len(eletr.ncm) != 8 or len(eletr.ncm) != 2:
+                        ncm = re.sub('[^0-9]', '', eletr.ncm or '00')
+                        if len(ncm) != 8 or len(ncm) != 2:
                             errors.append('{} - NCM {} - Código do NCM deve conter 2 ou 8 digitos'.format(prod,eletr.ncm or ''))
                     if not eletr.icms_cst:
                         errors.append('{} - CST do ICMS'.format(prod))
