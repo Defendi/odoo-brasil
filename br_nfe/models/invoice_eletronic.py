@@ -248,16 +248,16 @@ class InvoiceEletronic(models.Model):
             if not self.company_id.partner_id.inscr_est:
                 errors.append('Emitente / Inscrição Estadual')
             for eletr in self.eletronic_item_ids:
-                prod = "Produto: %s - %s" % (eletr.product_id.default_code,
-                                              eletr.product_id.name)
+                prod = "Produto: %s - %s" % (eletr.product_id.default_code or '',
+                                              eletr.product_id.name or '')
                 if not eletr.cfop:
                     errors.append('%s - CFOP' % prod)
                 if eletr.tipo_produto == 'product':
                     if not bool(eletr.ncm):
                         errors.append('%s - NCM' % prod)
                     else:
-                        if len(eletr.ncm) < 8:
-                            errors.append('%s - NCM % - Código do NCM inválido' % (prod,eletr.ncm.code))
+                        if len(eletr.ncm) != 8 or len(eletr.ncm) != 2:
+                            errors.append('%s - NCM % - Código do NCM deve conter 2 ou 8 digitos' % (prod,eletr.ncm or ''))
                     if not eletr.icms_cst:
                         errors.append('%s - CST do ICMS' % prod)
                     if not eletr.ipi_cst:
