@@ -256,7 +256,7 @@ class InvoiceEletronic(models.Model):
                         errors.append('{} - Sem o código NCM'.format(prod))
                     else:
                         ncm = re.sub('[^0-9]', '', eletr.ncm or '00')
-                        if len(ncm) != 8 or len(ncm) != 2:
+                        if len(ncm) != 8 and len(ncm) != 2:
                             errors.append('{} - NCM {} - Código do NCM deve conter 2 ou 8 digitos'.format(prod,eletr.ncm or ''))
                     if not eletr.icms_cst:
                         errors.append('{} - CST do ICMS'.format(prod))
