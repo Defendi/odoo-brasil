@@ -272,7 +272,7 @@ class SaleOrderLine(models.Model):
         icmsst = self.tax_id.filtered(lambda x: x.domain == 'icmsst')
         icms_inter = self.tax_id.filtered(lambda x: x.domain == 'icms_inter')
         icms_intra = self.tax_id.filtered(lambda x: x.domain == 'icms_intra')
-        icms_fcp = self.tax_id.filtered(lambda x: x.domain == 'icms_fcp')
+        icms_fcp = self.tax_id.filtered(lambda x: x.domain == 'fcp')
         ipi = self.tax_id.filtered(lambda x: x.domain == 'ipi')
         pis = self.tax_id.filtered(lambda x: x.domain == 'pis')
         cofins = self.tax_id.filtered(lambda x: x.domain == 'cofins')

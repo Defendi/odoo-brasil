@@ -276,10 +276,6 @@ class AccountInvoiceLine(models.Model):
     icms_st_aliquota_reducao_base = fields.Float('Red. Base ST %',digits=(12,4),default=0.00)
     icms_st_aliquota_mva = fields.Float('MVA Ajustado ST %',digits=(12,4), default=0.00)
     icms_st_base_calculo_manual = fields.Float('Base ICMS ST Manual', digits=(12,4),default=0.00)
-    icms_st_bc_ret_ant = fields.Monetary(string='BC Retido Fornecedor',help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).') 
-    icms_st_ali_sup_cons = fields.Float(string='Aliq.Sup. Consumidor', digits=(12,4),help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')                            
-    icms_st_substituto = fields.Monetary(string='Valor Substituto', help='Valor do ICMS Próprio do Substituto cobrado em operação anterior') 
-    icms_st_ret_ant = fields.Monetary(string='Valor Retido Fornecedor',help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).') 
 
     # =========================================================================
     # ICMS Difal
@@ -303,6 +299,27 @@ class AccountInvoiceLine(models.Model):
     icms_st_aliquota_deducao = fields.Float(string="% ICMS Próprio", digits=(12,4), help="Alíquota interna ou interestadual aplicada \
                                                                                           sobre o valor da operação para deduzir do ICMS ST - Para empresas \
                                                                                           do Simples Nacional ou usado em casos onde existe apenas ST sem ICMS")
+
+    # =========================================================================
+    # ICMS Retido anteriormente por ST
+    # =========================================================================
+#     icms_st_substituto = fields.Monetary(string='Valor Substituto', help='Valor do ICMS Próprio do Substituto cobrado em operação anterior') 
+#     icms_st_ret_ant = fields.Monetary(string='Valor Retido Fornecedor',help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).') 
+#     icms_st_bc_ret_ant = fields.Monetary(string='BC Retido Fornecedor',help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).') 
+#     icms_st_ali_sup_cons = fields.Float(string='Aliq.Sup. Consumidor', digits=(12,4),help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')                            
+# icms_substituto = 'icms_st_substituto' 
+# icms_bc_st_retido = 'icms_st_bc_ret_ant'
+# icms_aliquota_st_retido = 'icms_st_ali_sup_cons'
+# icms_st_retido = 'icms_st_ret_ant' 
+
+    icms_substituto = fields.Monetary("ICMS Substituto", digits=dp.get_precision('Account'), oldname='icms_st_substituto', 
+                                      help='Valor do ICMS Próprio do Substituto cobrado em operação anterior')
+    icms_bc_st_retido = fields.Monetary("Base Calc. ST Ret.", digits=dp.get_precision('Account'), oldname='icms_st_bc_ret_ant',
+                                        help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).')
+    icms_aliquota_st_retido = fields.Float("% ST Retido", digits=dp.get_precision('Account'), oldname='icms_st_ali_sup_cons',
+                                           help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')
+    icms_st_retido = fields.Monetary("ICMS ST Ret.", digits=dp.get_precision('Account'), oldname='icms_st_ret_ant', 
+                                     help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).')
 
     # =========================================================================
     # ISSQN
@@ -429,10 +446,14 @@ class AccountInvoiceLine(models.Model):
             'icms_st_aliquota_reducao_base': 0.0,
             'icms_st_aliquota_mva': 0.0,
             'icms_st_base_calculo_manual': 0.0,
-            'icms_st_bc_ret_ant': 0.0, 
-            'icms_st_ali_sup_cons': 0.0, 
-            'icms_st_substituto': 0.0,
-            'icms_st_ret_ant': 0.0,
+#             'icms_st_bc_ret_ant': 0.0, 
+#             'icms_st_ali_sup_cons': 0.0, 
+#             'icms_st_substituto': 0.0,
+#             'icms_st_ret_ant': 0.0,
+            "icms_substituto": 0.0,
+            "icms_bc_st_retido": 0.0,
+            "icms_aliquota_st_retido": 0.0,
+            "icms_st_retido": 0.0,
             'tem_difal': False,
             'tax_icms_inter_id': False,
             'tax_icms_intra_id': False,

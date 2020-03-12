@@ -721,12 +721,12 @@ class InvoiceEletronicItem(models.Model):
     icms_st_base_calculo = fields.Float(string='Base de cálculo', digits=dp.get_precision('Account'),readonly=True, states=STATE)
     icms_st_aliquota_reducao_base = fields.Float(string='% Redução Base', digits=(12,4),readonly=True, states=STATE)
     icms_st_valor = fields.Float(string='Valor Total', digits=dp.get_precision('Account'),readonly=True, states=STATE)
-    icms_st_bc_ret_ant = fields.Float(string='BC Retido Fornecedor', digits=dp.get_precision('Account'),readonly=True, states=STATE,help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).') 
-    icms_st_ali_sup_cons = fields.Float(string='Aliq.Sup. Consumidor', digits=(12,4),readonly=True, states=STATE,help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')                            
-    icms_st_substituto = fields.Float(string='Valor Substituto', readonly=True, states=STATE, digits=dp.get_precision('Account'), help='Valor do ICMS Próprio do Substituto cobrado em operação anterior') 
-    icms_st_ret_ant = fields.Float(string='Valor Retido Fornecedor', readonly=True, states=STATE, digits=dp.get_precision('Account'),help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).') 
-    icms_st_bc_dest = fields.Float(string='BC na UF Destino', digits=dp.get_precision('Account'),readonly=True, states=STATE,help='Informar o valor da BC do ICMS ST da UF destino (v2.0)') 
-    icms_st_dest = fields.Float(string='Valor da UF Destino ', readonly=True, states=STATE, help='Informar o valor do ICMS ST da UF destino (v2.0)') 
+
+    icms_substituto = fields.Monetary("ICMS Substituto", digits=dp.get_precision('Account'), oldname='icms_st_substituto', help='Valor do ICMS Próprio do Substituto cobrado em operação anterior')
+    icms_bc_st_retido = fields.Monetary("Base Calc. ST Ret.", digits=dp.get_precision('Account'), oldname='icms_st_bc_ret_ant', help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).')
+    icms_aliquota_st_retido = fields.Float("% ST Retido", digits=dp.get_precision('Account'), oldname='icms_st_ali_sup_cons', help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')
+    icms_st_retido = fields.Monetary("ICMS ST Ret.", digits=dp.get_precision('Account'), oldname='icms_st_ret_ant', help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).')
+
     icms_aliquota_diferimento = fields.Float(string='% Diferimento', digits=(12,4),readonly=True, states=STATE)
     icms_valor_diferido = fields.Float(string='Valor Diferido', digits=dp.get_precision('Account'),readonly=True, states=STATE)
     icms_valor_diferido_dif = fields.Float(string='Diferença Diferimento', digits=dp.get_precision('Account'),readonly=True, states=STATE)

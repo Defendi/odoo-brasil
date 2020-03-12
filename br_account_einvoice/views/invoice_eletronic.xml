@@ -70,12 +70,12 @@
                                     <field name="icms_st_aliquota_reducao_base"/>
                                     <field name="icms_st_aliquota" />
                                     <field name="icms_st_valor"/>
-                                    <field name="icms_st_bc_ret_ant"/>
-                                    <field name="icms_st_ali_sup_cons"/>
-                                    <field name="icms_st_substituto"/>
-                                    <field name="icms_st_ret_ant"/>
-                                    <field name="icms_st_bc_dest"/>
-                                    <field name="icms_st_dest"/>
+                                </group>
+                                <group>
+                                    <field name="icms_substituto" />
+                                    <field name="icms_bc_st_retido" />
+                                    <field name="icms_aliquota_st_retido" />
+                                    <field name="icms_st_retido" />
                                 </group>
                             </group>
                         </page>
@@ -274,12 +274,10 @@
 		                                    <field name="icms_st_aliquota_reducao_base" invisible="1"/>
 		                                    <field name="icms_st_aliquota"  invisible="1"/>
 		                                    <field name="icms_st_valor" invisible="1"/>
-		                                    <field name="icms_st_bc_ret_ant" invisible="1"/>
-		                                    <field name="icms_st_ali_sup_cons" invisible="1"/>
-		                                    <field name="icms_st_substituto" invisible="1"/>
-		                                    <field name="icms_st_ret_ant" invisible="1"/>
-		                                    <field name="icms_st_bc_dest" invisible="1"/>
-		                                    <field name="icms_st_dest" invisible="1"/>
+		                                    <field name="icms_bc_st_retido" invisible="1"/>
+		                                    <field name="icms_aliquota_st_retido" invisible="1"/>
+		                                    <field name="icms_substituto" invisible="1"/>
+		                                    <field name="icms_st_retido" invisible="1"/>
 		                                	<field name="issqn_base_calculo" invisible="1"/>
 		                                	<field name="issqn_aliquota" invisible="1"/>
 		                                	<field name="issqn_codigo"  invisible="1"/>

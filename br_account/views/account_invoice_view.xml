@@ -75,10 +75,10 @@
                 <field name="icms_st_aliquota_reducao_base" invisible="1" />
                 <field name="icms_st_aliquota_mva" invisible="1" />
                 <field name="icms_st_base_calculo_manual" invisible="1" />
-                <field name="icms_st_bc_ret_ant" invisible="1" />
-                <field name="icms_st_ali_sup_cons" invisible="1" />
-                <field name="icms_st_substituto" invisible="1" />
-                <field name="icms_st_ret_ant" invisible="1" />
+                <field name="icms_substituto" invisible="1" />
+                <field name="icms_bc_st_retido" invisible="1" />
+                <field name="icms_aliquota_st_retido" invisible="1" />
+                <field name="icms_st_retido" invisible="1" />
                 <field name="tem_difal" invisible="1" />
                 <field name="icms_bc_uf_dest" invisible="1" />
                 <field name="tax_icms_inter_id" invisible="1" />
@@ -327,10 +327,10 @@
                 <field name="icms_st_aliquota_reducao_base" invisible="1" />
                 <field name="icms_st_aliquota_mva" invisible="1" />
                 <field name="icms_st_base_calculo_manual" invisible="1" />
-                <field name="icms_st_bc_ret_ant" invisible="1" />
-                <field name="icms_st_ali_sup_cons" invisible="1" />
-                <field name="icms_st_substituto" invisible="1" />
-                <field name="icms_st_ret_ant" invisible="1" />
+                <field name="icms_substituto" invisible="1" />
+                <field name="icms_bc_st_retido" invisible="1" />
+                <field name="icms_aliquota_st_retido" invisible="1" />
+                <field name="icms_st_retido" invisible="1" />
                 <field name="tem_difal" invisible="1" />
                 <field name="icms_bc_uf_dest" invisible="1" />
                 <field name="tax_icms_inter_id" invisible="1" />
@@ -614,10 +614,12 @@
                                     <field name="icms_st_aliquota" groups="base.group_no_one" readonly="1"/>
                                     <field name="icms_st_aliquota_deducao" />
                                     <field name="icms_st_valor"/>
-                                    <field name="icms_st_bc_ret_ant" attrs="{'invisible': [('icms_cst_normal', '!=', '60'),('icms_csosn_simples', '!=', '500')] }"/>
-                                    <field name="icms_st_ali_sup_cons" attrs="{'invisible': [('icms_cst_normal', '!=', '60'),('icms_csosn_simples', '!=', '500')] }"/>
-                                    <field name="icms_st_substituto" attrs="{'invisible': [('icms_cst_normal', '!=', '60'),('icms_csosn_simples', '!=', '500')] }"/>
-                                    <field name="icms_st_ret_ant" attrs="{'invisible': [('icms_cst_normal', '!=', '60'),('icms_csosn_simples', '!=', '500')] }"/>
+                                </group>
+                                <group name="icms_st_retido" attrs="{'invisible': [('tem_difal', '!=', False)]}">
+                                    <field name="icms_substituto" />
+                                    <field name="icms_bc_st_retido" />
+                                    <field name="icms_aliquota_st_retido" />
+                                    <field name="icms_st_retido" />
                                 </group>
                                 <group name="icms_interestaual" attrs="{'invisible': [('tem_difal', '==', False)] }">
                                     <field name="icms_bc_uf_dest" />
