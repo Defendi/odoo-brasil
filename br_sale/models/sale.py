@@ -225,12 +225,13 @@ class SaleOrderLine(models.Model):
     def _compute_tax_id(self):
         res = super(SaleOrderLine, self)._compute_tax_id()
         for line in self:
+            analytic_id = line.order_id.analytic_account_id
             line._update_tax_from_ncm()
             fpos = line.order_id.fiscal_position_id or \
                 line.order_id.partner_id.property_account_position_id
             if fpos:
                 vals = fpos.map_tax_extra_values(
-                    line.company_id, line.product_id, line.order_id.partner_id)
+                    line.company_id, line.product_id, line.order_id.partner_id,analytic_id)
 
                 for key, value in vals.items():
                     if value and key in line._fields:
@@ -271,7 +272,7 @@ class SaleOrderLine(models.Model):
         icmsst = self.tax_id.filtered(lambda x: x.domain == 'icmsst')
         icms_inter = self.tax_id.filtered(lambda x: x.domain == 'icms_inter')
         icms_intra = self.tax_id.filtered(lambda x: x.domain == 'icms_intra')
-        icms_fcp = self.tax_id.filtered(lambda x: x.domain == 'icms_fcp')
+        icms_fcp = self.tax_id.filtered(lambda x: x.domain == 'fcp')
         ipi = self.tax_id.filtered(lambda x: x.domain == 'ipi')
         pis = self.tax_id.filtered(lambda x: x.domain == 'pis')
         cofins = self.tax_id.filtered(lambda x: x.domain == 'cofins')

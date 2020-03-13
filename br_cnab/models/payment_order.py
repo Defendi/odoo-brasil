@@ -39,7 +39,7 @@ class PaymentOrder(models.Model):
                 'datas_fname': self.name,
                 'description': 'Arquivo CNAB 240',
                 'res_model': 'payment.order',
-                'res_id': order_id
+                'res_id': order_id.id,
             })
 
 

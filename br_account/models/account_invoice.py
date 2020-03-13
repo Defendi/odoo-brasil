@@ -366,7 +366,9 @@ class AccountInvoice(models.Model):
 
     def button_recalculate(self):
         for inv in self:
+            inv.tax_line_ids = [(5, 0, 0)]
             inv._onchange_br_account_fiscal_position_id()
+            inv.compute_taxes()
 
     @api.onchange('fiscal_position_id')
     def _onchange_br_account_fiscal_position_id(self):
@@ -386,9 +388,10 @@ class AccountInvoice(models.Model):
         ob_ids = [x.id for x in self.fiscal_position_id.fiscal_observation_ids]
         self.fiscal_observation_ids = [(6, False, ob_ids)]
         #TODO: Fazer a alteração fiscal
-        self.invoice_line_ids.write(self.env['account.invoice.line']._clear_tax_id())
-        self.invoice_line_ids._br_account_onchange_product_id()
-        self.invoice_line_ids._compute_tax_id()
+        for line in self.invoice_line_ids:
+            line.update(self.env['account.invoice.line']._clear_tax_id())
+            line._br_account_onchange_product_id()
+            line._compute_tax_id()
 
     @api.multi
     def action_invoice_cancel_paid(self):
@@ -464,11 +467,13 @@ class AccountInvoice(models.Model):
         for line in self.invoice_line_ids:
             other_taxes = line.invoice_line_tax_ids.filtered(
                 lambda x: not x.domain)
-            line.invoice_line_tax_ids = other_taxes | line.tax_icms_id | \
-                line.tax_ipi_id | line.tax_pis_id | line.tax_cofins_id | \
-                line.tax_issqn_id | line.tax_ii_id | line.tax_icms_st_id | \
-                line.tax_csll_id | line.tax_irrf_id | \
-                line.tax_inss_id | line.tax_outros_id
+
+            line.invoice_line_tax_ids = line.tax_icms_id | line.tax_icms_st_id | \
+                line.tax_icms_inter_id | line.tax_icms_intra_id | \
+                line.tax_icms_fcp_id | line.tax_ipi_id | \
+                line.tax_pis_id | line.tax_cofins_id | line.tax_issqn_id | \
+                line.tax_ii_id | line.tax_csll_id | line.tax_irrf_id | \
+                line.tax_inss_id | other_taxes | line.tax_outros_id
 
             ctx = line._prepare_tax_context()
             tax_ids = line.invoice_line_tax_ids.with_context(**ctx)

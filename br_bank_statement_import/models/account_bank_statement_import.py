@@ -5,7 +5,7 @@ import io
 import uuid
 import logging
 
-from odoo import fields, models, _
+from odoo import fields, models, api, _
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -33,9 +33,28 @@ class AccountBankStatementImport(models.TransientModel):
     journal_id = fields.Many2one('account.journal', string=u"Conta Bancária",
                                  domain=[('type', '=', 'bank')])
 
+    @api.multi
+    def import_file(self):
+        res = super(AccountBankStatementImport,self).import_file()
+        self.env['ir.attachment'].create(
+            {
+                'name': self.filename,
+                'datas': self.data_file,
+                'datas_fname': self.filename,
+                'description': 'Arquivo OFX importado',
+                'res_model': 'account.bank.statement',
+                'res_id': res['context']['statement_ids'][0]
+            })
+        return res
+
     def _parse_file(self, data_file):
-        if self._check_ofx(data_file):
-            return self._parse_ofx(data_file)
+        x = data_file.find(b'OFXHEADER')
+        if x >= 0:
+            # Verifica se tem caracteres antes da OFXHEADER
+            if x > 0:
+                data_file = data_file[x:]
+            if self._check_ofx(data_file):
+                return self._parse_ofx(data_file)
         return super(AccountBankStatementImport, self)._parse_file(
             data_file)
 

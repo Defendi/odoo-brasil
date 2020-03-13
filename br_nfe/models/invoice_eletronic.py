@@ -248,27 +248,27 @@ class InvoiceEletronic(models.Model):
             if not self.company_id.partner_id.inscr_est:
                 errors.append('Emitente / Inscrição Estadual')
             for eletr in self.eletronic_item_ids:
-                prod = "Produto: %s - %s" % (eletr.product_id.default_code,
-                                              eletr.product_id.name)
+                prod = "Produto: {} - {}".format(eletr.product_id.default_code or '',eletr.product_id.name or '')
                 if not eletr.cfop:
-                    errors.append('%s - CFOP' % prod)
+                    errors.append('{} - CFOP'.format(prod))
                 if eletr.tipo_produto == 'product':
                     if not bool(eletr.ncm):
-                        errors.append('%s - NCM' % prod)
+                        errors.append('{} - Sem o código NCM'.format(prod))
                     else:
-                        if len(eletr.ncm) < 8:
-                            errors.append('%s - NCM % - Código do NCM inválido' % (prod,eletr.ncm.code))
+                        ncm = re.sub('[^0-9]', '', eletr.ncm or '00')
+                        if len(ncm) != 8 and len(ncm) != 2:
+                            errors.append('{} - NCM {} - Código do NCM deve conter 2 ou 8 digitos'.format(prod,eletr.ncm or ''))
                     if not eletr.icms_cst:
-                        errors.append('%s - CST do ICMS' % prod)
+                        errors.append('{} - CST do ICMS'.format(prod))
                     if not eletr.ipi_cst:
-                        errors.append('%s - CST do IPI' % prod)
+                        errors.append('{} - CST do IPI'.format(prod))
                 if eletr.tipo_produto == 'service':
                     if not eletr.issqn_codigo:
-                        errors.append('%s - Código de Serviço' % prod)
+                        errors.append('{} - Código de Serviço'.format(prod))
                 if not eletr.pis_cst:
-                    errors.append('%s - CST do PIS' % prod)
+                    errors.append('{} - CST do PIS'.format(prod))
                 if not eletr.cofins_cst:
-                    errors.append('%s - CST do Cofins' % prod)
+                    errors.append('{} - CST do Cofins'.format(prod))
         # NF-e
         if self.model == '55':
             if not self.fiscal_position_id:
@@ -436,10 +436,10 @@ class InvoiceEletronic(models.Model):
                     'vICMSST': "%.02f" % item.icms_st_valor,
                     'pCredSN': "%.04f" % item.icms_aliquota_credito,
                     'vCredICMSSN': "%.02f" % item.icms_valor_credito,
-                    'vBCSTRet': "%.02f" % item.icms_st_bc_ret_ant,
-                    'pST': "%.02f" % item.icms_st_ali_sup_cons,                            
-                    'vICMSSubstituto': "%.02f" % item.icms_st_substituto,
-                    'vICMSSTRet': "%.02f" % item.icms_st_ret_ant, 
+                    'vICMSSubstituto': "%.02f" % item.icms_substituto,
+                    'vBCSTRet': "%.02f" % item.icms_bc_st_retido,
+                    'pST': "%.04f" % item.icms_aliquota_st_retido,
+                    'vICMSSTRet': "%.02f" % item.icms_st_retido,
                 },
                 'IPI': {
                     'clEnq': item.classe_enquadramento_ipi or '',

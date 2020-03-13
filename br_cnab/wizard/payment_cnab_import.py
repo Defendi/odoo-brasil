@@ -99,6 +99,8 @@ class L10nBrPaymentCnabImport(models.TransientModel):
                         'type': 'receivable',
                     })
 
+                    
+
                 code, message = parse_cnab_code(
                     self.journal_id.bank_id.bic,
                     evento.servico_codigo_movimento)
@@ -116,14 +118,15 @@ class L10nBrPaymentCnabImport(models.TransientModel):
                 if self.force_journal:
                     cnab_acc_number, cnab_bra_number = self._get_account(cnab_file)
                     bank_account_id = self.env['res.partner.bank'].search([('acc_number','=',str(cnab_acc_number)),('bra_number','=',str(cnab_bra_number))])
-                    #journal_id = self.env['account.journal'].search([('bank_account_id','=',bank_account_id.id)],limit=1)
-                    payment_line = self.env['payment.order.line'].search([
-                        ('nosso_numero', '=', int(nosso_numero)),
-                        ('src_bank_account_id', '=', False)])
-                    if len(payment_line) != 1:
-                        payment_line = self.env['payment.order.line'].search([
-                            ('nosso_numero', '=', int(nosso_numero)),
-                            ('src_bank_account_id', '=', bank_account_id.id)])
+#                     #journal_id = self.env['account.journal'].search([('bank_account_id','=',bank_account_id.id)],limit=1)
+#                     payment_line = self.env['payment.order.line'].search([
+#                         ('nosso_numero', '=', int(nosso_numero)),
+#                         ('src_bank_account_id', '=', False)])
+#                     if len(payment_line) != 1:
+#                         payment_line = self.env['payment.order.line'].search([
+#                             ('nosso_numero', '=', int(nosso_numero)),
+#                             ('src_bank_account_id', '=', bank_account_id.id)])
+                    payment_line = self.env['payment.order.line'].search([('nosso_numero', '=', int(nosso_numero))],limit=1)
                     if len(payment_line) > 0:
                         payment_line.journal_id = self.journal_id
                 else:
@@ -155,6 +158,7 @@ class L10nBrPaymentCnabImport(models.TransientModel):
                     'data_ocorrencia': effective_date,
                     'cnab_code': code,
                     'cnab_message': message,
+                    'paymentorderline_id': payment_line.id,
                 }
 
                 IMMUTABLE_STATES = ('paid', 'rejected', 'cancelled')
@@ -164,6 +168,7 @@ class L10nBrPaymentCnabImport(models.TransientModel):
                     continue
 
                 if not payment_line:
+                    vals['cnab_message'] = 'Ordem de pagamento Não Localizada'
                     self._create_ignored_line(statement, vals)
                     continue
 
@@ -172,6 +177,9 @@ class L10nBrPaymentCnabImport(models.TransientModel):
 
         if not statement:
             raise UserError(_('Nenhum registro localizado nesse extrato!'))
-        action = self.env.ref(
-            'br_account_payment.action_payment_statement_tree')
+    
+        statement._create_attachment(cnab_file)
+    
+        action = self.env.ref('br_account_payment.action_payment_statement_tree')
+        
         return action.read()[0]
