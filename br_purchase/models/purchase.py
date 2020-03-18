@@ -84,12 +84,24 @@ class PurchaseOrder(models.Model):
     @api.onchange('account_analytic_id')
     def _onchange_account_analytic_id(self):
         for order in self:
+            tagsin = []
             if order.account_analytic_id:
-                tagsin = []
                 for tag in order.account_analytic_id.tag_ids:
                     tagsin.append(tag.id)
-                if tagsin:
-                    order.analytic_tag_ids = [(6,0,tagsin)]
+            order.analytic_tag_ids = [(6,0,tagsin)]
+            for line in order.order_line:
+                line.account_analytic_id = order.account_analytic_id
+                line.analytic_tag_ids = [(6,0,tagsin)]
+
+    @api.onchange('analytic_tag_ids')
+    def _onchange_analytic_tag_ids(self):
+        for order in self:
+            tagsin = []
+            for tag in order.analytic_tag_ids:
+                tagsin.append(tag.id)
+            for line in order.order_line: 
+                line.analytic_tag_ids = [(6,0,tagsin)]
+
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'

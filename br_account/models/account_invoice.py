@@ -310,7 +310,7 @@ class AccountInvoice(models.Model):
         digits=dp.get_precision('Account'),
         compute='_compute_amount')
     
-    account_analitic_id = fields.Many2one('account.analytic.account', 'Centro Custo', 
+    account_analytic_id = fields.Many2one('account.analytic.account', 'Centro Custo', old_name='account_analitic_id',
                                           copy=True, readonly=True, states={'draft': [('readonly', False)]})
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', 
                                         copy=True, readonly=True, states={'draft': [('readonly', False)]})
@@ -330,10 +330,21 @@ class AccountInvoice(models.Model):
                         raise UserError('Não é possível ter mais que uma fatura com o mesmo número de um único fornecedor.')
         return True
 
-    @api.onchange('account_analitic_id')
-    def _onchange_account_analitic_id(self):
-        if self.account_analitic_id:
-            self.analytic_tag_ids = [(6,0,self.account_analitic_id.tag_ids.ids)]
+    @api.onchange('account_analytic_id')
+    def _onchange_account_analytic_id(self):
+        for inv in self:
+            tagsin = [(6,0,self.account_analytic_id.tag_ids.ids)]
+            inv.analytic_tag_ids = tagsin
+            for line in inv.invoice_line_ids:
+                line.account_analytic_id = inv.account_analytic_id
+                line.analytic_tag_ids = tagsin
+
+    @api.onchange('analytic_tag_ids')
+    def _onchange_analytic_tag_ids(self):
+        for inv in self:
+            tagsin = [(6,0,self.account_analytic_id.tag_ids.ids)]
+            for line in inv.invoice_line_ids: 
+                line.analytic_tag_ids = tagsin
 
     @api.onchange('type')
     def _onchange_type(self):
@@ -453,7 +464,7 @@ class AccountInvoice(models.Model):
                 line['name'] = "%02d" % count
                 count += 1
             if not line.get('analytic_account_id',False):
-                line['analytic_account_id'] = self.account_analitic_id.id
+                line['analytic_account_id'] = self.account_analytic_id.id
             if not line.get('analytic_tag_ids',False) or len(line['analytic_tag_ids']) == 0:
                 tagsin = []
                 for tag in self.analytic_tag_ids:

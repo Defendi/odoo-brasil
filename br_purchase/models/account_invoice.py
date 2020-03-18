@@ -56,7 +56,6 @@ class AccountInvoice(models.Model):
         res['fiscal_classification_id'] = ncm.id
         res['service_type_id'] = service.id
         res['icms_origem'] = line.product_id.origin
-
         valor = 0
         if line.product_id.fiscal_type == 'service':
             valor = line.product_id.lst_price * (
@@ -109,35 +108,45 @@ class AccountInvoice(models.Model):
         res['inss_aliquota'] = inss.amount or 0.0
         res['irrf_aliquota'] = irrf.amount or 0.0
         
-        tagsin = []
-        for tag in line.analytic_tag_ids:
-            tagsin.append(tag.id)
-        res['analytic_tag_ids'] = [(6,0,tagsin)]
-        
         return res
 
     # Load all unsold PO lines
+
     @api.onchange('purchase_id')
     def purchase_order_change(self):
         if not self.purchase_id:
             return {}
         if not self.partner_id:
             self.partner_id = self.purchase_id.partner_id.id
+        self.account_analytic_id = self.purchase_id.account_analytic_id
+        self.analytic_tag_ids = self.purchase_id.analytic_tag_ids
         self.freight_responsibility = self.purchase_id.tipo_frete
         self.shipping_supplier_id = self.purchase_id.transportadora_id
         self.weight_net = self.purchase_id.peso_liquido
         self.kind_of_packages = self.purchase_id.vol_especie
         self.number_of_packages = self.purchase_id.volumes_total
-        self.account_analitic_id = self.purchase_id.account_analytic_id.id
-        tagsin = []
-        for tag in self.purchase_id.analytic_tag_ids:
-            tagsin.append(tag.id)
-        self.analytic_tag_ids = [(6,0,tagsin)]
         
         # Deve sempre ser o último
         res = super(AccountInvoice, self).purchase_order_change()
         return res
 
+    @api.onchange('account_analytic_id')
+    def _onchange_account_analytic_id(self):
+        for inv in self:
+            if not self.env.context.get('from_purchase_order_change',False):
+                tagsin = [(6,0,self.account_analytic_id.tag_ids.ids)]
+                inv.analytic_tag_ids = tagsin
+                for line in inv.invoice_line_ids:
+                    line.account_analytic_id = inv.account_analytic_id
+                    line.analytic_tag_ids = tagsin
+
+    @api.onchange('analytic_tag_ids')
+    def _onchange_analytic_tag_ids(self):
+        for inv in self:
+            if not self.env.context.get('from_purchase_order_change',False):
+                tagsin = [(6,0,self.account_analytic_id.tag_ids.ids)]
+                for line in inv.invoice_line_ids: 
+                    line.analytic_tag_ids = tagsin
 
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
@@ -153,3 +162,16 @@ class AccountInvoiceLine(models.Model):
             'fiscal_type': self.fiscal_position_type,
         })
         return res
+
+    @api.onchange('product_id')
+    def _br_account_onchange_product_id(self):
+        self.product_type = self.product_id.fiscal_type
+        self.icms_origem = self.product_id.origin
+        ncm = self.product_id.fiscal_classification_id
+        service = self.product_id.service_type_id
+        self.fiscal_classification_id = ncm.id
+        self.service_type_id = service.id
+        self._set_extimated_taxes(self.product_id.lst_price)
+        if self.product_id and not self.env.context.get('from_purchase_order_change',False):
+            self.account_analytic_id = self.invoice_id.account_analytic_id
+            self.analytic_tag_ids = self.invoice_id.analytic_tag_ids

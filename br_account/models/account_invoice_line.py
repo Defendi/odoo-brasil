@@ -603,10 +603,9 @@ class AccountInvoiceLine(models.Model):
         self.fiscal_classification_id = ncm.id
         self.service_type_id = service.id
         self._set_extimated_taxes(self.product_id.lst_price)
-        self.account_analytic_id = self.invoice_id.account_analitic_id
-        if len(self.invoice_id.analytic_tag_ids) > 0:
-            idsx = [(6,0,self.invoice_id.analytic_tag_ids.ids)]
-            self.analytic_tag_ids = idsx
+        if self.product_id:
+            self.account_analytic_id = self.invoice_id.account_analytic_id
+            self.analytic_tag_ids = self.invoice_id.analytic_tag_ids
 
     def _update_invoice_line_ids(self):
         other_taxes = self.invoice_line_tax_ids.filtered(
@@ -696,6 +695,7 @@ class AccountInvoiceLine(models.Model):
         if self.tax_outros_id:
             self.outros_aliquota = self.tax_outros_id.amount
         self._update_invoice_line_ids()
+    
 
     def _mount_tax_ids(self):
         res = []
