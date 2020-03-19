@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="br_account_ii_product_invoice_form" model="ir.ui.view">
+        <field name="name">br.account.ii.product.invoice.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="br_account.view_br_account_invoice_form"/>
+        <field name="arch" type="xml">
+			<field name="total_despesas_aduana" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </field>
+        </field>
+    </record>
+
+    <record id="br_account_ii_invoice_supplier_form" model="ir.ui.view">
+        <field name="name">br.account.ii.invoice.supplier.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="br_account.view_br_account_invoice_supplier_form" />
+        <field name="arch" type="xml">
+			<field name="total_despesas_aduana" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </field>
+        </field>
+    </record> 
+ 
+    <record model="ir.ui.view" id="view_br_account_ii_invoice_line_form">
+        <field name="name">br_account.ii.invoice.line.form</field>
+        <field name="model">account.invoice.line</field>
+        <field name="inherit_id" ref="br_account.view_br_account_invoice_line_form" />
+        <field name="priority">36</field>
+        <field name="arch" type="xml">
+        	<page name="ii"  position="attributes">
+                <attribute name="invisible">0</attribute>
+                <attribute name="attrs">{'invisible': [('product_type','=', 'service')]}</attribute>
+            </page>
+        </field>
+    </record>
+
+</odoo>

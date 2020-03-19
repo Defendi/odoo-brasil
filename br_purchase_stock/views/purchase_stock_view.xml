@@ -16,7 +16,6 @@
                 <field name="total_despesas" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                 <field name="total_seguro" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                 <field name="total_frete" widget='monetary' options="{'currency_field': 'currency_id'}" />
-                <field name="total_despesas_aduana" widget='monetary' options="{'currency_field': 'currency_id'}"/>
             </field>
         </field>
     </record>

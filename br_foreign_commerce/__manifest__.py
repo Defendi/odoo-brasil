@@ -18,6 +18,8 @@
     },
     'data': [
         'views/import_declaration_view.xml',
+        'views/account_fiscal_position_view.xml',
+        'views/account_invoice_view.xml',
     ],
     'qweb': [],
     'installable': True,
