@@ -65,11 +65,11 @@ class ResPartner(models.Model):
             elif len(partner.parent_id) > 0:
                 name = partner.parent_id.legal_name if bool(partner.parent_id.legal_name) else partner.parent_id.name
                 if bool(name):
-                    name = '['+name+'] ' + partner.name
+                    name = '['+(name or '')+'] ' + (partner.name or '')
                 else:
-                    name = partner.name
+                    name = partner.name or ''
             elif partner.company_type == 'company' and bool(partner.legal_name):
-                name = '['+partner.name+'] '+partner.legal_name
+                name = '['+(partner.name or '')+'] '+(partner.legal_name or '')
 
             if partner.company_name or partner.parent_id:
                 if not name and partner.type in ['invoice', 'delivery', 'other']:
