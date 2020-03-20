@@ -1208,14 +1208,16 @@ class InvoiceEletronic(models.Model):
         })
         self._create_attachment('canc', self, resp['sent_xml'])
         self._create_attachment('canc-ret', self, resp['received_xml'])
-        nfe_processada = base64.decodestring(self.nfe_processada)
-
-        nfe_proc_cancel = gerar_nfeproc_cancel(
-            nfe_processada, resp['received_xml'].encode())
+        if self.nfe_processada:
+            nfe_processada = base64.decodestring(self.nfe_processada)
+        elif self.xml_to_send:
+            nfe_processada = base64.decodestring(self.xml_to_send)
+        else:
+            nfe_processada = ''
+        nfe_proc_cancel = gerar_nfeproc_cancel(nfe_processada, resp['received_xml'].encode())
         if nfe_proc_cancel:
             self.nfe_processada = base64.encodestring(nfe_proc_cancel)
-        _logger.info('Cancelling NF-e (%s) was finished with status %s' % (
-            self.numero, self.codigo_retorno))
+        _logger.info('Cancelling NF-e (%s) was finished with status %s' % (self.numero, self.codigo_retorno))
 
     def action_get_status(self):
         cert = self.company_id.with_context({'bin_size': False}).nfe_a1_file
@@ -1231,13 +1233,18 @@ class InvoiceEletronic(models.Model):
             }
         }
         resp = consultar_protocolo_nfe(certificado, **consulta)
+        self._create_attachment('consul', self, resp['sent_xml'])
+        self._create_attachment('resp_consul', self, resp['received_xml'])
         retorno_consulta = resp['object'].getchildren()[0]
-        if retorno_consulta.cStat == 101:
+        if retorno_consulta.cStat == 100:
+            self.state = 'done'
+            self.codigo_retorno = retorno_consulta.cStat
+            self.mensagem_retorno = retorno_consulta.xMotivo
+        elif retorno_consulta.cStat == 101:
             self.state = 'cancel'
             self.codigo_retorno = retorno_consulta.cStat
             self.mensagem_retorno = retorno_consulta.xMotivo
-            resp['received_xml'] = etree.tostring(
-                retorno_consulta, encoding=str)
+            resp['received_xml'] = etree.tostring(retorno_consulta, encoding=str)
 
             self.env['invoice.eletronic.event'].create({
                 'code': self.codigo_retorno,

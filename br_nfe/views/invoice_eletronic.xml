@@ -17,6 +17,7 @@
                 <button name="generate_correction_letter" type="object" class="oe_highlight" icon="fa-envelope"
                     string="Carta de Correção" attrs="{'invisible': ['|', ('state', '!=', 'done'), ('model', 'not in', ('55', '65'))]}">
                 </button>
+                <button name="action_get_status" attrs="{'invisible': [('state','!=','error')]}" string="Consultar" type="object" groups="br_account_einvoice.group_edit_edoc"/>
             </button>
             <field name="payment_term_id" position="after">
                 <field name="payment_mode_id" />
