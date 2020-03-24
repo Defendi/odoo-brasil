@@ -112,6 +112,7 @@
             </field>
             <field name="numero_controle" position="after">
                 <field name="recibo_nfe"  attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
+                <field name="chave_nfe"  attrs="{'invisible': ['|',('state', '!=', 'edit'),('model', 'not in', ('55', '65'))]}" />
                 <field name="qrcode_hash" attrs="{'invisible': [('model', 'not in', ('65'))]}" />
                 <field name="qrcode_url" attrs="{'invisible': [('model', 'not in', ('65'))]}" />
                 <field name="nfe_processada_name" invisible="1"/>
