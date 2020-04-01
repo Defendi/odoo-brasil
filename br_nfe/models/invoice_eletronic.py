@@ -693,10 +693,14 @@ class InvoiceEletronic(models.Model):
                 if self.valor_retencao_inss else '',
             }
         if self.transportadora_id.street:
-            end_transp = "%s - %s, %s" % (self.transportadora_id.street,
+            end_transp = "%s, %s - %s" % (self.transportadora_id.street,
                                           self.transportadora_id.number or '',
-                                          self.
-                                          transportadora_id.district or '')
+                                          self.transportadora_id.district or '')
+            if len(end_transp) > 60:
+                end_transp = "%s, %s" % (self.transportadora_id.street,
+                                          self.transportadora_id.number or '')
+            if len(end_transp) > 60:
+                end_transp = end_transp[:60]
         else:
             end_transp = ''
         transp = {
