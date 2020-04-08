@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="br_document_serie_rps_41" model="br_account.document.serie">
+        <field name="code">041</field>
+        <field name="name">RPS - Nota Curitibana</field>
+        <field name="fiscal_document_id" ref="br_nfse_curitibana.fiscal_document_041" />
+        <field name="company_id" ref="base.main_company" />
+        <field name="active">True</field>
+        <field name="fiscal_type">service</field>
+    </record>
+
+</odoo>
