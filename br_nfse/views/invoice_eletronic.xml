@@ -15,6 +15,7 @@
             </div>
             <field name="numero" position="after">
                 <field name="numero_nfse" />
+                <field name="numero_lote_nfse"/>
             </field>
             <field name="mensagem_retorno" position="after">
                 <span>

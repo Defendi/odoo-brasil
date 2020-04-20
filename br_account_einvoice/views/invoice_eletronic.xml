@@ -358,6 +358,8 @@
                                         <field name="valor_retencao_csll" />
                                         <field name="valor_bc_inss" />
                                         <field name="valor_retencao_inss" />
+                                        <field name="valor_bc_outras_ret" />
+                                        <field name="valor_retencao_outras" />
                                     </group>
                                 </group>
                             </page>

@@ -7,10 +7,9 @@ class InvoiceEletronic(models.Model):
 
     state = fields.Selection(selection_add=[('waiting', 'Esperando')])
     nfse_eletronic = fields.Boolean('Emite NFS-e?', readonly=True)
-    verify_code = fields.Char(
-        string='Código Autorização', size=20, readonly=True, states=STATE)
-    numero_nfse = fields.Char(
-        string="Número NFSe", size=50, readonly=True, states=STATE)
+    verify_code = fields.Char(string='Código Autorização', size=20, readonly=True, states=STATE)
+    numero_nfse = fields.Char(string="Número NFSe", size=50, readonly=True, states=STATE)
+    numero_lote_nfse = fields.Char(string="Número Lote NFSe", size=50, readonly=True, states=STATE)
 
     @api.multi
     def _hook_validation(self):
@@ -26,12 +25,9 @@ class InvoiceEletronicItem(models.Model):
     country_id = fields.Many2one('res.country', string='País retenção', ondelete='restrict')
     state_id = fields.Many2one("res.country.state", string='UF retenção', ondelete='restrict')
     city_id = fields.Many2one('res.state.city', 'Município retenção', ondelete='restrict')
-    issqn_tipo = fields.Selection([('N', 'Normal'),
-                                   ('R', 'Retida'),
-                                   ('S', 'Substituta'),
-                                   ('I', 'Isenta')],
-                                  string='Tipo do ISSQN',
-                                  required=True, default='N')
+    issqn_tipo = fields.Selection([('N', 'Normal'),('R', 'Retida'),('S', 'Substituta'),('I', 'Isenta')],string='Tipo do ISSQN',required=True, default='N')
+    service_type_id = fields.Many2one('br_account.service.type','Tipo de Serviço')
+    codigo_tributacao_municipio = fields.Char(string="Cód. Tribut. Munic.", size=20, readonly=True,help="Código de Tributação no Munípio", states=STATE)
 
     @api.onchange('issqn_tipo')
     def _onchange_issqn_tipo(self):

@@ -36,8 +36,7 @@ class InvoiceEletronicItem(models.Model):
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
-    model = fields.Selection(
-        selection_add=[('013', 'Nota Carioca')])
+    model = fields.Selection(selection_add=[('013', 'Nota Carioca')])
 
     @api.multi
     def _hook_validation(self):

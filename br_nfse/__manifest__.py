@@ -15,6 +15,7 @@
         'Danimar Ribeiro <danimaribeiro@gmail.com>',
     ],
     'depends': [
+        'br_account',
         'br_account_einvoice',
     ],
     'external_dependencies': {
@@ -25,6 +26,7 @@
     'data': [
         'views/account_invoice.xml',
         'views/invoice_eletronic.xml',
+        'views/br_account_service.xml',
         'wizard/cancel_nfse.xml',
     ],
     'installable': True,
