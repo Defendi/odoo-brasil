@@ -27,7 +27,10 @@
         'views/account_invoice.xml',
         'views/invoice_eletronic.xml',
         'views/br_account_service.xml',
+        'views/batch_nfse_view.xml',
         'wizard/cancel_nfse.xml',
+        'wizard/create_batch.xml',
+        'security/ir.model.access.csv',
     ],
     'installable': True,
 }

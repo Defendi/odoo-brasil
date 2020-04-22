@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_batch_invoice_eletronic_manager,batch_invoice_eletronic_manager,model_batch_invoice_eletronic,account.group_account_manager,1,1,1,1
+access_batch_invoice_eletronic_accountant,batch_invoice_eletronic_accountant,model_batch_invoice_eletronic,account.group_account_user,1,1,1,0
+access_batch_invoice_eletronic_user,batch_invoice_eletronic_user,model_batch_invoice_eletronic,account.group_account_invoice,1,0,1,0

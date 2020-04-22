@@ -1,4 +1,8 @@
+import logging
+
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 STATE = {'edit': [('readonly', False)]}
 
@@ -9,7 +13,8 @@ class InvoiceEletronic(models.Model):
     nfse_eletronic = fields.Boolean('Emite NFS-e?', readonly=True)
     verify_code = fields.Char(string='Código Autorização', size=20, readonly=True, states=STATE)
     numero_nfse = fields.Char(string="Número NFSe", size=50, readonly=True, states=STATE)
-    numero_lote_nfse = fields.Char(string="Número Lote NFSe", size=50, readonly=True, states=STATE)
+    batch_id = fields.Many2one('batch.invoice.eletronic', 'Lote', readonly=True, states=STATE)
+    numero_lote_nfse = fields.Char(string="Número Lote NFSe", related='batch_id.name', size=10, readonly=True, states=STATE)
 
     @api.multi
     def _hook_validation(self):
@@ -18,6 +23,25 @@ class InvoiceEletronic(models.Model):
             if not self.company_id.inscr_mun:
                 errors.append('Inscrição municipal obrigatória')
         return errors
+
+    @api.multi
+    def cron_send_nfe(self, limit=50):
+        inv_obj = self.env['invoice.eletronic'].with_context({'lang': self.env.user.lang, 'tz': self.env.user.tz})
+        states = self._get_state_to_send()
+        nfes = inv_obj.search([('state', 'in', states),
+                               ('data_agendada', '<=', fields.Date.today()),
+                               ('nfse_eletronic', '=', False)],
+                              limit=limit)
+        for item in nfes:
+            try:
+                _logger.info('Sending edoc id: %s (number: %s) by cron' % (
+                    item.id, item.numero))
+                item.action_send_eletronic_invoice()
+            except Exception as e:
+                item.log_exception(e)
+                item.notify_user()
+                _logger.error(
+                    'Erro no envio de documento eletrônico', exc_info=True)
 
 class InvoiceEletronicItem(models.Model):
     _inherit = 'invoice.eletronic.item'
