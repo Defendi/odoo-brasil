@@ -207,21 +207,24 @@ class InvoiceEletronic(models.Model):
 
         return atts
 
+    def _gerar_xml_rps(self,rps_values,cert,key):
+        cert_pfx = base64.decodestring(cert)
+        certificado = Certificado(cert_pfx, key)
+        return xml_gerar_rps(certificado, rps=rps_values)
+
+    def _gerar_xml_lote(self,lote_values,cert,key):
+        cert_pfx = base64.decodestring(cert)
+        certificado = Certificado(cert_pfx, key)
+        return xml_gerar_lote(certificado, lote=lote_values)
+        
     @api.multi
     def action_post_validate(self):
         super(InvoiceEletronic, self).action_post_validate()
         if self.model not in ('041'):
             return
-
-        cert = self.company_id.with_context({'bin_size': False}).nfe_a1_file
-        cert_pfx = base64.decodestring(cert)
-
-        certificado = Certificado(cert_pfx, self.company_id.nfe_a1_password)
-
-        nfse_values = self._prepare_eletronic_invoice_values()
-        xml_enviar = xml_gerar_rps(certificado, rps=nfse_values)
-
-        self.xml_to_send = base64.encodestring(xml_enviar.encode())
+        rps_values = self._prepare_eletronic_invoice_values()
+        xml_rps = self._gerar_xml_rps(rps_values,self.company_id.with_context({'bin_size': False}).nfe_a1_file,self.company_id.nfe_a1_password)
+        self.xml_to_send = base64.encodestring(xml_rps.encode())
         self.xml_to_send_name = 'nfse-enviar-%s.xml' % self.numero
 
     @api.multi
@@ -230,55 +233,68 @@ class InvoiceEletronic(models.Model):
         if self.model != '041' or self.state in ('done', 'cancel'):
             return
 
-        rps = base64.decodestring(self.xml_to_send)
+        lote = self.env['batch.invoice.eletronic'].search([('model','=',self.model),
+                                                           ('state','=','draft')],limit=1)
+        if len(lote) == 0:
+            lote = self.env['batch.invoice.eletronic'].create({
+                    'date': fields.date.today(),
+                    'name': self.env['wizard.create.batch.nfse']._create_lote_id(self.serie),
+                    'state': 'draft',
+                    'model': self.model,
+                })
+        self.batch_id = lote
+        self.state = 'waiting'
 
-        lote = {
-            'numero_lote': str(self.id),
-            'inscricao_municipal': re.sub('[^0-9]', '',self.env.user.company_id.inscr_mun or ''),
-            'cnpj_prestador': re.sub('[^0-9]', '',self.env.user.company_id.cnpj_cpf or ''),
-            'lista_rps': [rps],
-        }
 
-        cert = self.company_id.with_context({'bin_size': False}).nfe_a1_file
-        cert_pfx = base64.decodestring(cert)
-
-        certificado = Certificado(cert_pfx, self.company_id.nfe_a1_password)
-
-        xml_to_send = xml_gerar_lote(certificado, lote=lote)
-
-        if bool(xml_to_send):
-            self._create_attachment('nfse-lote-envio', self, xml_to_send)
-        self.state = 'error'
-        self.env.cr.commit()
-        
-        enviar_nfse = valid_xml(certificado, xml=xml_to_send, ambiente='producao')#self.ambiente)
-
-        retorno = enviar_nfse['object']
-        if bool(retorno):
-            self._create_attachment(
-                'nfse-envio', self, enviar_nfse['sent_xml'])
-            self._create_attachment(
-                'nfse-ret', self, enviar_nfse['received_xml'])
-            self.env.cr.commit()
-            if "CompNfse" in dir(retorno):
-                self.state = 'done'
-                self.codigo_retorno = '100'
-                self.mensagem_retorno = 'NFSe emitida com sucesso'
-                self.verify_code = retorno.CompNfse.Nfse.InfNfse.CodigoVerificacao
-                self.numero_nfse = retorno.CompNfse.Nfse.InfNfse.Numero
-            else:
-                mensagem_retorno = retorno.MensagemRetorno[0][0]
-                self.codigo_retorno = 'ERR'
-                self.mensagem_retorno = '%s' % (mensagem_retorno['Mensagem'])
-     
-            self.env['invoice.eletronic.event'].create({
-                'code': self.codigo_retorno,
-                'name': self.mensagem_retorno,
-                'invoice_eletronic_id': self.id,
-            })
-        else:
-            self.codigo_retorno = '???'
-            self.mensagem_retorno = enviar_nfse['received_xml']
+#         rps = base64.decodestring(self.xml_to_send)
+# 
+#         lote = {
+#             'numero_lote': str(self.id),
+#             'inscricao_municipal': re.sub('[^0-9]', '',self.env.user.company_id.inscr_mun or ''),
+#             'cnpj_prestador': re.sub('[^0-9]', '',self.env.user.company_id.cnpj_cpf or ''),
+#             'lista_rps': [rps],
+#         }
+# 
+#         cert = self.company_id.with_context({'bin_size': False}).nfe_a1_file
+#         cert_pfx = base64.decodestring(cert)
+# 
+#         certificado = Certificado(cert_pfx, self.company_id.nfe_a1_password)
+# 
+#         xml_to_send = xml_gerar_lote(certificado, lote=lote)
+# 
+#         if bool(xml_to_send):
+#             self._create_attachment('nfse-lote-envio', self, xml_to_send)
+#         self.state = 'error'
+#         self.env.cr.commit()
+#         
+#         enviar_nfse = valid_xml(certificado, xml=xml_to_send, ambiente='producao')#self.ambiente)
+# 
+#         retorno = enviar_nfse['object']
+#         if bool(retorno):
+#             self._create_attachment(
+#                 'nfse-envio', self, enviar_nfse['sent_xml'])
+#             self._create_attachment(
+#                 'nfse-ret', self, enviar_nfse['received_xml'])
+#             self.env.cr.commit()
+#             if "CompNfse" in dir(retorno):
+#                 self.state = 'done'
+#                 self.codigo_retorno = '100'
+#                 self.mensagem_retorno = 'NFSe emitida com sucesso'
+#                 self.verify_code = retorno.CompNfse.Nfse.InfNfse.CodigoVerificacao
+#                 self.numero_nfse = retorno.CompNfse.Nfse.InfNfse.Numero
+#             else:
+#                 mensagem_retorno = retorno.MensagemRetorno[0][0]
+#                 self.codigo_retorno = 'ERR'
+#                 self.mensagem_retorno = '%s' % (mensagem_retorno['Mensagem'])
+#      
+#             self.env['invoice.eletronic.event'].create({
+#                 'code': self.codigo_retorno,
+#                 'name': self.mensagem_retorno,
+#                 'invoice_eletronic_id': self.id,
+#             })
+#         else:
+#             self.codigo_retorno = '???'
+#             self.mensagem_retorno = enviar_nfse['received_xml']
             
     @api.multi
     def action_cancel_document(self, context=None, justificativa=None):

@@ -43,6 +43,12 @@ class InvoiceEletronic(models.Model):
                 _logger.error(
                     'Erro no envio de documento eletrônico', exc_info=True)
 
+    def _gerar_xml_rps(self,rps_values):
+        return False
+
+    def _gerar_xml_lote(self,lote_values):
+        return False
+
 class InvoiceEletronicItem(models.Model):
     _inherit = 'invoice.eletronic.item'
 

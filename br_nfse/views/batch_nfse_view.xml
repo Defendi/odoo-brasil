@@ -19,22 +19,36 @@
 		<field name="name">batch.invoice.eletronic.form</field>
 		<field name="model">batch.invoice.eletronic</field>
 		<field name="arch" type="xml">
-			<form string="Lote de NFSe">
+			<form string="Documento Eletrônico">
 				<header>
+					<button name="action_create_file" type="object" states="draft" string="Criar Arquivo" class="oe_highlight" groups="account.group_account_invoice"/>
+					<button name="action_process_file" type="object" states="tosend" string="Processar" class="oe_highlight" groups="account.group_account_invoice"/>
+					<button name="action_cancel" type="object" states="tosend,done" string="Cancelar" groups="account.group_account_invoice"/>
+					<button name="action_error_nogroup" type="object" states="draft,tosend,cancel" string="Forçar com Erro" groups="base.group_no_one"/>
+					<button name="action_draft" type="object" string="Voltar Provisório" groups="account.group_account_invoice"/> <!-- states="tosend"  -->
 					<field name="state" widget="statusbar" statusbar_visible="draft,tosend,done" />
 				</header>
-				<sheet>
-					<group>
+				<sheet string="Corpo do Lote">
+					<group colspan="4">
 						<field name="name"/>
+						<field name="protocolo"/>
+						<field name="format_file"/>
 						<field name="company_id" groups="base.group_multi_company"/>
 						<field name="date"/>
 						<field name="model"/>
-						<field name="state"/>
+						<field name="xml_to_send_name" invisible="1"/>
+						<field name="xml_to_send" filename="xml_to_send_name"/>
+						<field name="return_xml_name" invisible="1"/>
+						<field name="return_xml" filename="return_xml_name"/>
 					</group>
-					<group>
-						<label for="document_ids"/>
-						<field name="document_ids" nolabel="1"/>
-					</group>
+                    <notebook>
+                        <page string="RPS">
+							<field name="document_ids" nolabel="1"/>
+						</page>
+                        <page string="Observações">
+							<field name="observation" nolabel="1"/>
+						</page>
+					</notebook>
 				</sheet>
 			</form>
 		</field>
