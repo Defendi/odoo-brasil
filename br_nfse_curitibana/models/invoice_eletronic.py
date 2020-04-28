@@ -15,6 +15,7 @@ _logger = logging.getLogger(__name__)
 try:
     from pytrustnfe.nfse.curitibana import xml_gerar_rps
     from pytrustnfe.nfse.curitibana import xml_gerar_lote
+    from pytrustnfe.nfse.curitibana import xml_gerar_lote_cancel
     from pytrustnfe.nfse.curitibana import send_lote
     from pytrustnfe.nfse.curitibana import valid_xml
     from pytrustnfe.certificado import Certificado
@@ -73,7 +74,7 @@ class InvoiceEletronic(models.Model):
             'pais': '%s' % (partner.country_id.ibge_code),
             'uf': partner.state_id.code,
             'cep': re.sub('[^0-9]', '', partner.zip),
-            'telefone': re.sub('[^0-9]', '', partner.phone[:11] or ''),
+            'telefone': re.sub('[^0-9]', '', partner.phone or '')[:11],
             'inscricao_municipal': re.sub('[^0-9]', '', partner.inscr_mun or ''),
             'email': self.partner_id.email or partner.email or '',
         }
@@ -216,6 +217,11 @@ class InvoiceEletronic(models.Model):
         cert_pfx = base64.decodestring(cert)
         certificado = Certificado(cert_pfx, key)
         return xml_gerar_lote(certificado, lote=lote_values)
+
+    def _gerar_xml_cancel_lote(self,lote_values,cert,key):
+        cert_pfx = base64.decodestring(cert)
+        certificado = Certificado(cert_pfx, key)
+        return xml_gerar_lote_cancel(certificado, lote=lote_values)
         
     @api.multi
     def action_post_validate(self):

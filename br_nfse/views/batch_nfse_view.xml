@@ -9,6 +9,7 @@
 				<field name="date"/>
 				<field name="company_id" groups="base.group_multi_company"/>
 				<field name="name"/>
+				<field name="batch_type"/>
 				<field name="model"/>
 				<field name="state"/>
 			</tree>
@@ -31,7 +32,8 @@
 				<sheet string="Corpo do Lote">
 					<group colspan="4">
 						<field name="name"/>
-						<field name="protocolo"/>
+						<field name="batch_type"/>
+						<field name="protocolo" attrs="{'invisible': [('state','!=','done')]}"/>
 						<field name="format_file"/>
 						<field name="company_id" groups="base.group_multi_company"/>
 						<field name="date"/>
@@ -42,8 +44,11 @@
 						<field name="return_xml" filename="return_xml_name"/>
 					</group>
                     <notebook>
-                        <page string="RPS">
+                        <page string="RPS Enviar" attrs="{'invisible': [('batch_type','!=','tonew')]}">
 							<field name="document_ids" nolabel="1"/>
+						</page>
+                        <page string="RPS Cancelar" attrs="{'invisible': [('batch_type','!=','tocancel')]}">
+							<field name="document_cancel_ids" nolabel="1"/>
 						</page>
                         <page string="Observações">
 							<field name="observation" nolabel="1"/>

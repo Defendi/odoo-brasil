@@ -7,12 +7,16 @@ class CreateBatchNFSe(models.TransientModel):
 
     format_file = fields.Selection([('xml','XML')], default='xml')
     date_scheduled = fields.Date(string='Data agendada',default=fields.Date.today)
+    batch_type = fields.Selection([('tonew','Novas NFSe'),('tocancel','Cancelar NFSe')],string='Motivo',default='tonew')
 
     @api.multi
     def _browse_records(self):
         context = dict(self._context or {})
         active_ids = context.get('active_ids', []) or []
-        records = self.env['invoice.eletronic'].browse(active_ids).filtered(lambda x: x.nfse_eletronic and len(x.batch_id) == 0)
+        if self.batch_type == 'tosend':
+            records = self.env['invoice.eletronic'].browse(active_ids).filtered(lambda x: x.nfse_eletronic and len(x.batch_id) == 0)
+        else:
+            records = self.env['invoice.eletronic'].browse(active_ids).filtered(lambda x: x.nfse_eletronic and len(x.batch_id) > 0 and len(x.batch_cancel_id) == 0)
         return records
     
     @api.model
@@ -30,13 +34,18 @@ class CreateBatchNFSe(models.TransientModel):
             if len(lote) == 0:
                 lote = self.env['batch.invoice.eletronic'].create({
                         'date': self.date_scheduled,
+                        'batch_type': self.batch_type,
                         'name': self._create_lote_id(nfse.serie),
                         'state': 'draft',
                         'model': nfse.model,
                         'format_file11': self.format_file,
                     })
-            if len(lote) > 0:
-                nfse.batch_id = lote
-                nfse.state = 'waiting'
-                nfse.data_agendada = self.date_scheduled
             
+            if len(lote) > 0:
+                if self.batch_type == 'tosend' and len(nfse.batch_id) == 0:
+                    nfse.batch_id = lote
+                    nfse.state = 'waiting'
+                    nfse.data_agendada = self.date_scheduled
+                elif self.batch_type == 'tocancel' and len(nfse.batch_id) > 0:
+                    nfse.batch_cancel_id = lote
+                    nfse.state = 'waiting'

@@ -18,6 +18,7 @@ class BatchInvoiceEletronic(models.Model):
     _order = 'name,model,date'
 
     state = fields.Selection(BATCHSTATES, string='Situação', readonly=True)
+    batch_type = fields.Selection([('tonew','Novas NFSe'),('tocancel','Cancelar NFSe')],string='Motivo',default='tonew',states=STATE,readonly=True)
     format_file = fields.Selection([('xml','XML'),('csv','CSV'),('txt','TXT')], default='xml', states=STATE, readonly=True)
     date = fields.Date('Data', readonly=True, states=STATE, index=True, default=fields.date.today())
     name = fields.Char(string='Código', size=10, readonly=True, states=STATE, index=True)
@@ -25,12 +26,11 @@ class BatchInvoiceEletronic(models.Model):
     model = fields.Selection([], string='Modelo', readonly=True, states=STATE)
     company_id = fields.Many2one('res.company', 'Empresa', readonly=True, states=STATE, default=lambda self: self.env.user.company_id.id)
     document_ids = fields.One2many("invoice.eletronic", "batch_id", string="Documentos",readonly=True)
+    document_cancel_ids = fields.One2many("invoice.eletronic", "batch_cancel_id", string="Documentos", readonly=True)
     xml_to_send = fields.Binary(string="Arquivo a Enviar", readonly=True, states=STATE)
     xml_to_send_name = fields.Char(string="Nome Arquivo a ser enviado", size=100, readonly=True)
     return_xml = fields.Binary(string="Arquivo Retorno", readonly=True, states={'tosend': [('readonly', False)]})
     return_xml_name = fields.Char(string="Nome Arquivo de Retorno", size=100, readonly=True)
-    cancel_xml = fields.Binary(string="Arquivo Cancelamento", readonly=True, states={'tosend': [('readonly', False)]})
-    cancel_xml_name = fields.Char(string="Nome Arquivo de Cancelamento", size=100, readonly=True)
     observation = fields.Text(string="Observação",readonly=True)
 
     def _get_protocol(self,name):
