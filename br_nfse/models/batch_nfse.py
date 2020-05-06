@@ -48,8 +48,7 @@ class BatchInvoiceEletronic(models.Model):
         for lote in self:
             if lote.state not in ('draft'):
                 raise UserError('O lote não pode ser excluído')
-            for nfse in lote.document_ids:
-                nfse._unlink_nfse()
+            lote._unlink_nfse()
         return super(BatchInvoiceEletronic,self).unlink()
 
     @api.multi
