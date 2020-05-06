@@ -13,7 +13,7 @@ class CreateBatchNFSe(models.TransientModel):
     def _browse_records(self):
         context = dict(self._context or {})
         active_ids = context.get('active_ids', []) or []
-        if self.batch_type == 'tosend':
+        if self.batch_type == 'tonew':
             records = self.env['invoice.eletronic'].browse(active_ids).filtered(lambda x: x.nfse_eletronic and len(x.batch_id) == 0)
         else:
             records = self.env['invoice.eletronic'].browse(active_ids).filtered(lambda x: x.nfse_eletronic and len(x.batch_id) > 0 and len(x.batch_cancel_id) == 0)
@@ -42,7 +42,7 @@ class CreateBatchNFSe(models.TransientModel):
                     })
             
             if len(lote) > 0:
-                if self.batch_type == 'tosend' and len(nfse.batch_id) == 0:
+                if self.batch_type == 'tonew' and len(nfse.batch_id) == 0:
                     nfse.batch_id = lote
                     nfse.state = 'waiting'
                     nfse.data_agendada = self.date_scheduled
