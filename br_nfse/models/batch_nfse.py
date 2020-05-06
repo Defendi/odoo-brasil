@@ -74,6 +74,17 @@ class BatchInvoiceEletronic(models.Model):
     def _create_file(self):
         pass
 
+
+    @api.multi
+    def _cancel_lote(self):
+        for nfse in self.document_ids:
+            if self.state == 'draft':
+                nfse.state = 'draft'
+                nfse.batch_id = False
+                self.state = 'cancel'
+            elif self.state == 'tosend':
+                self.state = 'cancel'
+
     @api.multi
     def action_create_file(self):
         for lote in self:
