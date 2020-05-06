@@ -113,7 +113,7 @@ class BrAccountDocumentSerie(models.Model):
                                            'Sequência Interna')
 
     lot_sequence_id = fields.Many2one('ir.sequence',
-                                           'Sequência Interna')
+                                           'Sequência Lote')
 
     @api.model
     def _create_sequence(self, vals, lote=False):
