@@ -19,7 +19,7 @@ except ImportError:
 
 class BrZip(models.Model):
     _name = 'br.zip'
-    _description = 'CEP'
+    _description = u'CEP'
     _rec_name = 'zip'
 
     zip = fields.Char('CEP', size=8, required=True)
@@ -160,7 +160,8 @@ class BrZip(models.Model):
         zip_ids = self.zip_search_multi(zip_code=zip_code)
         if len(zip_ids) == 1:
             return self.set_result(zip_ids[0])
-        return False
+        else:
+            return False
 
     @api.multi
     def search_by_address(self, obj, country_id=False, state_id=False,
