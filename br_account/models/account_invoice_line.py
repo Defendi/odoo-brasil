@@ -316,7 +316,7 @@ class AccountInvoiceLine(models.Model):
                                       help='Valor do ICMS Próprio do Substituto cobrado em operação anterior')
     icms_bc_st_retido = fields.Monetary("Base Calc. ST Ret.", digits=dp.get_precision('Account'), oldname='icms_st_bc_ret_ant',
                                         help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).')
-    icms_aliquota_st_retido = fields.Float("% ST Retido", digits=dp.get_precision('Account'), oldname='icms_st_ali_sup_cons',
+    icms_aliquota_st_retido = fields.Float("% ST Retido", digits=(12,4), oldname='icms_st_ali_sup_cons',
                                            help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')
     icms_st_retido = fields.Monetary("ICMS ST Ret.", digits=dp.get_precision('Account'), oldname='icms_st_ret_ant', 
                                      help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).')
@@ -403,7 +403,7 @@ class AccountInvoiceLine(models.Model):
     tax_irrf_id = fields.Many2one('account.tax', string="Alíquota IRRF", domain=[('domain', '=', 'irrf')])
     irrf_base_calculo = fields.Float('Base IRRF', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
     irrf_valor = fields.Float('Valor IRFF', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
-    irrf_aliquota = fields.Float('IRRF %', required=True, digits=dp.get_precision('Account'), default=0.00)
+    irrf_aliquota = fields.Float('IRRF %', required=True, digits=(12,4), default=0.00)
 
     # =========================================================================
     # Impostos de serviço - INSS
@@ -412,7 +412,7 @@ class AccountInvoiceLine(models.Model):
     tax_inss_id = fields.Many2one('account.tax', string="Alíquota INSS", domain=[('domain', '=', 'inss')])
     inss_base_calculo = fields.Float('Base INSS', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
     inss_valor = fields.Float('Valor INSS', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
-    inss_aliquota = fields.Float('INSS %', required=True, digits=dp.get_precision('Account'),default=0.00)
+    inss_aliquota = fields.Float('INSS %', required=True, digits=(12,4),default=0.00)
 
     # =========================================================================
     # Impostos de serviço - Outras retenções
