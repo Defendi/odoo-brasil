@@ -22,7 +22,7 @@ class BatchInvoiceEletronic(models.Model):
     format_file = fields.Selection([('xml','XML'),('csv','CSV'),('txt','TXT')], default='xml', states=STATE, readonly=True)
     date = fields.Date('Data', readonly=True, states=STATE, index=True, default=fields.date.today())
     name = fields.Char(string='Código', size=10, readonly=True, states=STATE, index=True)
-    protocolo = fields.Char(string='Protocolo', size=20, readonly=True, states=STATE, index=True)
+    protocolo = fields.Char(string='Protocolo', size=20, readonly=True, states={'draft': [('readonly', False)],'tosend': [('readonly', False)]}, index=True)
     model = fields.Selection([], string='Modelo', readonly=True, states=STATE)
     company_id = fields.Many2one('res.company', 'Empresa', readonly=True, states=STATE, default=lambda self: self.env.user.company_id.id)
     document_ids = fields.One2many("invoice.eletronic", "batch_id", string="Documentos",readonly=True)
@@ -73,7 +73,6 @@ class BatchInvoiceEletronic(models.Model):
     @api.multi
     def _create_file(self):
         pass
-
 
     @api.multi
     def _cancel_lote(self):

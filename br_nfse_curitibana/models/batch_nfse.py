@@ -61,33 +61,47 @@ class BatchInvoiceEletronic(models.Model):
             super(BatchInvoiceEletronic,self)._create_file(self)
         else:
             if self.batch_type == 'tonew':
-                xml_ret = base64.decodestring(self.return_xml).decode()
-                erro = []
-                try:
-                    xml_ret, retorno = sanitize_response(xml_ret)
-                    if hasattr(retorno, 'ConsultarLoteRpsResult'):
-                        list_nfse = retorno.ConsultarLoteRpsResult.ListaNfse.CompNfse.tcCompNfse if hasattr(retorno.ConsultarLoteRpsResult.ListaNfse.CompNfse, 'tcCompNfse') == True else []
-                        for NFSe in list_nfse:
-                            rps_number = NFSe.Nfse.InfNfse.IdentificacaoRps.Numero.text
-                            rps_serie = NFSe.Nfse.InfNfse.IdentificacaoRps.Serie.text
-                            Nfse_number = NFSe.Nfse.InfNfse.Numero.text
-                            Nfse_code = NFSe.Nfse.InfNfse.CodigoVerificacao.text
-                            doc = self.env['invoice.eletronic'].search([('numero','=',rps_number),('serie_documento','=',rps_serie),('model','=',self.model)],limit=1)
-                            if len(doc) > 0:
-                                doc.number = Nfse_number
-                                doc.state = 'done'
-                                doc.codigo_retorno = '100'
-                                doc.mensagem_retorno = 'NFSe emitida com sucesso'
-                                doc.verify_code = Nfse_code
-                                doc.numero_nfse = Nfse_number
-                            else:
-                                erro += 'Documento NFSe série {} número {}'.format(rps_serie,rps_number)
-#                     for message in list_msg_ret:
-#                         erro += message + '\n'
-                    if len(erro) > 0:
-                        for msg in erro:
-                            self.observation += msg
-                    else:
-                        self.state = 'done'
-                except Exception as e:
-                    raise UserError(str(e))
+                if bool(self.return_xml):
+                    xml_ret = base64.decodestring(self.return_xml).decode()
+                    erro = []
+                    try:
+                        xml_ret, retorno = sanitize_response(xml_ret)
+                        if hasattr(retorno, 'ConsultarLoteRpsResult'):
+                            list_nfse = retorno.ConsultarLoteRpsResult.ListaNfse.CompNfse.tcCompNfse if hasattr(retorno.ConsultarLoteRpsResult.ListaNfse.CompNfse, 'tcCompNfse') == True else []
+                            for NFSe in list_nfse:
+                                rps_number = NFSe.Nfse.InfNfse.IdentificacaoRps.Numero.text
+                                rps_serie = NFSe.Nfse.InfNfse.IdentificacaoRps.Serie.text
+                                Nfse_number = NFSe.Nfse.InfNfse.Numero.text
+                                Nfse_code = NFSe.Nfse.InfNfse.CodigoVerificacao.text
+                                doc = self.env['invoice.eletronic'].search([('numero','=',rps_number),('serie_documento','=',rps_serie),('model','=',self.model)],limit=1)
+                                if len(doc) > 0:
+                                    doc.number = Nfse_number
+                                    doc.state = 'done'
+                                    doc.codigo_retorno = '100'
+                                    doc.mensagem_retorno = 'NFSe emitida com sucesso'
+                                    doc.verify_code = Nfse_code
+                                    doc.numero_nfse = Nfse_number
+                                else:
+                                    erro += 'Documento NFSe série {} número {}'.format(rps_serie,rps_number)
+                        #for message in list_msg_ret:
+                        #    erro += message + '\n'
+                        if len(erro) > 0:
+                            for msg in erro:
+                                self.observation += msg
+                        else:
+                            self.state = 'done'
+                    except Exception as e:
+                        raise UserError(str(e))
+                else:
+                    raise UserError('Adicone o arquivo de Retorno')
+            else:
+                if bool(self.protocolo) and len(self.protocolo) >= 18 and str(self.protocolo).isnumeric():
+                    #637243750752384917
+                    for doc in self.document_cancel_ids:
+                        doc.state = 'cancel'
+                        doc.codigo_retorno = '135'
+                        doc.mensagem_retorno = 'NFSe cancelada com o protocolo %s' % self.protocolo
+                    self.state = 'done'
+                else:
+                    raise UserError('Número de Protocolo Inválido')
+                
