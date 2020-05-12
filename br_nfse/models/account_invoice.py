@@ -69,6 +69,12 @@ class AccountInvoiceLine(models.Model):
     state_id = fields.Many2one("res.country.state", string='UF retenção', ondelete='restrict')
     city_id = fields.Many2one('res.state.city', u'Município retenção', ondelete='restrict')
 
+    @api.onchange('product_id','quantity','uom_id','price_unit','discount','tributos_estimados',
+                  'tributos_estimados_federais','tributos_estimados_estaduais','tributos_estimados_municipais',
+                  'country_id','state_id','city_id')
+    def _onchange_name(self):
+        super(AccountInvoiceLine,self)._onchange_name()
+
     @api.onchange('issqn_tipo')
     def _onchange_issqn_tipo(self):
         if self.issqn_tipo in ('R','S'):

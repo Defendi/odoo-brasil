@@ -88,8 +88,11 @@
         <field name="model">account.fiscal.position</field>
         <field name="inherit_id" ref="account.view_account_position_form"/>
         <field name="arch" type="xml">
+            <field name="name" position="after">
+            	<field name="natureza"/>	
+            </field>
             <field name="auto_apply" position="after">
-                <field name="fiscal_type"></field>
+                <field name="fiscal_type"/>
             </field>
             <xpath expr="//page[@name='account_mapping']/group" position="before">
                 <group>

@@ -658,7 +658,7 @@ class InvoiceEletronicItem(models.Model):
     _order = "invoice_eletronic_id,sequence,id"
     
     code = fields.Text('Código', readonly=True, states=STATE)
-    name = fields.Text('Nome', readonly=True, states=STATE)
+    name = fields.Text('Descrição', readonly=True, states=STATE)
     sequence = fields.Integer(default=10,help="Gives the sequence of this line when displaying the invoice.")
     company_id = fields.Many2one('res.company', 'Empresa', index=True, readonly=True, states=STATE)
     invoice_eletronic_id = fields.Many2one('invoice.eletronic', string='Documento', ondelete='cascade', index=True)

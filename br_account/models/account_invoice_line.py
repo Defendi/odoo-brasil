@@ -180,6 +180,15 @@ class AccountInvoiceLine(models.Model):
             item.icms_cst = item.icms_cst_normal \
                 if item.company_fiscal_type == '3' else item.icms_csosn_simples
 
+    def _render_name(self):
+        res = False
+        if bool(self.product_id.description_fiscal):
+            try:
+                res = self.product_id.render_template(self.product_id.description_fiscal,invoice=self.invoice_id,line=self)
+            except:
+                pass
+        return res
+
     price_tax = fields.Float(
         compute='_compute_price', string='Impostos', store=True,
         digits=dp.get_precision('Account'))
@@ -595,6 +604,11 @@ class AccountInvoiceLine(models.Model):
         self._set_extimated_taxes(self.price_subtotal)
 
     @api.onchange('product_id')
+    def _onchange_product_id(self):
+        domain = super(AccountInvoiceLine,self)._onchange_product_id()
+        return domain
+        
+    @api.onchange('product_id')
     def _br_account_onchange_product_id(self):
         self.product_type = self.product_id.fiscal_type
         self.icms_origem = self.product_id.origin
@@ -695,7 +709,13 @@ class AccountInvoiceLine(models.Model):
         if self.tax_outros_id:
             self.outros_aliquota = self.tax_outros_id.amount
         self._update_invoice_line_ids()
-    
+
+    @api.onchange('product_id','quantity','uom_id','price_unit','discount','tributos_estimados',
+                  'tributos_estimados_federais','tributos_estimados_estaduais','tributos_estimados_municipais')
+    def _onchange_name(self):
+        res = self._render_name()
+        if bool(res):
+            self.name = res
 
     def _mount_tax_ids(self):
         res = []
