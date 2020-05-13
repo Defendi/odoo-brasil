@@ -297,18 +297,19 @@ class InvoiceEletronic(models.Model):
             return res
 
         if self.ambiente != 'homologacao':
-            xProd = item.product_id.with_context(
-                display_default_code=False).name_get()[0][1]
+            if item.name == item.product_id.name_get()[0][1]:
+                xProd = item.product_id.with_context(display_default_code=False).name_get()[0][1]
+            else:
+                xProd = item.name
         else:
-            xProd = 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO -\
- SEM VALOR FISCAL'
+            xProd = 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
 
         price_precis = dp.get_precision('Product Price')(self.env.cr)
         qty_precis = dp.get_precision('Product Unit of Measure')(self.env.cr)
         qty_frmt = '{:.%sf}' % qty_precis[1]
         price_frmt = '{:.%sf}' % price_precis[1]
         prod = {
-            'cProd': item.product_id.default_code,
+            'cProd': item.code,
             'cEAN': item.product_id.barcode or 'SEM GTIN',
             'xProd': xProd,
             'NCM': re.sub('[^0-9]', '', item.ncm or '00')[:8],

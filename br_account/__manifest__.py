@@ -4,7 +4,7 @@
 {  # pylint: disable=C8101,C8103
     'name': 'Brazilian Localization Account',
     'description': """Brazilian Localization Account""",
-    'version': '11.0.1.0.0',
+    'version': '11.0.1.1.0',
     'category': 'account',
     'author': 'Trustcode',
     'license': 'AGPL-3',
@@ -28,6 +28,7 @@
         'views/res_config_settings.xml',
         'wizard/br_product_fiscal_classification_wizard.xml',
         'security/ir.model.access.csv',
+        'reports/br_papers_format.xml',
         'reports/account_invoice.xml',
     ],
 }

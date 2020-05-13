@@ -184,6 +184,15 @@ class AccountInvoiceLine(models.Model):
             item.icms_cst = item.icms_cst_normal \
                 if item.company_fiscal_type == '3' else item.icms_csosn_simples
 
+    def _render_name(self):
+        res = False
+        if bool(self.product_id.description_fiscal):
+            try:
+                res = self.product_id.render_template(self.product_id.description_fiscal,invoice=self.invoice_id,line=self)
+            except:
+                pass
+        return res
+
     price_tax = fields.Float(
         compute='_compute_price', string='Impostos', store=True,
         digits=dp.get_precision('Account'))
@@ -309,7 +318,7 @@ class AccountInvoiceLine(models.Model):
                                       help='Valor do ICMS Próprio do Substituto cobrado em operação anterior')
     icms_bc_st_retido = fields.Monetary("Base Calc. ST Ret.", digits=dp.get_precision('Account'), oldname='icms_st_bc_ret_ant',
                                         help='Valor da BC do ICMS ST cobrado anteriormente por ST (v2.0).')
-    icms_aliquota_st_retido = fields.Float("% ST Retido", digits=dp.get_precision('Account'), oldname='icms_st_ali_sup_cons',
+    icms_aliquota_st_retido = fields.Float("% ST Retido", digits=(12,4), oldname='icms_st_ali_sup_cons',
                                            help='Deve ser informada a alíquota do cálculo do ICMS-ST, já incluso o FCP caso incida sobre a mercadoria')
     icms_st_retido = fields.Monetary("ICMS ST Ret.", digits=dp.get_precision('Account'), oldname='icms_st_ret_ant', 
                                      help='Valor do ICMS ST cobrado anteriormente por ST (v2.0).')
@@ -396,7 +405,7 @@ class AccountInvoiceLine(models.Model):
     tax_irrf_id = fields.Many2one('account.tax', string="Alíquota IRRF", domain=[('domain', '=', 'irrf')])
     irrf_base_calculo = fields.Float('Base IRRF', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
     irrf_valor = fields.Float('Valor IRFF', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
-    irrf_aliquota = fields.Float('IRRF %', required=True, digits=dp.get_precision('Account'), default=0.00)
+    irrf_aliquota = fields.Float('IRRF %', required=True, digits=(12,4), default=0.00)
 
     # =========================================================================
     # Impostos de serviço - INSS
@@ -405,7 +414,7 @@ class AccountInvoiceLine(models.Model):
     tax_inss_id = fields.Many2one('account.tax', string="Alíquota INSS", domain=[('domain', '=', 'inss')])
     inss_base_calculo = fields.Float('Base INSS', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
     inss_valor = fields.Float('Valor INSS', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
-    inss_aliquota = fields.Float('INSS %', required=True, digits=dp.get_precision('Account'),default=0.00)
+    inss_aliquota = fields.Float('INSS %', required=True, digits=(12,4),default=0.00)
 
     # =========================================================================
     # Impostos de serviço - Outras retenções
@@ -588,6 +597,11 @@ class AccountInvoiceLine(models.Model):
         self._set_extimated_taxes(self.price_subtotal)
 
     @api.onchange('product_id')
+    def _onchange_product_id(self):
+        domain = super(AccountInvoiceLine,self)._onchange_product_id()
+        return domain
+        
+    @api.onchange('product_id')
     def _br_account_onchange_product_id(self):
         self.product_type = self.product_id.fiscal_type
         self.icms_origem = self.product_id.origin
@@ -688,7 +702,13 @@ class AccountInvoiceLine(models.Model):
         if self.tax_outros_id:
             self.outros_aliquota = self.tax_outros_id.amount
         self._update_invoice_line_ids()
-    
+
+    @api.onchange('product_id','quantity','uom_id','price_unit','discount','tributos_estimados',
+                  'tributos_estimados_federais','tributos_estimados_estaduais','tributos_estimados_municipais')
+    def _onchange_name(self):
+        res = self._render_name()
+        if bool(res):
+            self.name = res
 
     def _mount_tax_ids(self):
         res = []
