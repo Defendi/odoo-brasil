@@ -33,7 +33,7 @@
 					<group colspan="4">
 						<field name="name"/>
 						<field name="batch_type"/>
-						<field name="protocolo" attrs="{'invisible': ['|',('state','!=','done'),('batch_type','!=','tocancel')]}"/>
+						<field name="protocolo" attrs="{'invisible': [('state','!=','done')]}"/>
 						<field name="format_file"/>
 						<field name="company_id" groups="base.group_multi_company"/>
 						<field name="date"/>

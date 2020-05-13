@@ -21,8 +21,14 @@ class CreateBatchNFSe(models.TransientModel):
     
     @api.model
     def _create_lote_id(self,serie):
-        res = serie.lot_sequence_id.next_by_id()
-        res = str(res).zfill(5)
+        if len(serie.lot_sequence_id) > 0:
+            try:
+                res = serie.lot_sequence_id.next_by_id()
+                res = str(res).zfill(5)
+            except:
+                raise UserError('Erro ao gerar número de lote.')
+        else:
+            raise UserError('Sequencia do lote não está definida.')
         return res
     
     @api.multi
