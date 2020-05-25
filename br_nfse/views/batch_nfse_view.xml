@@ -24,9 +24,9 @@
 				<header>
 					<button name="action_create_file" type="object" states="draft" string="Criar Arquivo" class="oe_highlight" groups="account.group_account_invoice"/>
 					<button name="action_process_file" type="object" states="tosend" string="Processar" class="oe_highlight" groups="account.group_account_invoice"/>
-					<button name="action_cancel" type="object" states="tosend,error" string="Cancelar" confirm="Confirmar cancelamento?" groups="account.group_account_invoice"/>
+					<button name="action_cancel" type="object" states="draft,tosend,error" string="Cancelar" confirm="Confirmar cancelamento?" groups="account.group_account_invoice"/>
 					<button name="action_cancel" type="object" states="done" string="Cancelar" confirm="Confirmar cancelamento?" groups="base.group_no_one"/>
-					<button name="action_error_nogroup" type="object" states="draft,tosend,cancel" string="Forçar com Erro" groups="base.group_no_one"/>
+					<button name="action_error_nogroup" type="object" string="Forçar Erro" groups="base.group_no_one"/>
 					<button name="action_draft" type="object" states="tosend,cancel" string="Voltar Provisório" groups="account.group_account_invoice"/>
 					<field name="state" widget="statusbar" statusbar_visible="draft,tosend,done" />
 				</header>
