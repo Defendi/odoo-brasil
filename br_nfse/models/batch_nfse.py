@@ -114,6 +114,7 @@ class BatchInvoiceEletronic(models.Model):
     def action_error_nogroup(self):
         for lote in self:
             for nfse in lote.document_ids:
+                nfse.action_post_validate()
                 nfse.state = 'draft'
 #                 nfse.batch_id = False
             lote.state = 'error'
