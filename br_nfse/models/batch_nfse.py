@@ -80,14 +80,11 @@ class BatchInvoiceEletronic(models.Model):
             if self.state == 'draft':
                 nfse.state = 'draft'
                 nfse.batch_id = False
-                self.state = 'cancel'
             elif self.state == 'tosend':
                 self.state = 'cancel'
             elif self.state == 'done':
                 nfse.state = 'draft'
-                self.state = 'draft'
-            elif self.state == 'error':
-                self.state = 'cancel'
+        self.state = 'cancel'
 
     @api.multi
     def action_create_file(self):
