@@ -113,6 +113,6 @@ class BatchInvoiceEletronic(models.Model):
         for lote in self:
             for nfse in lote.document_ids:
                 nfse.state = 'draft'
-                nfse.batch_id = False
+#                 nfse.batch_id = False
             lote.state = 'error'
 
