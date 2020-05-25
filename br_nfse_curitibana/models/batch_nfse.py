@@ -83,6 +83,8 @@ class BatchInvoiceEletronic(models.Model):
                                     doc.numero_nfse = Nfse_number
                                 else:
                                     erro += 'Documento NFSe série {} número {}'.format(rps_serie,rps_number)
+                        else:
+                            raise UserError('Este arquivo não é um retorno válido!')
                         #for message in list_msg_ret:
                         #    erro += message + '\n'
                         if len(erro) > 0:
