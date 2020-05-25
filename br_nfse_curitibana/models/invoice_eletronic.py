@@ -103,7 +103,7 @@ class InvoiceEletronic(models.Model):
                 'valor_iss_retido': 1 if item.issqn_valor_retencao > 0.0 else 2,
             })
             iss_base += item.issqn_base_calculo
-            iss_valor += item.issqn_valor_retencao
+            iss_retido += item.issqn_valor_retencao
             iss_valor += item.issqn_valor 
             codigo_servico = re.sub('[^0-9]', '', item.issqn_codigo)
             codigo_tributacao_municipio = item.product_id.service_type_id.codigo_tributacao_municipio
@@ -131,9 +131,9 @@ class InvoiceEletronic(models.Model):
             'valor_ir': str("%.2f" % self.valor_retencao_irrf),
             'valor_csll': str("%.2f" % self.valor_retencao_csll),
             'outras_retencoes': str("%.2f" % self.valor_retencao_outras),
-            'iss_retido': '1' if self.valor_retencao_issqn > 0 else '2',
+            'iss_retido': '1' if iss_retido > 0.0 else '2',
             'valor_iss': str("%.2f" % iss_valor),
-            'valor_iss_retido': str("%.2f" % self.valor_retencao_issqn),
+            'valor_iss_retido': str("%.2f" % iss_retido),
             'desconto_incondicionado': str("%.2f" % self.valor_desconto),
             'desconto_condicionado': '0.00',    
             'base_calculo': str("%.2f" % self.valor_bc_issqn),
@@ -151,9 +151,9 @@ class InvoiceEletronic(models.Model):
             'prestador': prestador,
         }
         
-        if rps['iss_retido'] == '1':
-            rps.pop('valor_iss')
-        else:
+        if rps['iss_retido'] == '2':
+#             rps.pop('valor_iss')
+#         else:
             rps.pop('valor_iss_retido')
         
 #         nfse_vals = {

@@ -378,6 +378,10 @@ class AccountInvoice(models.Model):
     def button_recalculate(self):
         for inv in self:
             inv.tax_line_ids = [(5, 0, 0)]
+            if len(inv.fiscal_position_id) and (inv.fiscal_position_id.account_id):
+                inv.account_id = inv.fiscal_position_id.account_id
+            else:
+                inv.account_id = inv.partner_id.property_account_receivable_id
             inv._onchange_br_account_fiscal_position_id()
             inv.compute_taxes()
 
