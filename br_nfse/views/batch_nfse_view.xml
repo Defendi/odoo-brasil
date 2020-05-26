@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+	<record id="view_batch_invoice_eletronic_tree" model="ir.ui.view">
+		<field name="name">batch.invoice.eletronic.tree</field>
+		<field name="model">batch.invoice.eletronic</field>
+		<field name="arch" type="xml">
+			<tree string="Lote de NFSe">
+				<field name="date"/>
+				<field name="company_id" groups="base.group_multi_company"/>
+				<field name="name"/>
+				<field name="batch_type"/>
+				<field name="model"/>
+				<field name="state"/>
+			</tree>
+		</field>
+	</record>
+
+	<record id="view_batch_invoice_eletronic_form" model="ir.ui.view">
+		<field name="name">batch.invoice.eletronic.form</field>
+		<field name="model">batch.invoice.eletronic</field>
+		<field name="arch" type="xml">
+			<form string="Documento Eletrônico">
+				<header>
+					<button name="action_create_file" type="object" states="draft" string="Criar Arquivo" class="oe_highlight" groups="account.group_account_invoice"/>
+					<button name="action_process_file" type="object" states="tosend" string="Processar" class="oe_highlight" groups="account.group_account_invoice"/>
+					<button name="action_cancel" type="object" states="draft,tosend,error" string="Cancelar" confirm="Confirmar cancelamento?" groups="account.group_account_invoice"/>
+					<button name="action_cancel" type="object" states="done" string="Cancelar" confirm="Confirmar cancelamento?" groups="base.group_no_one"/>
+					<button name="action_error_nogroup" type="object" string="Forçar Erro" groups="base.group_no_one"/>
+					<button name="action_draft" type="object" states="tosend,cancel" string="Voltar Provisório" groups="account.group_account_invoice"/>
+					<field name="state" widget="statusbar" statusbar_visible="draft,tosend,done" />
+				</header>
+				<sheet string="Corpo do Lote">
+					<group colspan="4">
+						<field name="name"/>
+						<field name="batch_type"/>
+						<field name="protocolo" attrs="{'invisible': [('state','=','draft')]}"/>
+						<field name="format_file"/>
+						<field name="company_id" groups="base.group_multi_company"/>
+						<field name="date"/>
+						<field name="model"/>
+						<field name="xml_to_send_name" invisible="1"/>
+						<field name="xml_to_send" filename="xml_to_send_name"/>
+						<field name="return_xml_name" invisible="1"/>
+						<field name="return_xml" filename="return_xml_name"/>
+					</group>
+                    <notebook>
+                        <page string="RPS Enviar" attrs="{'invisible': [('batch_type','!=','tonew')]}">
+							<field name="document_ids" nolabel="1"/>
+						</page>
+                        <page string="RPS Cancelar" attrs="{'invisible': [('batch_type','!=','tocancel')]}">
+							<field name="document_cancel_ids" nolabel="1"/>
+						</page>
+                        <page string="Observações">
+							<field name="observation" nolabel="1"/>
+						</page>
+					</notebook>
+				</sheet>
+			</form>
+		</field>
+	</record>
+
+    <record id="action_batch_invoice_eletronic_tree" model="ir.actions.act_window">
+        <field name="name">Lote de NFSe</field>
+        <field name="res_model">batch.invoice.eletronic</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_type">form</field>
+    </record>
+
+    <menuitem id="menu_batch_invoice_eletronic" 
+              name="Lote de NFSe" 
+              parent="br_account_einvoice.menu_eletronic_doc_base" 
+              action="action_batch_invoice_eletronic_tree"/>
+
+</odoo>

@@ -259,6 +259,7 @@
             </field>
       	</field>
     </record>
+    
     <record id="view_br_account_invoice_cancel_form" model="ir.ui.view">
         <field name="name">br_account.invoice.cancel.form</field>
         <field name="model">account.invoice</field>
@@ -268,6 +269,7 @@
                 <button name="action_invoice_cancel_paid" type="object" states="draft,proforma2,open,paid" string="Cancelar Fatura" groups="account.group_account_manager"/></button>
         </field>
     </record>
+    
     <record id="view_br_account_invoice_supplier_form" model="ir.ui.view">
         <field name="name">br_account.invoice.supplier.form</field>
         <field name="model">account.invoice</field>
@@ -489,6 +491,7 @@
             </field>
         </field>
     </record>
+    
 	<record id="view_br_account_invoice_supplier_tree" model="ir.ui.view">
 		<field name="name">br.account.invoice.supplier.tree</field>
 		<field name="model">account.invoice</field>
@@ -502,6 +505,7 @@
             </field>
 		</field>
 	</record>
+	
     <record id="view_br_account_invoice_filter" model="ir.ui.view">
 		<field name="name">br_account.invoice.filter</field>
 		<field name="model">account.invoice</field>
@@ -522,6 +526,7 @@
                 <button name="action_invoice_cancel_paid" type="object" states="draft,proforma2,open,paid" string="Cancelar Fatura" groups="account.group_account_manager"/></button>
         </field>
     </record>
+    
     <!-- Invoice Line views -->
     <record model="ir.ui.view" id="br_account_product_invoice_line_tree">
         <field name="name">br_account_product.invoice.line.tree</field>
@@ -535,6 +540,7 @@
             </field>
         </field>
     </record>
+    
     <record model="ir.ui.view" id="view_br_account_invoice_line_form">
         <field name="name">br_account.invoice.line.form</field>
         <field name="model">account.invoice.line</field>
@@ -561,7 +567,7 @@
                                 </group>
                                 <group>
                                     <field name="cfop_id" domain="[('internal_type', '=', 'normal')]" attrs="{'invisible': [('product_type', '=', 'service')]}"/>
-                                    <field name="fiscal_classification_id" />
+                                    <field name="fiscal_classification_id" attrs="{'invisible': [('product_type', '=', 'service')]}"/>
                                     <field name="account_id" domain="[('deprecated', '=', False),('user_type_id', '&lt;&gt;', 'view')]" groups="account.group_account_user"/>
                                     <field name="account_analytic_id" domain="[('company_id', '=', parent.company_id)]" groups="analytic.group_analytic_accounting"/>
                                     <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags" options="{'color_field': 'color'}"/>
@@ -644,7 +650,7 @@
                                 <group>
                                     <field name="l10n_br_issqn_deduction" />
                                     <field name="issqn_base_calculo"/>
-                                    <field name="tax_issqn_id" string="Taxa INSS"/>
+                                    <field name="tax_issqn_id" string="Taxa ISSQN"/>
                                     <field name="issqn_aliquota" groups="base.group_no_one" readonly="1" />
                                     <field name="issqn_valor"/>
                                 </group>

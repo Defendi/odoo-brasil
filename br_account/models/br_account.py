@@ -112,12 +112,15 @@ class BrAccountDocumentSerie(models.Model):
     internal_sequence_id = fields.Many2one('ir.sequence',
                                            'Sequência Interna')
 
+    lot_sequence_id = fields.Many2one('ir.sequence',
+                                           'Sequência Lote')
+
     @api.model
-    def _create_sequence(self, vals):
+    def _create_sequence(self, vals, lote=False):
         """ Create new no_gap entry sequence for every
          new document serie """
         seq = {
-            'name': vals['name'],
+            'name': 'lote_'+vals['name'] if lote else vals['name'],
             'implementation': 'no_gap',
             'padding': 1,
             'number_increment': 1}

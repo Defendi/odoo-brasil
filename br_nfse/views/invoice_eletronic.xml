@@ -15,6 +15,8 @@
             </div>
             <field name="numero" position="after">
                 <field name="numero_nfse" />
+                <field name="batch_id" /> <!-- invisible -->
+                <field name="numero_lote_nfse"/> <!-- invisible when batch_id == False -->
             </field>
             <field name="mensagem_retorno" position="after">
                 <span>

@@ -479,3 +479,14 @@ def validate_cpf(cpf):
     if novo == cpf:
         return True
     return False
+
+def format_cpf_cnpj(numero,limpa=False):
+    valor = re.sub('[^0-9]', '', numero)
+    res = valor
+    if not limpa:
+        x = len(valor)
+        if  x == 11:
+            res = "%s.%s.%s-%s" % (valor[:3],valor[3:6],valor[6:9],valor[9:11])
+        elif x == 14:
+            res = "%s.%s.%s/%s-%s" % (valor[:2],valor[2:5],valor[5:8],valor[8:12],valor[12:14])
+    return res

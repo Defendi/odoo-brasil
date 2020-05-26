@@ -57,13 +57,13 @@
                 <group string="Aplicar esta regra quando:">
                     <field name="tipo_produto" />
                 </group>
-                <group string="Estados">
+                <group string="Estados" attrs="{'invisible': [('tipo_produto', '=', 'service')]}">
                     <field name="state_ids" widget="many2many_tags" nolabel="1"/>
                 </group>
                 <group string="Categorias Fiscais">
                     <field name="fiscal_category_ids" widget="many2many_tags" nolabel="1"/>
                 </group>
-                <group string="Classificação Fiscal">
+                <group string="Classificação Fiscal" attrs="{'invisible': [('tipo_produto', '=', 'service')]}">
                     <field name="product_fiscal_classification_ids" widget="many2many_tags" nolabel="1"/>
                 </group>
                 <group string="Centro Custo/Contrato" attrs="{'invisible': [('tipo_produto', '=', 'product')]}">
@@ -88,8 +88,11 @@
         <field name="model">account.fiscal.position</field>
         <field name="inherit_id" ref="account.view_account_position_form"/>
         <field name="arch" type="xml">
+            <field name="name" position="after">
+            	<field name="natureza"/>	
+            </field>
             <field name="auto_apply" position="after">
-                <field name="fiscal_type"></field>
+                <field name="fiscal_type"/>
             </field>
             <xpath expr="//page[@name='account_mapping']/group" position="before">
                 <group>

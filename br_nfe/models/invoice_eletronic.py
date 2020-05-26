@@ -297,18 +297,19 @@ class InvoiceEletronic(models.Model):
             return res
 
         if self.ambiente != 'homologacao':
-            xProd = item.product_id.with_context(
-                display_default_code=False).name_get()[0][1]
+            if item.name == item.product_id.name_get()[0][1]:
+                xProd = item.product_id.with_context(display_default_code=False).name_get()[0][1]
+            else:
+                xProd = item.name
         else:
-            xProd = 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO -\
- SEM VALOR FISCAL'
+            xProd = 'NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
 
         price_precis = dp.get_precision('Product Price')(self.env.cr)
         qty_precis = dp.get_precision('Product Unit of Measure')(self.env.cr)
         qty_frmt = '{:.%sf}' % qty_precis[1]
         price_frmt = '{:.%sf}' % price_precis[1]
         prod = {
-            'cProd': item.product_id.default_code,
+            'cProd': item.code,
             'cEAN': item.product_id.barcode or 'SEM GTIN',
             'xProd': xProd,
             'NCM': re.sub('[^0-9]', '', item.ncm or '00')[:8],
@@ -693,10 +694,14 @@ class InvoiceEletronic(models.Model):
                 if self.valor_retencao_inss else '',
             }
         if self.transportadora_id.street:
-            end_transp = "%s - %s, %s" % (self.transportadora_id.street,
+            end_transp = "%s, %s - %s" % (self.transportadora_id.street,
                                           self.transportadora_id.number or '',
-                                          self.
-                                          transportadora_id.district or '')
+                                          self.transportadora_id.district or '')
+            if len(end_transp) > 60:
+                end_transp = "%s, %s" % (self.transportadora_id.street,
+                                          self.transportadora_id.number or '')
+            if len(end_transp) > 60:
+                end_transp = end_transp[:60]
         else:
             end_transp = ''
         transp = {
@@ -824,9 +829,8 @@ class InvoiceEletronic(models.Model):
 #                 'idCSRT': self.company_id.id_token_csrt or '',
 #                 'hashCSRT': self._get_hash_csrt() or '',
 #             }
-
         vals = {
-            'Id': '',
+            'Id': 'NFe'+self.chave_nfe if bool(self.chave_nfe) else False,
             'ide': ide,
             'emit': emit,
             'dest': dest,
@@ -934,17 +938,18 @@ class InvoiceEletronic(models.Model):
         super(InvoiceEletronic, self).action_post_validate()
         if self.model not in ('55', '65'):
             return
-        chave_dict = {
-            'cnpj': re.sub('[^0-9]', '', self.company_id.cnpj_cpf),
-            'estado': self.company_id.state_id.ibge_code,
-            'emissao': self.data_emissao[2:4] + self.data_emissao[5:7],
-            'modelo': self.model,
-            'numero': self.numero,
-            'serie': self.serie.code.zfill(3),
-            'tipo': int(self.tipo_emissao),
-            'codigo': "%08d" % self.numero_controle
-        }
-        self.chave_nfe = gerar_chave(ChaveNFe(**chave_dict))
+        if not bool(self.chave_nfe):
+            chave_dict = {
+                'cnpj': re.sub('[^0-9]', '', self.company_id.cnpj_cpf),
+                'estado': self.company_id.state_id.ibge_code,
+                'emissao': self.data_emissao[2:4] + self.data_emissao[5:7],
+                'modelo': self.model,
+                'numero': self.numero,
+                'serie': self.serie.code.zfill(3),
+                'tipo': int(self.tipo_emissao),
+                'codigo': "%08d" % self.numero_controle
+            }
+            self.chave_nfe = gerar_chave(ChaveNFe(**chave_dict))
 
         cert = self.company_id.with_context({'bin_size': False}).nfe_a1_file
         
@@ -979,8 +984,7 @@ class InvoiceEletronic(models.Model):
             return
 
         tz = pytz.timezone(self.env.user.tz)
-        _logger.info('Sending NF-e (%s) (%.2f) - %s' % (
-            self.numero, self.valor_final, self.partner_id.name))
+        _logger.info('-> NF-e Sending (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
         self.write({
             'state': 'error',
             'data_emissao': datetime.now(tz)
@@ -1012,6 +1016,7 @@ class InvoiceEletronic(models.Model):
             return
             
         if retorno.cStat == 103:
+            _logger.info('-> NF-e Lote recebido com sucesso (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
             obj = {
                 'estado': self.company_id.partner_id.state_id.ibge_code,
                 'ambiente': 1 if self.ambiente == 'producao' else 2,
@@ -1024,13 +1029,15 @@ class InvoiceEletronic(models.Model):
             self.recibo_nfe = obj['obj']['numero_recibo']
             import time
             while True:
-                time.sleep(2)
+                _logger.info('-> NF-e Verificando Lote (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
+                time.sleep(3)
                 resposta_recibo = retorno_autorizar_nfe(certificado, **obj)
                 retorno = resposta_recibo['object'].getchildren()[0]
                 if retorno.cStat != 105:
                     break
 
         if retorno.cStat == 108:
+            _logger.info('-> NF-e Serviço Paralisado Momentaneamente (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
             self.codigo_retorno = retorno.cStat
             self.mensagem_retorno = retorno.xMotivo
             self.write({
@@ -1043,12 +1050,14 @@ class InvoiceEletronic(models.Model):
             self.action_post_validate()
             
         if retorno.cStat != 104:
+            _logger.info('-> NF-e Lote processado (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
             self.write({
                 'codigo_retorno': retorno.cStat,
                 'mensagem_retorno': retorno.xMotivo,
             })
             self.notify_user()
         else:
+            _logger.info('-> NF-e Nota Processada NF-e (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
             self.write({
                 'codigo_retorno': retorno.protNFe.infProt.cStat,
                 'mensagem_retorno': retorno.protNFe.infProt.xMotivo,
@@ -1093,6 +1102,23 @@ class InvoiceEletronic(models.Model):
                 'nfe_processada': base64.encodestring(nfe_proc),
                 'nfe_processada_name': "NFe%08d.xml" % self.numero,
             })
+        elif self.codigo_retorno == '539':
+            motivo = str(retorno.protNFe.infProt.xMotivo)
+            p1 = motivo.find('[')
+            p2 = motivo.find(']')
+            nr_chave = motivo[p1+1:p2]
+            p1 = motivo.find('[nRec:')
+            p2 = motivo.find(']', p1)
+            nr_rec = motivo[p1+6:p2]
+            
+            nfe_proc = gerar_nfeproc(resposta['sent_xml'], recibo_xml)
+            self.write({
+                'protocolo_nfe': nr_rec,
+                'chave_nfe': nr_chave,
+                'state': 'draft',
+            })
+            
+            
         _logger.info('NF-e (%s) was finished with status %s' % (
             self.numero, self.codigo_retorno))
 
@@ -1208,14 +1234,16 @@ class InvoiceEletronic(models.Model):
         })
         self._create_attachment('canc', self, resp['sent_xml'])
         self._create_attachment('canc-ret', self, resp['received_xml'])
-        nfe_processada = base64.decodestring(self.nfe_processada)
-
-        nfe_proc_cancel = gerar_nfeproc_cancel(
-            nfe_processada, resp['received_xml'].encode())
+        if self.nfe_processada:
+            nfe_processada = base64.decodestring(self.nfe_processada)
+        elif self.xml_to_send:
+            nfe_processada = base64.decodestring(self.xml_to_send)
+        else:
+            nfe_processada = ''
+        nfe_proc_cancel = gerar_nfeproc_cancel(nfe_processada, resp['received_xml'].encode())
         if nfe_proc_cancel:
             self.nfe_processada = base64.encodestring(nfe_proc_cancel)
-        _logger.info('Cancelling NF-e (%s) was finished with status %s' % (
-            self.numero, self.codigo_retorno))
+        _logger.info('Cancelling NF-e (%s) was finished with status %s' % (self.numero, self.codigo_retorno))
 
     def action_get_status(self):
         cert = self.company_id.with_context({'bin_size': False}).nfe_a1_file
@@ -1231,13 +1259,18 @@ class InvoiceEletronic(models.Model):
             }
         }
         resp = consultar_protocolo_nfe(certificado, **consulta)
+        self._create_attachment('consul', self, resp['sent_xml'])
+        self._create_attachment('resp_consul', self, resp['received_xml'])
         retorno_consulta = resp['object'].getchildren()[0]
-        if retorno_consulta.cStat == 101:
+        if retorno_consulta.cStat == 100:
+            self.state = 'done'
+            self.codigo_retorno = retorno_consulta.cStat
+            self.mensagem_retorno = retorno_consulta.xMotivo
+        elif retorno_consulta.cStat == 101:
             self.state = 'cancel'
             self.codigo_retorno = retorno_consulta.cStat
             self.mensagem_retorno = retorno_consulta.xMotivo
-            resp['received_xml'] = etree.tostring(
-                retorno_consulta, encoding=str)
+            resp['received_xml'] = etree.tostring(retorno_consulta, encoding=str)
 
             self.env['invoice.eletronic.event'].create({
                 'code': self.codigo_retorno,
@@ -1252,6 +1285,11 @@ class InvoiceEletronic(models.Model):
                 nfe_processada, resp['received_xml'].encode())
             if nfe_proc_cancel:
                 self.nfe_processada = base64.encodestring(nfe_proc_cancel)
+        elif retorno_consulta.cStat == 539:
+            self.state = 'error'
+            self.codigo_retorno = retorno_consulta.cStat
+            self.mensagem_retorno = retorno_consulta.xMotivo + '\n*** Chave foi corrigida'
+            self.chave_nfe = str(retorno_consulta.chNFe)
         else:
             message = "%s - %s" % (retorno_consulta.cStat,
                                    retorno_consulta.xMotivo)

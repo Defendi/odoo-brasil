@@ -17,6 +17,7 @@
                 <button name="generate_correction_letter" type="object" class="oe_highlight" icon="fa-envelope"
                     string="Carta de Correção" attrs="{'invisible': ['|', ('state', '!=', 'done'), ('model', 'not in', ('55', '65'))]}">
                 </button>
+                <button name="action_get_status" attrs="{'invisible': [('state','!=','error')]}" string="Consultar" type="object" groups="br_account_einvoice.group_edit_edoc"/>
             </button>
             <field name="payment_term_id" position="after">
                 <field name="payment_mode_id" />
@@ -110,7 +111,9 @@
                 <field name="data_entrada_saida" />
             </field>
             <field name="numero_controle" position="after">
-                <field name="recibo_nfe"  attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
+                <field name="recibo_nfe" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
+                <field name="chave_nfe" attrs="{'invisible': ['|',('state', '!=', 'edit'),('model', 'not in', ('55', '65'))]}"/>
+                <field name="protocolo_nfe" attrs="{'invisible': ['|',('state', '!=', 'edit'),('model', 'not in', ('55', '65'))]}"/>
                 <field name="qrcode_hash" attrs="{'invisible': [('model', 'not in', ('65'))]}" />
                 <field name="qrcode_url" attrs="{'invisible': [('model', 'not in', ('65'))]}" />
                 <field name="nfe_processada_name" invisible="1"/>

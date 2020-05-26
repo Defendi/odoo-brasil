@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="view_wizard_create_batch">
+        <field name="name">wizard.create.batch.form</field>
+        <field name="model">wizard.create.batch.nfse</field>
+        <field name="arch" type="xml">
+            <form string="Criação de Lote">
+                <group>
+                	<field name='batch_type'/>
+                	<field name='format_file'/>
+                	<field name='date_scheduled'/>
+                </group>
+                <footer>
+                    <button name="action_create_batch" string="Criar" type="object" class="oe_highlight"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+	<act_window id="action_account_invoice_create_batch"
+	    multi="True"
+	    key2="client_action_multi" name="Criar Lotes NFSe"
+	    res_model="wizard.create.batch.nfse" src_model="invoice.eletronic"
+	    view_mode="form" target="new" view_type="form" />
+
+</odoo>

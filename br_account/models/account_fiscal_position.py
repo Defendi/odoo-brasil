@@ -73,7 +73,6 @@ class AccountFiscalPositionTaxRule(models.Model):
     tax_icms_fcp_id = fields.Many2one(
         'account.tax', string="% FCP", domain=[('domain', '=', 'fcp')])
 
-
 class AccountFiscalPosition(models.Model):
     _inherit = 'account.fiscal.position'
 
@@ -135,6 +134,7 @@ class AccountFiscalPosition(models.Model):
     fiscal_type = fields.Selection([('saida', 'Saída'),
                                     ('entrada', 'Entrada')],
                                    string="Tipo da posição", copy=True)
+    natureza = fields.Char(string='Natureza Operação',oldname='nat_operacao')
 
     @api.model
     def _get_fpos_by_region(self, country_id=False, state_id=False,

@@ -3,7 +3,6 @@
 
 from odoo import api, fields, models
 
-
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
@@ -49,25 +48,22 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
-    state = fields.Selection(
-        string="Status",
-        selection=[
-            ('pendente', 'Pendente'),
-            ('transmitido', 'Transmitido'),
-        ],
-        default='pendente',
-        help="""Define a situação eletrônica do item da fatura.
-                Pendente: Ainda não foi transmitido eletronicamente.
-                Transmitido: Já foi transmitido eletronicamente."""
-    )
+    state = fields.Selection(string="Status",selection=[('pendente', 'Pendente'),('transmitido', 'Transmitido'),],
+        default='pendente',help="""Define a situação eletrônica do item da fatura.
+                                   Pendente: Ainda não foi transmitido eletronicamente.
+                                   Transmitido: Já foi transmitido eletronicamente.""")
 
-    numero_nfse = fields.Char(string="Número NFS-e",
-                              help="""Número da NFS-e na qual o item foi
-                              transmitido eletrônicamente.""")
-
+    numero_nfse = fields.Char(string="Número NFS-e", help="""Número da NFS-e na qual o item foi transmitido eletrônicamente.""")
     country_id = fields.Many2one('res.country', string=u'País retenção', ondelete='restrict')
     state_id = fields.Many2one("res.country.state", string='UF retenção', ondelete='restrict')
     city_id = fields.Many2one('res.state.city', u'Município retenção', ondelete='restrict')
+    codigo_tributacao_municipio = fields.Char(string="Cód. Tribut. Munic.",size=20,help="Código de Tributação no Munípio")
+
+    @api.onchange('product_id','quantity','uom_id','price_unit','discount','tributos_estimados',
+                  'tributos_estimados_federais','tributos_estimados_estaduais','tributos_estimados_municipais',
+                  'country_id','state_id','city_id')
+    def _onchange_name(self):
+        super(AccountInvoiceLine,self)._onchange_name()
 
     @api.onchange('issqn_tipo')
     def _onchange_issqn_tipo(self):
