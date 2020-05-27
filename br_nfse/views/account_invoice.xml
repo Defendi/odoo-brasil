@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
+    <record id="view_br_account_nfse_filter" model="ir.ui.view">
+		<field name="name">br_account.nfse.invoice.filter</field>
+		<field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+		<field name="arch" type="xml">
+			<field name="date" position="after">
+				<field name="numero_nfse" string="NF Serviço"/>
+				<field name="service_document_nr" string="Número RPS"/>
+			</field>
+		</field>
+	</record>
+
+    <record id="view_br_nfse_invoice_tree" model="ir.ui.view">
+        <field name="name">view.br.nfse.invoice.tree</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_tree"/>
+        <field name="arch" type="xml">
+            <field name="date_invoice" position="after">
+                <field name="numero_nfse" string="NF Serviço"/>
+                <field name="service_document_nr" string="Número RPS"/>
+            </field>
+      	</field>
+    </record>
+
     <record id="view_br_nfse_account_invoice_form" model="ir.ui.view">
         <field name="name">view_br_nfse.account.invoice.form</field>
         <field name="model">account.invoice</field>

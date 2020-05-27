@@ -151,7 +151,7 @@ class AccountInvoice(models.Model):
         states={'draft': [('readonly', False)]})
     
     service_document_nr = fields.Integer(
-        string='Número Doc', readonly=True, 
+        string='Número RPS', readonly=True, 
         states={'draft': [('readonly', False)]},
         copy=False, default=0)
     

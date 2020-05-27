@@ -13,9 +13,9 @@ class InvoiceEletronic(models.Model):
     nfse_eletronic = fields.Boolean('Emite NFS-e?', readonly=True)
     verify_code = fields.Char(string='Código Autorização', size=20, readonly=True, states=STATE)
     numero_nfse = fields.Char(string="Número NFSe", size=50, readonly=True, states=STATE)
-    batch_id = fields.Many2one('batch.invoice.eletronic', 'Lote', readonly=True, states=STATE)
-    batch_cancel_id = fields.Many2one('batch.invoice.eletronic', 'Lote', readonly=True, states=STATE)
-    numero_lote_nfse = fields.Char(string="Número Lote NFSe", related='batch_id.name', size=10, readonly=True, states=STATE)
+    batch_id = fields.Many2one('batch.invoice.eletronic', 'Lote', readonly=True, states=STATE, invisible=True)
+    batch_cancel_id = fields.Many2one('batch.invoice.eletronic', 'Lote', readonly=True, states=STATE, invisible=True)
+    numero_lote_nfse = fields.Char(string="Número Lote RPS", related='batch_id.name', size=10, readonly=True, states=STATE)
 
     @api.multi
     def _hook_validation(self):
