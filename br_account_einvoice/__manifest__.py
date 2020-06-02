@@ -23,12 +23,13 @@
     'data': [
         'data/nfe_cron.xml',
         'data/br_account_einvoice.xml',
-        'security/ir.model.access.csv',
         'views/invoice_eletronic.xml',
         'views/account_invoice.xml',
         'views/account_config_settings.xml',
         'views/res_company.xml',
         'wizard/invoice_eletronic_selection_wizard_view.xml',
+        'security/einvoice_security.xml',
+        'security/ir.model.access.csv',
     ],
     'installable': True
 }
