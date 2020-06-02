@@ -37,6 +37,8 @@ class InvoiceEletronicItem(models.Model):
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
+    model = fields.Selection(selection_add=[('004', 'NFS-e - Provedor BETHA')])
+
     enforce_iss_betha = fields.Selection(
         [('1', "1 - Exigível"),
          ('2', "2 - Não incidência"),

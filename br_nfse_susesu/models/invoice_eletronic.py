@@ -24,8 +24,8 @@ except ImportError:
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
-    url_danfe = fields.Char(
-        string='Url de Impressão Danfe', size=500, readonly=True)
+    model = fields.Selection(selection_add=[('009', 'NFS-e - Provedor SUSESU')])
+    url_danfe = fields.Char(string='Url de Impressão Danfe', size=500, readonly=True)
 
     @api.multi
     def _hook_validation(self):

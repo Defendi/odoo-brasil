@@ -103,7 +103,8 @@ class BrAccountDocumentSerie(models.Model):
     name = fields.Char('Descrição', required=True)
     active = fields.Boolean('Ativo')
     fiscal_type = fields.Selection([('service', 'Serviço'),
-                                    ('product', 'Produto')], 'Tipo Fiscal',
+                                    ('product', 'Produto'),
+                                    ('conjugated', 'Conjugada')], 'Tipo Fiscal',
                                    default='service')
     fiscal_document_id = fields.Many2one('br_account.fiscal.document',
                                          'Documento Fiscal', required=True)

@@ -26,8 +26,7 @@ STATE = {'edit': [('readonly', False)]}
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
-    model = fields.Selection(
-        selection_add=[('012', 'NFS-e Florianópolis')])
+    model = fields.Selection(selection_add=[('012', 'NFS-e Florianópolis')])
 
     def qrcode_floripa_url(self):
         import urllib

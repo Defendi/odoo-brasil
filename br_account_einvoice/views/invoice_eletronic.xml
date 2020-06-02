@@ -88,27 +88,6 @@
                                 <field name="issqn_valor_retencao"/>
                             </group>
                         </page>
-                        <page name="retencoes" string="Retenções" attrs="{'invisible': [('tipo_produto','!=', 'service')]}">
-                            <group>
-                                <group string="CSLL">
-                                    <field name="csll_base_calculo"/>
-                                    <field name="csll_aliquota"/>
-                                    <field name="csll_valor_retencao"/>
-                                </group>
-                                <group string="IRRF">
-                                    <field name="irrf_base_calculo"/>
-                                    <field name="irrf_aliquota"/>
-                                    <field name="irrf_valor_retencao"/>
-                                </group>
-                            </group>
-                            <group>
-                                <group string="INSS">
-                                    <field name="inss_base_calculo"/>
-                                    <field name="inss_aliquota"/>
-                                    <field name="inss_valor_retencao"/>
-                                </group>
-                            </group>
-                        </page>
                         <page name="ipi" string="IPI" attrs="{'invisible': [('tipo_produto','==', 'service')]}">
                             <group string="Detalhes do IPI">
                                 <group>
@@ -157,6 +136,27 @@
                                 <field name="ii_valor_despesas"/>
                                 <field name="ii_valor_iof"/>
                                 <field name="ii_valor"/>
+                            </group>
+                        </page>
+                        <page name="retencoes" string="Retenções" attrs="{'invisible': [('tipo_produto','!=', 'service')]}">
+                            <group>
+                                <group string="CSLL">
+                                    <field name="csll_base_calculo"/>
+                                    <field name="csll_aliquota"/>
+                                    <field name="csll_valor_retencao"/>
+                                </group>
+                                <group string="IRRF">
+                                    <field name="irrf_base_calculo"/>
+                                    <field name="irrf_aliquota"/>
+                                    <field name="irrf_valor_retencao"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="INSS">
+                                    <field name="inss_base_calculo"/>
+                                    <field name="inss_aliquota"/>
+                                    <field name="inss_valor_retencao"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>
@@ -209,10 +209,11 @@
                                         <field name="code"/>
                                         <field name="name"/>
                                         <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
-                                        <field name="currency_id"/> <!-- invisible="1"/>  -->
+                                        <field name="currency_id" invisible="1"/>
                                         <field name="serie" options="{'no_quick_create': True}"/>
+                                        <field name="fiscal_type"/>
                                         <field name="serie_documento"/>
-                                        <field name="numero"/>
+                                        <field name="numero" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}"/>
                                         <field name="numero_controle"/>
                                         <field name="xml_to_send_name" invisible="1"/>
                                         <field name="xml_to_send" filename="xml_to_send_name"/>
@@ -221,7 +222,7 @@
                                         <field name="data_emissao"/>
                                         <field name="data_autorizacao"/>
                                         <field name="ambiente"/>
-                                        <field name="finalidade_emissao"/>
+                                        <field name="finalidade_emissao" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}"/>
                                     </group>
                                 </group>
                             </page>
@@ -318,29 +319,29 @@
                                 </group>
                             </page>
                             <page name="totais" string="Totais">
-                                <group>
-                                    <group name="totais" string="Totais">
-                                        <field name="valor_bruto" />
-                                        <field name="valor_frete" />
-                                        <field name="valor_seguro" />
-                                        <field name="valor_desconto" />
-                                        <field name="valor_despesas" />
-                                        <field name="valor_final" />
+                                <group attrs="{'invisible': [('model', 'not in', ('55', '65'))]}">
+                                    <group name="totais" string="Totais de Produtos">
+                                        <field name="valor_bruto"/>
+                                        <field name="valor_frete"/>
+                                        <field name="valor_seguro"/>
+                                        <field name="valor_desconto"/>
+                                        <field name="valor_despesas"/>
+                                        <field name="valor_final"/>
                                     </group>
                                     <group name="impostos" string="Impostos">
-                                        <field name="valor_bc_icms" />
-                                        <field name="valor_icms" />
-                                        <field name="valor_icms_deson" />
-                                        <field name="valor_bc_icmsst" />
-                                        <field name="valor_icmsst" />
-                                        <field name="valor_ii" />
-                                        <field name="valor_ipi" />
-                                        <field name="valor_pis" />
-                                        <field name="valor_cofins" />
-                                        <field name="valor_estimado_tributos" />
+                                        <field name="valor_bc_icms"/>
+                                        <field name="valor_icms"/>
+                                        <field name="valor_icms_deson"/>
+                                        <field name="valor_bc_icmsst"/>
+                                        <field name="valor_icmsst"/>
+                                        <field name="valor_ii"/>
+                                        <field name="valor_ipi"/>
+                                        <field name="valor_pis"/>
+                                        <field name="valor_cofins"/>
+                                        <field name="valor_estimado_tributos"/>
                                     </group>
                                 </group>
-                                <group>
+                                <group attrs="{'invisible': [('model', 'in', ('55', '65'))]}">
                                     <group name="servico" string="Totais de Serviço">
                                         <field name="valor_servicos" />
                                         <field name="valor_bc_issqn" />
@@ -369,7 +370,7 @@
                                     <field name="informacoes_complementares" />
                                 </group>
                             </page>
-                            <page name="eventos" string="Eventos">
+                            <page name="eventos" string="Eventos" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}">
                                 <group>
                                     <field name="eletronic_event_ids" nolabel="1">
                                         <tree name="Eventos">

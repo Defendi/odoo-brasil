@@ -53,8 +53,7 @@ class InvoiceEletronic(models.Model):
                 item.valor_final - (item.retencoes_federais or 0) - \
                 (item.valor_retencao_issqn or 0) - (item.valor_desconto or 0)
 
-    model = fields.Selection(
-        selection_add=[('014', 'Nota Belo Horizonte')])
+    model = fields.Selection(selection_add=[('014', 'Nota Belo Horizonte')])
 
     retencoes_federais = fields.Monetary(compute="_compute_total_retencoes")
 

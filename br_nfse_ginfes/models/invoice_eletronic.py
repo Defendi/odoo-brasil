@@ -39,6 +39,8 @@ class InvoiceEletronicItem(models.Model):
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
+    model = fields.Selection(selection_add=[('002', 'NFS-e - Provedor GINFES')])
+
     state = fields.Selection(
         selection_add=[('waiting', 'Esperando processamento')])
 

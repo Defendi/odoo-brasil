@@ -27,7 +27,7 @@ STATE = {'edit': [('readonly', False)]}
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
-    model = fields.Selection(selection_add=[('041', 'Nota Curitibana')])
+    model = fields.Selection(selection_add=[('041', 'NFS-e - Nota Curitibana')])
 
     @api.multi
     def _hook_validation(self):

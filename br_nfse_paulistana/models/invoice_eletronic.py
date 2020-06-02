@@ -47,6 +47,8 @@ class InvoiceEletronic(models.Model):
                 descricao += item.informacoes_legais.replace('\n', '<br/>')
             item.discriminacao_servicos = descricao
 
+    model = fields.Selection(selection_add=[('001', 'NFS-e - Nota Fiscal Paulistana')])
+
     operation = fields.Selection(
         [('T', "Tributado em São Paulo"),
          ('F', "Tributado Fora de São Paulo"),

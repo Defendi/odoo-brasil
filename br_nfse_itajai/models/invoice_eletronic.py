@@ -38,6 +38,7 @@ class InvoiceEletronicItem(models.Model):
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
+    model = fields.Selection(selection_add=[('203', 'NFS-e - Itajaí')])
     nfse_itajai_nat_oper = fields.Selection(NFSE_NAT_OPER, string="Natureza Opera",default="101")
     
 #     enforce_iss_betha = fields.Selection(

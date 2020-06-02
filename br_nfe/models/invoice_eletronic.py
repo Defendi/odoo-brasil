@@ -57,6 +57,8 @@ class InvoiceEletronic(models.Model):
             "context": {'default_eletronic_doc_id': self.id},
         }
 
+    model = fields.Selection(selection_add=[('55', '55 - NFe'),('65', '65 - NFCe')])
+
     payment_mode_id = fields.Many2one(
         'l10n_br.payment.mode', string='Modo de Pagamento',
         readonly=True, states=STATE)

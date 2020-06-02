@@ -62,11 +62,12 @@ class InvoiceEletronicItem(models.Model):
 
     @api.onchange('issqn_tipo')
     def _onchange_issqn_tipo(self):
-        if self.issqn_tipo in ('R','S'):
-            self.country_id = self.invoice_id.partner_id.country_id
-            self.state_id = self.invoice_id.partner_id.state_id
-            self.city_id = self.invoice_id.partner_id.city_id
-        else:
-            self.country_id = self.invoice_id.company_id.country_id
-            self.state_id = self.invoice_id.company_id.state_id
-            self.city_id = self.invoice_id.company_id.city_id
+        if self.invoice_eletronic_id.model not in ('55', '65'): 
+            if self.issqn_tipo in ('R','S'):
+                self.country_id = self.invoice_eletronic_id.partner_id.country_id
+                self.state_id = self.invoice_eletronic_id.partner_id.state_id
+                self.city_id = self.invoice_eletronic_id.partner_id.city_id
+            else:
+                self.country_id = self.invoice_eletronic_id.company_id.country_id
+                self.state_id = self.invoice_eletronic_id.company_id.state_id
+                self.city_id = self.invoice_eletronic_id.company_id.city_id

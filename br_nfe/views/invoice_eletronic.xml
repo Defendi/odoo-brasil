@@ -43,7 +43,7 @@
                         <field name="volume_ids" nolabel="1" context="{'default_invoice_eletronic_id': id}" />
                     </group>
                 </page>
-                <page name="cobranca" string="Cobrança">
+                <page name="cobranca" string="Cobrança" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}">
                     <group>
                         <field name="numero_fatura" />
                         <field name="fatura_bruto" />
@@ -54,7 +54,7 @@
                         <field name="duplicata_ids" nolabel="1" context="{'default_invoice_eletronic_id': id}" />
                     </group>
                 </page>
-                <page name="pagamentos" string="Pagamentos">
+                <page name="pagamentos" string="Pagamentos" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}">
                     <group>
                         <field name="pagamento_ids" nolabel="1" context="{'default_invoice_eletronic_id': id}">
 	                        <tree>
@@ -108,7 +108,7 @@
                 </span>
             </field>
             <field name="data_emissao" position="after">
-                <field name="data_entrada_saida" />
+                <field name="data_entrada_saida" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}"/>
             </field>
             <field name="numero_controle" position="after">
                 <field name="recibo_nfe" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
@@ -117,7 +117,7 @@
                 <field name="qrcode_hash" attrs="{'invisible': [('model', 'not in', ('65'))]}" />
                 <field name="qrcode_url" attrs="{'invisible': [('model', 'not in', ('65'))]}" />
                 <field name="nfe_processada_name" invisible="1"/>
-                <field name="nfe_processada" filename="nfe_processada_name"/>
+                <field name="nfe_processada" filename="nfe_processada_name" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}"/>
             </field>
             <field name="finalidade_emissao" position="after">
                 <field name="tipo_emissao" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
@@ -128,9 +128,9 @@
                 <field name="iest" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
             </field>
             <field name="valor_cofins" position="after">
-                <field name="valor_icms_fcp_uf_dest" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
-                <field name="valor_icms_uf_dest" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
-                <field name="valor_icms_uf_remet" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />
+                <field name="valor_icms_fcp_uf_dest"/>
+                <field name="valor_icms_uf_dest"/>
+                <field name="valor_icms_uf_remet"/>
             </field>
         </field>
     </record>

@@ -71,19 +71,22 @@ class InvoiceEletronic(models.Model):
         string='State', default='saida', readonly=True, states=STATE,
         track_visibility='always')
     schedule_user_id = fields.Many2one('res.users', string="Agendado por", readonly=True,track_visibility='always',default=lambda self: self.env.user.id)
-    model = fields.Selection(
-        [('55', '55 - NFe'),
-         ('65', '65 - NFCe'),
-         ('001', 'NFS-e - Nota Fiscal Paulistana'),
-         ('004', 'NFS-e - Provedor BETHA'),
-         ('002', 'NFS-e - Provedor GINFES'),
-         ('008', 'NFS-e - Provedor SIMPLISS'),
-         ('009', 'NFS-e - Provedor SUSES'),
-         ('010', 'NFS-e Imperial - Petrópolis'),
-         ('012', 'NFS-e - Florianópolis'),
-         ('203', 'NFS-e - Itajaí')],
-        string='Modelo', readonly=True, states=STATE)
+#     model = fields.Selection(
+#         [('55', '55 - NFe'),
+#          ('65', '65 - NFCe'),
+#          ('001', 'NFS-e - Nota Fiscal Paulistana'),
+#          ('004', 'NFS-e - Provedor BETHA'),
+#          ('002', 'NFS-e - Provedor GINFES'),
+#          ('008', 'NFS-e - Provedor SIMPLISS'),
+#          ('009', 'NFS-e - Provedor SUSES'),
+#          ('010', 'NFS-e Imperial - Petrópolis'),
+#          ('012', 'NFS-e - Florianópolis'),
+#          ('203', 'NFS-e - Itajaí')],
+#         string='Modelo', readonly=True, states=STATE)
+    model = fields.Selection([], string='Modelo', readonly=True, states=STATE)
     serie = fields.Many2one('br_account.document.serie', string='Série',readonly=True, states=STATE)
+    fiscal_type = fields.Selection(string='Tipo Fiscal',related='serie.fiscal_type',store=True,readonly=True)
+
     serie_documento = fields.Char(string='Série Documento', size=6, readonly=True, states=STATE)
     numero = fields.Integer(string='Número Documento', readonly=True, states=STATE)
     numero_controle = fields.Integer(string='Número de Controle', readonly=True, states=STATE)
@@ -294,6 +297,10 @@ class InvoiceEletronic(models.Model):
                 if doc.model in ['55','65']:
                     doc.serie = doc.fiscal_position_id.product_serie_id.id
                     doc.eletronic_item_ids._on_change_fiscal_position()
+
+    @api.onchange('model','serie')
+    def _on_change_model_serie(self):
+        self.code = '%s.%s.%s' % (self.model or '',self.serie.code or '', str(self.numero))
 
     def _create_attachment(self, prefix, event, data):
         file_name = '%s-%s.xml' % (
@@ -837,10 +844,11 @@ class InvoiceEletronicItem(models.Model):
 
     @api.onchange('fiscal_position_id')
     def _on_change_fiscal_position(self):
-        if self.product_id and self.fiscal_position_id and self.state == 'edit':
-            vals = self._compute_map_tax()
-            self.update(vals)
-
+#         if self.product_id and self.fiscal_position_id and self.state == 'edit':
+#             vals = self._compute_map_tax()
+#             self.update(vals)
+        pass
+    
     @api.onchange('quantidade','preco_unitario','desconto','seguro','frete','outras_despesas') 
     def _on_change_preco(self): 
         if self.state == 'edit':

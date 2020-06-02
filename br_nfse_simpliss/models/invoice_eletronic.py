@@ -24,8 +24,8 @@ STATE = {'edit': [('readonly', False)]}
 class InvoiceEletronic(models.Model):
     _inherit = 'invoice.eletronic'
 
-    state = fields.Selection(
-        selection_add=[('waiting', 'Aguardando processamento')])
+    model = fields.Selection(selection_add=[('008', 'NFS-e - Provedor SIMPLISS')])
+    state = fields.Selection(selection_add=[('waiting', 'Aguardando processamento')])
 
     def can_unlink(self):
         res = super(InvoiceEletronic, self).can_unlink()
