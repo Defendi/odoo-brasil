@@ -157,6 +157,11 @@
                                     <field name="inss_aliquota"/>
                                     <field name="inss_valor_retencao"/>
                                 </group>
+                                <group string="Outras Retenções">
+                                    <field name="outras_base_calculo"/>
+                                    <field name="outras_aliquota"/>
+                                    <field name="outras_valor_retencao"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>
