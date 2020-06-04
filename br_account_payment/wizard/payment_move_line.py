@@ -99,7 +99,7 @@ class PaymentAccountMoveLine(models.TransientModel):
             'amount': self.amount,
             'payment_date': self.payment_date,
             'payment_type': payment_type,
-            'payment_method_id': payment_method_id.id,
+            'payment_method_id': payment_method_id.id if bool(payment_method_id) else False,
             'currency_id': self.currency_id.id,
         }
         if len(self.invoice_id) > 0:

@@ -5,7 +5,7 @@
 		<field name="name">batch.invoice.eletronic.tree</field>
 		<field name="model">batch.invoice.eletronic</field>
 		<field name="arch" type="xml">
-			<tree string="Lote de NFSe">
+			<tree string="Lote de NFSe" create="false" delete="false" edit="false">
 				<field name="date"/>
 				<field name="company_id" groups="base.group_multi_company"/>
 				<field name="name"/>
@@ -20,7 +20,7 @@
 		<field name="name">batch.invoice.eletronic.form</field>
 		<field name="model">batch.invoice.eletronic</field>
 		<field name="arch" type="xml">
-			<form string="Documento Eletrônico">
+			<form string="Documento Eletrônico" create="false">
 				<header>
 					<button name="action_create_file" type="object" states="draft" string="Criar Arquivo" class="oe_highlight" groups="account.group_account_invoice"/>
 					<button name="action_process_file" type="object" states="tosend" string="Processar" class="oe_highlight" groups="account.group_account_invoice"/>

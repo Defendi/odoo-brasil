@@ -6,23 +6,47 @@
         <field name="inherit_id" ref="hr_contract.hr_contract_view_form" />
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <group name="salary_and_advantages" position="after">
-                <group name="">
-                    <field name="value_va"/>
-                    <field name="percent_va" />
-                    <field name="value_vr"/>
-                    <field name="percent_vr" />
-                    <field name="transportation_voucher" />
-                    <field name="percent_transportation" />
-                    <field name="health_insurance" />
-                    <field name="health_insurance_dependent" />
-                    <field name="ir_value" />
-                    <field name="workeddays" invisible="1" />
-                </group>
-            </group>
+            <page name="information" position="after">
+				<page name="benefits" string="Benefícios">
+                   	<group>
+                        <group string="Transporte">
+							<field name="transportation_voucher_has"/>
+							<field name="transportation_voucher" attrs="{'invisible': [('transportation_voucher_has', '!=', True)]}"/>
+							<field name="transportation_diary_qtd" attrs="{'invisible': [('transportation_voucher_has', '!=', True)]}"/>
+							<field name="percent_transportation" attrs="{'invisible': [('transportation_voucher_has', '!=', True)]}"/>
+						</group>
+						<group string="Alimentação/Refeição">
+                        	<field name="va_has"/>
+                        	<field name="value_va" attrs="{'invisible': [('va_has', '!=', True)]}"/>
+                        	<field name="percent_va" attrs="{'invisible': [('va_has', '!=', True)]}"/>
+                        	<field name="vr_has"/>
+                        	<field name="value_vr" attrs="{'invisible': [('vr_has', '!=', True)]}"/>
+                        	<field name="percent_vr" attrs="{'invisible': [('vr_has', '!=', True)]}"/>
+						</group>
+					</group>
+                   	<group>
+                        <group string="Saúde">
+                        	<field name="health_insurance_has"/>
+                        	<field name="health_company_id" attrs="{'invisible': [('health_insurance_has', '!=', True)]}"/>
+                        	<field name="health_insurance" attrs="{'invisible': [('health_insurance_has', '!=', True)]}"/>
+                        	<field name="health_insurance_dependent" attrs="{'invisible': [('health_insurance_has', '!=', True)]}"/>
+                        	<field name="dental_plan_has"/>
+                        	<field name="dental_plan_company_id" attrs="{'invisible': [('dental_plan_has', '!=', True)]}"/>
+                        	<field name="dental_plan" attrs="{'invisible': [('dental_plan_has', '!=', True)]}"/>
+                        	<field name="dental_plan_dependent" attrs="{'invisible': [('dental_plan_has', '!=', True)]}"/>
+                        </group>
+                        <group string="Seguro">
+                        	<field name="life_insurance_has"/>
+                        	<field name="life_company_id" attrs="{'invisible': [('life_insurance_has', '!=', True)]}"/>
+                        	<field name="policy_number" attrs="{'invisible': [('life_insurance_has', '!=', True)]}"/>
+                        </group>
+                    </group>
+                </page>
+            </page>
         </field>
     </record>
 
+	<!-- 
     <record id="hr_hr_employee_view_form3" model="ir.ui.view">
         <field name="name">hr.hr.employee.view.form3</field>
         <field name="model">hr.employee</field>
@@ -46,5 +70,6 @@
             </field>
         </field>
     </record>
+    -->
 
 </odoo>

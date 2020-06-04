@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="hr_dependent_type_01" model="hr.employee.dependent.type">
+        <field name="code">01</field>
+        <field name="name">Cônjuge</field>
+    </record>
+
+    <record id="hr_dependent_type_02" model="hr.employee.dependent.type">
+        <field name="code">02</field>
+        <field name="name">Companheiro(a) com o(a) qual tenha filho ou viva há mais de 5 (cinco) anos ou possua Declaração de União Estável</field>
+    </record>
+
+    <record id="hr_dependent_type_03" model="hr.employee.dependent.type">
+        <field name="code">03</field>
+        <field name="name">Filho(a) ou enteado(a)</field>
+    </record>
+
+    <record id="hr_dependent_type_04" model="hr.employee.dependent.type">
+        <field name="code">04</field>
+        <field name="name">Filho(a) ou enteado(a), universitário(a) ou cursando escola técnica de 2o grau</field>
+    </record>
+
+    <record id="hr_dependent_type_05" model="hr.employee.dependent.type">
+        <field name="code">06</field>
+        <field name="name">Irmão(ã), neto(a) ou bisneto(a) sem arrimo dos pais, do(a) qual detenha a guarda judicial</field>
+    </record>
+
+    <record id="hr_dependent_type_06" model="hr.employee.dependent.type">
+        <field name="code">07</field>
+        <field name="name">Irmão(ã), neto(a) ou bisneto(a) sem arrimo dos pais, universitário(a) ou cursando escola técnica de 2° grau, do(a) qual detenha a guarda judicial</field>
+    </record>
+
+    <record id="hr_dependent_type_07" model="hr.employee.dependent.type">
+        <field name="code">09</field>
+        <field name="name">Pais, avós e bisavós</field>
+    </record>
+
+    <record id="hr_dependent_type_08" model="hr.employee.dependent.type">
+        <field name="code">10</field>
+        <field name="name">Menor pobre do qual detenha a guarda judicial</field>
+    </record>
+
+    <record id="hr_dependent_type_09" model="hr.employee.dependent.type">
+        <field name="code">11</field>
+        <field name="name">A pessoa absolutamente incapaz, da qual seja tutor ou curador</field>
+    </record>
+
+    <record id="hr_dependent_type_10" model="hr.employee.dependent.type">
+        <field name="code">12</field>
+        <field name="name">Ex-cônjuge</field>
+    </record>
+
+    <record id="hr_dependent_type_11" model="hr.employee.dependent.type">
+        <field name="code">99</field>
+        <field name="name">Agregado/Outros</field>
+    </record>
+
+</odoo>

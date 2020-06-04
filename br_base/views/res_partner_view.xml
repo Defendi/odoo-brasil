@@ -41,7 +41,7 @@
                     <field name="legal_name" placeholder="Legal Name" nolabel="1" />
                 </h3>
                 <h3>
-                    <field name="cnpj_cpf" placeholder="CNPJ/CPF" nolabel="1" />
+                    <field name="cnpj_cpf" placeholder="CNPJ/CPF" nolabel="1" required="1"/>
                 </h3>
             </xpath>
             <field name="zip" position="replace" />

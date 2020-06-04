@@ -12,9 +12,10 @@
     'maintainer': 'Trustcode',
     'website': 'http://www.trustcode.com.br/',
     'version': '11.0.1.0.0',
-    'depends': ['hr', 'br_base'],
+    'depends': ['hr', 'br_base', 'br_zip'],
     'data': [
         'data/br_hr.cbo.csv',
+        'data/tabelas.xml',
         'security/ir.model.access.csv',
         'view/br_hr_cbo_view.xml',
         'view/hr_employee_view.xml',

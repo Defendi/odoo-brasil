@@ -25,24 +25,36 @@ class HrContract(models.Model):
                 item.calc_date = True
             else:
                 item.calc_date = False
+    
+    workeddays = fields.Float(compute=_get_worked_days, string="Dias trabalhados")
 
-    value_va = fields.Float('Vale Alimentação', help='Valor diário')
-    percent_va = fields.Float('% Vale Alimentação',
-                              help='Percentagem descontada ao final do mês')
-    value_vr = fields.Float('Vale Refeição', help='Valor diário')
-    percent_vr = fields.Float("% Vale Refeição",
-                              help='Percentual descontado ao fim do mês')
-    workeddays = fields.Float(compute=_get_worked_days,
-                              string="Dias trabalhados")
-    transportation_voucher = fields.Float(
-        'Vale Transporte', help='Valor diário')
-    percent_transportation = fields.Float(
-        '% Vale Transporte',
-        help='Percentual descontado ao fim do mês')
-    health_insurance = fields.Float(
-        'Plano de saúde', help='Valor mensal do plano de saúde')
-    health_insurance_dependent = fields.Float(
-        'Plano de Saúde de Dependentes',
-        help='Plano de Saúde para Cônjugue e Dependentes')
+    # Vale Transporte
+    transportation_voucher_has = fields.Boolean("Vale Transporte")
+    transportation_voucher = fields.Float('Valor Transporte', help='Valor diário', digits=(12,2), default=0.00)
+    transportation_diary_qtd = fields.Integer("Qtde diária")
+    percent_transportation = fields.Float('% Vale Transporte',help='Percentual descontado ao fim do mês')
+    # Vale Alimentação
+    va_has = fields.Boolean("Tem vale alimentação")
+    value_va = fields.Float('V.A. Valor/dia', help='Valor diário', digits=(12,2), default=0.00)
+    percent_va = fields.Float('% Vale Alimentação',help='Percentagem descontada ao final do mês')
+    # Vale Refeição
+    vr_has = fields.Boolean("Tem vale refeição")
+    value_vr = fields.Float(string="V.R. Valor/dia ",digits=(12,2), default=0.00)
+    percent_vr = fields.Float(u"% Vale Refeição", help=u'Percentual descontado ao fim do mês')
+    # Plano de saúde
+    health_insurance_has = fields.Boolean("Tem plano saúde") 
+    health_company_id = fields.Many2one('res.partner', 'Empresa/Cooperativa')
+    health_insurance = fields.Float('Plano de saúde', help=u'Valor mensal do plano de saúde')
+    health_insurance_dependent = fields.Float('Plano de Saúde de Dependentes', help=u'Plano de Saúde para Cônjugue e Dependentes')
+    # Plano odontológico
+    dental_plan_has = fields.Boolean("Tem plano dental") 
+    dental_plan_company_id = fields.Many2one('res.partner', 'Empresa/Cooperativa')
+    dental_plan = fields.Float('Plano de saúde', help='Valor mensal do plano dental')
+    dental_plan_dependent = fields.Float('Plano Dental de Dependentes', help='Plano de Saúde para Cônjugue e Dependentes')
+    # Seguro de Vida
+    life_insurance_has = fields.Boolean("Tem seguro vida")
+    life_company_id = fields.Many2one('res.partner', 'Seguradora')
+    policy_number = fields.Char('Nr Apólice',size=50)
+    
     calc_date = fields.Boolean(compute=_check_date, string="Calcular data")
     ir_value = fields.Float(string="Valor IR")

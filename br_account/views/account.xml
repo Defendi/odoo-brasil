@@ -11,15 +11,39 @@
         </field>
     </record>
 
+    <record id="view_br_account_search" model="ir.ui.view">
+        <field name="name">br.account.account.search</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_search"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="shortcut" />
+            </field>
+		</field>
+	</record>
+
     <record id="br_account_account_form" model="ir.ui.view">
         <field name="name">br_account.account.form</field>
         <field name="model">account.account</field>
         <field name="inherit_id" ref="account.view_account_form"/>
         <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="shortcut" />
+            </field>
             <field name="user_type_id" position="after">
                 <field name="account_type" />
             </field>
         </field>
     </record>
 
+    <record id="view_br_account_list" model="ir.ui.view">
+        <field name="name">br.account.account.list</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_list"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="shortcut" />
+            </field>
+		</field>
+	</record>
 </odoo>

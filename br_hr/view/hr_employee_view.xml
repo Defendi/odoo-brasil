@@ -1,80 +1,165 @@
 <?xml version="1.0"?>
 <odoo>
+
     <record model="ir.ui.view" id="view_br_hr_employee_form">
         <field name="name">br_hr_employee.form</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form" />
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <field name="address_home_id" position="after">
-                <field name="cpf"/>
-            </field>
+        	<field name="country_id" position="replace"/>
+        	<field name="identification_id" position="replace"/>
+        	<field name="passport_id" position="replace"/>
+        	<field name="gender" position="replace"/>
+        	<field name="marital" position="replace"/>
+        	<field name="birthday" position="replace"/>
+        	<field name="address_home_id" position="replace"/>
+        	<field name="visa_no" position="replace"/>
+        	<field name="permit_no" position="replace"/>
+        	<field name="visa_expire" position="replace"/>
+			<field name="bank_account_id" position="replace"/>
+            <xpath expr="//page[@name='personal_information']" position="attributes">
+            	<attribute name="invisible">1</attribute>
+            </xpath>
             <page name="public" position="after">
-                <page string="Dados Trabalhistas">
-                    <form string="Dados trabalhistas" version="7.0">
-                        <group>
-                            <group string="CTPS">
-                                <field name="ctps" string="Number"/>
-                                <field name="ctps_series" />
-                                <field name="ctps_date"/>
-                            </group>
-                            <group string="RG">
-                                <field name="rg" string="Number"/>
-                                <field name="organ_exp"/>
-                                <field name="rg_emission"/>
-                            </group>
-                            <group string="Reservista">
-                                <field name="creservist" string="Number"/>
-                                <field name="crresv_categ"/>
-                            </group>
-                            <group string="Título eleitoral">
-                                <field name="title_voter" string="Number"/>
-                                <field name="zone_voter"/>
-                                <field name="session_voter"/>
-                            </group>
-                            <group string="Carteira de motorista">
-                                <field name="driver_license" string="Number"/>
-                                <field name="driver_categ"/>
-                                <field name="ginstru"/>
-                            </group>
-                            <group string="PIS/PASEP">
-                                <field name="pis_pasep" placeholder="XXX.XXXXX.XX-X" />
-                            </group>
-                            <group string="Pais">
-                                <field name="father_name"/>
-                                <field name="mother_name"/>
-                            </group>
+                <page name="personal_information" string="Dados Pessoais" groups="hr.group_hr_user">
+                	<group>
+                    	<group string="Contato">
+                     		<field name='address_home_id'/>
+                         	<label for="street" string="Endereço"/>
+                         	<div class="o_address_format">
+	                			<field name="zip" placeholder="CEP" class="o_address_zip oe_inline" />
+               					<field name="street" placeholder="Logradouro" class="o_address_street" />
+               					<field name="number" placeholder="Número" class="o_address_zip"/>
+                				<field name="district" placeholder="Bairro" class="o_address_street" />
+                        		<field name="complement" placeholder="Complemento" class="o_address_street" />
+                        		<field name="country_id" placeholder="País" options="{'no_create': True, 'no_create_edit': True}" />
+                         		<div class="o_row">
+                           			<field name="state_id" placeholder="Estado" options="{'no_create': True, 'no_create_edit': True}" />
+                           			<field name="city_id" placeholder="Cidade" options="{'no_create': True, 'no_create_edit': True}" />
+                           		</div>
+                         	</div>
+                        	<field name="personal_phone"/>
+                        	<field name="personal_mobile"/>
+                        	<field name="personal_email"/>
+	                    	<field name="father_name"/>
+	                    	<field name="mother_name"/>
                         </group>
-                    </form>
-                </page>
-                <page string="Spouse and Dependents">
-                    <form string="Spouse and Dependents" version="7.0">
-                        <group colspan="4" col="4">
-                            <field name="have_dependent"/>
+                        <group string="Cidadania e Outras Informações">
+                        	<field name="have_dependent"/>
+                        	<label for="birthday"/>
+                        	<div class="o_row">
+                            	<field name="birthday"/> / 
+                            	<field name="employee_age"/> Ano(s)
+                            </div>
+                            <field name="gender"/>
+                            <field name="marital"/>
+                            <field name="nationality_id" options='{"no_open": True, "no_create": True}'/>
+                            <field name="ginstru" />
+                            <field name="cor" />
+                        	<field name="no_of_dependent"/>
+                            <field name="no_of_dependent_children"/>
+                            <field name="no_of_dependent_health_plan"/>
                         </group>
-                        <field name="dependent_ids"  widget="one2many_list" nolabel="1" attrs="{'invisible':[('have_dependent', '!=', True)]}">
+                    </group>
+                	<group colspan="4" string="Beneficiários" attrs="{'invisible':[('have_dependent', '!=', True)]}">
+                        <field name="dependent_ids"  widget="one2many_list" nolabel="1">
                             <tree>
                                 <field name="dependent_name" />
-                                <field name="dependent_age"/>
-                                <field name="dependent_type"/>
-                                <field name="pension_benefits"/>
-                                <field name="use_health_plan"/>
-                                <field name="is_dependent"/>
+                                <field name="dependent_birthday"/>
+                                <field name="dependent_age_vl"/>
+                                <field name="dependent_cpf"/>
+                            	<field name="dependent_type_id"/>
                             </tree>
                             <form>
                                 <group>
+                                	<field name="dependent_type_id"/>
                                     <field name="dependent_name" />
-                                    <field name="dependent_age"/>
-                                    <field name="dependent_type"/>
+                                    <field name="dependent_cpf" />
+		                        	<label for="dependent_birthday"/>
+		                        	<div class="o_row">
+	                                    <field name="dependent_birthday"/> / <field name="dependent_age_vl"/> Anos
+	                                </div>
                                     <field name="pension_benefits"/>
                                     <field name="use_health_plan"/>
                                     <field name="is_dependent"/>
+                                    <field name="irrf_is"/>
                                 </group>
                             </form>
                         </field>
-                    </form>
+                    </group>
                 </page>
+                <page name="document" string="Documentos">
+	                <group>
+	                    <group string="R.G.">
+	                        <field name="rg" string="Número"/>
+	                        <field name="rg_organ_exp"/>
+	                        <field name="rg_emission"/>
+	                    </group>
+	                    <group string="Identificação">
+	                        <field name="cpf" placeholder="XXX.XXX.XXX-XX"/>
+							<field name="pis_pasep" placeholder="XXX.XXXXX.XX-X"/>
+				        	<field name="passport_id"/>
+	                    </group>
+	                </group>
+	                <group>
+	                    <group string="Título eleitoral">
+	                        <field name="title_voter" string="Número"/>
+	                        <field name="zone_voter"/>
+	                        <field name="session_voter"/>
+	                    </group>
+	                    <group string="Carteira Trabalho">
+	                        <field name="ctps" string="Número"/>
+	                        <field name="ctps_series" />
+	                        <field name="ctps_date"/>
+	                    </group>
+	                </group>
+	                <group>
+	                    <group string="Certificado Reservista">
+	                        <field name="cert_res_nr" string="Número"/>
+	                        <field name="cert_res_categ"/>
+	                    </group>
+	                    <group string="Carteira de motorista">
+	                        <field name="driver_license" string="Number"/>
+	                        <field name="driver_categ"/>
+	                        <field name="ginstru"/>
+	                    </group>
+	                </group>
+	                <group>
+	                	<group string="Permissão de Trabalho">
+				        	<field name="visa_no"/>
+				        	<field name="permit_no"/>
+				        	<field name="visa_expire"/>
+	                	</group>
+                   		<group string="Dados Bancários">
+	                   		<field name="bank_account_id" invisible="1"/>
+	                   		<field name="bank_id" options="{'no_create': True, 'no_create_edit': True}"/>
+	                   		<label for="bra_number" string="Agência/Dig"/>
+	                   		<div class="o_row">
+	                   			<field name="bra_number" />
+	                   			<field name="bra_number_dig" />
+	                   		</div>
+	                   		<label for="acc_number" string="Conta/Dig"/>
+	                   		<div class="o_row">
+	                   			<field name="acc_number" />
+	                   			<field name="acc_number_dig" />
+	                   		</div>
+	                   	</group>
+                   	</group>
+				</page>
             </page>
         </field>
     </record>
+    
+<!-- 
+	<record id="br_hr_hr_employee_view_form2" model="ir.ui.view">
+	    <field name="name">br.hr.hr.employee.view.form2</field>
+	    <field name="model">hr.employee</field>
+	    <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form2"/>
+	    <field name="arch" type="xml">
+            <field name="medic_exam" position="replace"/>
+	    </field>
+	</record>
+ -->
+ 
 </odoo>

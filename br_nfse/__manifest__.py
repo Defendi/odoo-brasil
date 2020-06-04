@@ -31,6 +31,7 @@
         'wizard/cancel_nfse.xml',
         'wizard/create_batch.xml',
         'security/ir.model.access.csv',
+        'security/nfse_security.xml',
     ],
     'installable': True,
 }
