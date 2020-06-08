@@ -27,6 +27,9 @@
         <field name="model">br_account.import.declaration</field>
         <field name="arch" type="xml">
             <form string="Declaração de Importação">
+                <header>
+					<field name="state" widget="statusbar" statusbar_visible="draft,done" />
+                </header>
             	<sheet>
 	                <group>
 	                    <group>
@@ -99,6 +102,7 @@
 										                    <field name="uom_id"/>
 										                    <field name="price_unit" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 										                    <field name="price_unit_cl" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										                    <field name="price_unit_edoc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										                    <field name="amount_discount" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 										                    <field name="weight_unit"/>
 									                	</group>
@@ -148,18 +152,39 @@
 									                		<field name="ii_valor" attrs="{'invisible': [('tax_ii_id','=',False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									                	</group>
 									                	<group string="IPI">
+									                		<field name="tax_ipi_id"/>
+									                		<field name="ipi_inclui_ii_base" attrs="{'invisible': [('tax_ipi_id','=',False)]}"/>
+									                		<field name="ipi_base_calculo" attrs="{'invisible': [('tax_ipi_id','=',False)]}"/>
+									                		<field name="ipi_aliquota" attrs="{'invisible': [('tax_ipi_id','=',False)]}"/>
+									                		<field name="ipi_valor" attrs="{'invisible': [('tax_ipi_id','=',False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									                	</group>
 									                </group>
 									                <group>
 									                	<group string="PIS">
+									                		<field name="tax_pis_id"/>
+									                		<field name="pis_base_calculo" attrs="{'invisible': [('tax_pis_id','=',False)]}"/>
+									                		<field name="pis_aliquota" attrs="{'invisible': [('tax_pis_id','=',False)]}"/>
+									                		<field name="pis_valor" attrs="{'invisible': [('tax_pis_id','=',False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									                	</group>
 									                	<group string="COFINS">
+									                		<field name="tax_cofins_id"/>
+									                		<field name="cofins_base_calculo" attrs="{'invisible': [('tax_cofins_id','=',False)]}"/>
+									                		<field name="cofins_aliquota" attrs="{'invisible': [('tax_cofins_id','=',False)]}"/>
+									                		<field name="cofins_valor" attrs="{'invisible': [('tax_cofins_id','=',False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									                	</group>
 									                </group>
 									                <group>
 									                	<group string="ICMS">
+									                		<field name="tax_icms_id"/>
+									                		<field name="icms_base_calculo" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
+									                		<field name="icms_aliquota" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
+									                		<field name="icms_valor" attrs="{'invisible': [('tax_icms_id','=',False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									                	</group>
 									                	<group string="ICMS ST">
+									                		<field name="tax_icms_st_id"/>
+									                		<field name="icms_st_base_calculo" attrs="{'invisible': [('tax_icms_st_id','=',False)]}"/>
+									                		<field name="icms_st_aliquota" attrs="{'invisible': [('tax_icms_st_id','=',False)]}"/>
+									                		<field name="icms_st_valor" attrs="{'invisible': [('tax_icms_st_id','=',False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									                	</group>
 									                </group>
 									            </page>

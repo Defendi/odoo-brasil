@@ -3,6 +3,9 @@ from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
 from odoo.tools import float_is_zero, float_compare
 
+DI_STATE = [('draft','nova'),('done','pronta')]
+DI_STATES= {'draft': [('readonly', False)]}
+
 class ImportDeclaration(models.Model):
     _inherit = 'br_account.import.declaration'
 
@@ -48,17 +51,19 @@ class ImportDeclaration(models.Model):
         for di in self:
             di.siscomex_converted_vl = di.siscomex_value
 
-    partner_id = fields.Many2one('res.partner', string='Exportador')
-    freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00)
-    insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00)
-    tax_cambial = fields.Float('Tx. Cambial', digits=(12,6), default=0.00)
+    partner_id = fields.Many2one('res.partner', string='Exportador', readonly=True, states=DI_STATES)
+    freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    tax_cambial = fields.Float('Tx. Cambial', digits=(12,6), default=0.00, readonly=True, states=DI_STATES)
+
+    state = fields.Selection(DI_STATE, string='Situação', default='draft')
     
-    invoice_id = fields.Many2one('account.invoice', 'Fatura', ondelete='cascade', index=True)
-    name = fields.Char('Número da DI', size=10, required=True)
-    date_registration = fields.Date('Data de Registro', required=True)
-    state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", required=True)
-    location = fields.Char('Local', required=True, size=60)
-    date_release = fields.Date('Data de Liberação', required=True)
+    invoice_id = fields.Many2one('account.invoice', 'Fatura', ondelete='cascade', index=True, readonly=True, states=DI_STATES)
+    name = fields.Char('Número da DI', size=10, required=True, readonly=True, states=DI_STATES)
+    date_registration = fields.Date('Data de Registro', required=True, readonly=True, states=DI_STATES)
+    state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", required=True, readonly=True, states=DI_STATES)
+    location = fields.Char('Local', required=True, size=60, readonly=True, states=DI_STATES)
+    date_release = fields.Date('Data de Liberação', required=True, readonly=True, states=DI_STATES)
     type_transportation = fields.Selection([
         ('1', '1 - Marítima'),
         ('2', '2 - Fluvial'),
@@ -70,28 +75,28 @@ class ImportDeclaration(models.Model):
         ('8', '8 - Conduto / Rede Transmissão'),
         ('9', '9 - Meios Próprios'),
         ('10', '10 - Entrada / Saída ficta'),
-    ], 'Transporte Internacional', required=True, default="1")
+    ], 'Transporte Internacional', required=True, default="1", readonly=True, states=DI_STATES)
     type_import = fields.Selection([
         ('1', '1 - Importação por conta própria'),
         ('2', '2 - Importação por conta e ordem'),
         ('3', '3 - Importação por encomenda'),
-    ], 'Tipo de Importação', default='1', required=True)
-    thirdparty_cnpj = fields.Char('CNPJ', size=18)
-    thirdparty_state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]")
-    exporting_code = fields.Char('Código do Exportador', required=True, size=60)
-    additional_information = fields.Text('Informações Adicionais')
+    ], 'Tipo de Importação', default='1', required=True, readonly=True, states=DI_STATES)
+    thirdparty_cnpj = fields.Char('CNPJ', size=18, readonly=True, states=DI_STATES)
+    thirdparty_state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", readonly=True, states=DI_STATES)
+    exporting_code = fields.Char('Código do Exportador', required=True, size=60, readonly=True, states=DI_STATES)
+    additional_information = fields.Text('Informações Adicionais', readonly=True, states=DI_STATES)
 
-    company_id = fields.Many2one('res.company', 'Empresa', default=lambda self: self.env.user.company_id.id)
+    company_id = fields.Many2one('res.company', 'Empresa', default=lambda self: self.env.user.company_id.id, readonly=True, states=DI_STATES)
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id', string="Moeda Empresa", readonly=True)
-    currency_purchase_id = fields.Many2one('res.currency', string="Moeda Compra", required=True, default=lambda self: self.env.user.company_id.currency_id.id)
+    currency_purchase_id = fields.Many2one('res.currency', string="Moeda Compra", required=True, default=lambda self: self.env.user.company_id.currency_id.id, readonly=True, states=DI_STATES)
 
-    afrmm_value = fields.Float('Valor AFRMM', digits=dp.get_precision('Account'), default=0.00)
-    siscomex_value = fields.Float('Valor SISCOMEX', digits=dp.get_precision('Account'), default=0.00)
-    freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00)
-    insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00)
-    tax_cambial = fields.Float('Taxa Cambial', digits=(12,6), default=0.00)
+    afrmm_value = fields.Float('Valor AFRMM', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    siscomex_value = fields.Float('Valor SISCOMEX', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    tax_cambial = fields.Float('Taxa Cambial', digits=(12,6), default=0.00, readonly=True, states=DI_STATES)
     
-    line_ids = fields.One2many('br_account.import.declaration.line','import_declaration_id', 'Linhas da DI')
+    line_ids = fields.One2many('br_account.import.declaration.line','import_declaration_id', 'Linhas da DI', readonly=True, states=DI_STATES)
 
     # Campos Calculados
     freight_converted_vl = fields.Float('Frete', compute='_compute_freight', digits=dp.get_precision('Account'), readonly=True, store=True)
@@ -127,6 +132,7 @@ class ImportDeclarationLine(models.Model):
 
             cif_value = amount_local + freight_value + insurance_value
             cif_afrmm_value = cif_value + afrmm_value
+            price_unit_edoc = cif_afrmm_value / line.quantity 
             
             siscomex_part = (cif_value / line.total_cif) * 100 if line.total_cif > 0.0 else 0.0
             siscomex_value = line.siscomex_converted_vl * (siscomex_part / 100)
@@ -135,6 +141,7 @@ class ImportDeclarationLine(models.Model):
                 'amount_value': amount, 
                 'amount_value_cl': amount_local,
                 'price_unit_cl': price_unit_local,
+                'price_unit_edoc': price_unit_edoc,
                 'amount_weight': weight,
                 'freight_part': freight_p,
                 'freight_value': freight_value,
@@ -148,21 +155,81 @@ class ImportDeclarationLine(models.Model):
             }
             line.update(vals)
 
-    @api.depends('cif_afrmm_value','tax_ii_id')
-    def _compute_ii(self):
+    @api.depends('cif_afrmm_value','tax_ii_id','tax_ipi_id','ipi_inclui_ii_base','tax_pis_id','tax_cofins_id','tax_icms_id','tax_icms_st_id')
+    def _compute_impostos(self):
         for line in self:
-            ii_base_calculo = line.cif_afrmm_value
             ii_aliquota = 0.0
             ii_valor = 0.0
-            if bool(line.tax_ii_id):
+            ipi_aliquota = 0.0
+            ipi_valor = 0.0
+            pis_aliquota = 0.0
+            pis_valor = 0.0
+            cofins_aliquota = 0.0
+            cofins_valor = 0.0
+            icms_aliquota = 0.0
+            icms_valor = 0.0
+            icms_st_aliquota = 0.0
+            icms_st_valor = 0.0
+            ii_base_calculo = line.cif_afrmm_value
+            ipi_base_calculo = line.cif_afrmm_value
+            pis_base_calculo = line.cif_afrmm_value
+            cofins_base_calculo = line.cif_afrmm_value
+            icms_base_calculo = line.cif_afrmm_value + line.siscomex_value
+            icms_st_base_calculo = 0.0
+
+            if len(line.tax_ii_id) > 0:
                 ii_aliquota += line.tax_ii_id.amount
                 ii_valor += ii_base_calculo * (ii_aliquota/100)
+                icms_base_calculo += ii_valor
+
+            if bool(line.ipi_inclui_ii_base):
+                ipi_base_calculo += ii_valor
+            if len(line.tax_ipi_id) > 0:
+                ipi_aliquota += line.tax_ipi_id.amount
+                ipi_valor += ipi_base_calculo * (ipi_aliquota/100)
+                icms_base_calculo += ipi_valor
+
+            if len(line.tax_pis_id) > 0:
+                pis_aliquota += line.tax_pis_id.amount
+                pis_valor += pis_base_calculo * (pis_aliquota/100)
+                icms_base_calculo += pis_valor
+
+            if len(line.tax_cofins_id) > 0:
+                cofins_aliquota += line.tax_cofins_id.amount
+                cofins_valor += cofins_base_calculo * (cofins_aliquota/100)
+                icms_base_calculo += cofins_valor
+
+            if len(line.tax_icms_id) > 0:
+                icms_aliquota += line.tax_icms_id.amount
+                icms_base_calculo = icms_base_calculo / (1-(icms_aliquota/100))
+                icms_valor += icms_base_calculo * (icms_aliquota/100)
+
+            if len(line.tax_icms_st_id) > 0:
+                icms_st_aliquota += line.tax_icms_st_id.amount
+                icms_st_base_calculo = icms_base_calculo + (icms_base_calculo * (icms_st_aliquota/100))
+                icms_st_valor += (icms_st_base_calculo * (icms_aliquota/100)) - icms_valor
+
             line.update({
                 'ii_base_calculo': ii_base_calculo,
                 'ii_aliquota': ii_aliquota,
                 'ii_valor': ii_valor,
+                'ipi_base_calculo': ipi_base_calculo,
+                'ipi_aliquota': ipi_aliquota,
+                'ipi_valor': ipi_valor,
+                'pis_base_calculo': pis_base_calculo,
+                'pis_aliquota': pis_aliquota,
+                'pis_valor': pis_valor,
+                'cofins_base_calculo': cofins_base_calculo,
+                'cofins_aliquota': cofins_aliquota,
+                'cofins_valor': cofins_valor,
+                'icms_base_calculo': icms_base_calculo,
+                'icms_aliquota': icms_aliquota,
+                'icms_valor': icms_valor,
+                'icms_st_base_calculo': icms_st_base_calculo,
+                'icms_st_aliquota': icms_st_aliquota,
+                'icms_st_valor': icms_st_valor,
             })
-                 
+
     import_declaration_id = fields.Many2one('br_account.import.declaration', 'DI', ondelete='cascade')
     currency_id = fields.Many2one('res.currency', related='import_declaration_id.currency_id', readonly=True, store=True)
     currency_purchase_id = fields.Many2one('res.currency', related='import_declaration_id.currency_purchase_id', readonly=True, store=True)
@@ -189,15 +256,46 @@ class ImportDeclarationLine(models.Model):
     # impostos
     # II
     tax_ii_id = fields.Many2one('account.tax', string="Alíquota II", domain=[('domain', '=', 'ii')])
-    ii_base_calculo = fields.Float('Base II', compute='_compute_ii', digits=dp.get_precision('Account'), default=0.00, store=True)
-    ii_aliquota = fields.Float('II %', compute='_compute_ii', digits=(12,4), default=0.00)
-    ii_valor = fields.Float('Valor II', digits=dp.get_precision('Account'),default=0.00, compute='_compute_ii', store=True)
+    ii_base_calculo = fields.Float('Base II', compute='_compute_impostos', digits=dp.get_precision('Account'), default=0.00, store=True)
+    ii_aliquota = fields.Float('II %', compute='_compute_impostos', digits=(12,4), default=0.00)
+    ii_valor = fields.Float('Valor II', digits=dp.get_precision('Account'),default=0.00, compute='_compute_impostos', store=True)
     
+    # IPI
+    tax_ipi_id = fields.Many2one('account.tax', string="Alíquota IPI", domain=[('domain', '=', 'ipi')])
+    ipi_inclui_ii_base = fields.Boolean('Inclui II na base',default=True)
+    ipi_base_calculo = fields.Float('Base IPI', compute='_compute_impostos', digits=dp.get_precision('Account'), default=0.00, store=True)
+    ipi_aliquota = fields.Float('IPI %', compute='_compute_impostos', digits=(12,4), default=0.00)
+    ipi_valor = fields.Float('Valor IPI', digits=dp.get_precision('Account'),default=0.00, compute='_compute_impostos', store=True)
+
+    # PIS
+    tax_pis_id = fields.Many2one('account.tax', string="Alíquota PIS", domain=[('domain', '=', 'pis')])
+    pis_base_calculo = fields.Float('Base PIS', compute='_compute_impostos', digits=dp.get_precision('Account'), default=0.00, store=True)
+    pis_aliquota = fields.Float('PIS %', compute='_compute_impostos', digits=(12,4), default=0.00)
+    pis_valor = fields.Float('Valor PIS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_impostos', store=True)
+
+    # COFINS
+    tax_cofins_id = fields.Many2one('account.tax', string="Alíquota COFINS", domain=[('domain', '=', 'cofins')])
+    cofins_base_calculo = fields.Float('Base COFINS', compute='_compute_impostos', digits=dp.get_precision('Account'), default=0.00, store=True)
+    cofins_aliquota = fields.Float('COFINS %', compute='_compute_impostos', digits=(12,4), default=0.00)
+    cofins_valor = fields.Float('Valor COFINS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_impostos', store=True)
+
+    # ICMS
+    tax_icms_id = fields.Many2one('account.tax', string="Alíquota ICMS", domain=[('domain', '=', 'icms')])
+    icms_base_calculo = fields.Float('Base ICMS', compute='_compute_impostos', digits=dp.get_precision('Account'), default=0.00, store=True)
+    icms_aliquota = fields.Float('ICMS %', compute='_compute_impostos', digits=(12,4), default=0.00)
+    icms_valor = fields.Float('Valor ICMS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_impostos', store=True)
+
+    # ICMS ST
+    tax_icms_st_id = fields.Many2one('account.tax', string="Alíquota ICMS ST", domain=[('domain', '=', 'icmsst')])
+    icms_st_base_calculo = fields.Float('Base ICMS ST', compute='_compute_impostos', digits=dp.get_precision('Account'), default=0.00, store=True)
+    icms_st_aliquota = fields.Float('ICMS ST %', compute='_compute_impostos', digits=(12,4), default=0.00)
+    icms_st_valor = fields.Float('Valor ICMS ST', digits=dp.get_precision('Account'),default=0.00, compute='_compute_impostos', store=True)
 
     # Fileds Calculados
     amount_value = fields.Float(string='Valor FOB', compute='_compute_item', digits=dp.get_precision('Account'), readonly=True, store=True)
     amount_value_cl = fields.Float(string='Valor FOB', compute='_compute_item', digits=dp.get_precision('Account'), readonly=True, store=True)
     price_unit_cl = fields.Float(string='Preço Un', compute='_compute_item', digits=(12,5), readonly=True, store=True)
+    price_unit_edoc = fields.Float(string='Preço Un eDoc', compute='_compute_item', digits=(12,5), readonly=True, store=True)
     amount_weight = fields.Float(string='Peso Liq (kg)', compute='_compute_item', digits=(12,4), readonly=True, store=True)
     freight_part = fields.Float(string='% Frete', compute='_compute_item', digits=(12,4), readonly=True, store=True)
     freight_value = fields.Float(string='Frete', compute='_compute_item', digits=dp.get_precision('Account'), readonly=True, store=True)
