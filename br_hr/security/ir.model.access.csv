@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_employee_dependent_type_id,access_hr_employee_dependent_type,model_hr_employee_dependent_type,hr.group_hr_user,1,1,1,1
+access_hr_employee_dependent_id,access_hr_employee_dependent,model_hr_employee_dependent,hr.group_hr_user,1,1,1,1
 access_br_hr_cbo,access_br_hr_cbo,model_br_hr_cbo,hr.group_hr_manager,1,1,1,1
 access_hr_employee_dependent,access_hr_employee_dependent,model_hr_employee_dependent,hr.group_hr_user,1,1,1,1
