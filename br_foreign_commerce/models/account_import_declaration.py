@@ -3,13 +3,13 @@ from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
 from odoo.tools import float_is_zero, float_compare
 
-DI_STATE = [('draft','nova'),('done','pronta')]
+DI_STATE = [('draft','Aberta'),('done','Pronta')]
 DI_STATES= {'draft': [('readonly', False)]}
 
 class ImportDeclaration(models.Model):
     _inherit = 'br_account.import.declaration'
 
-    @api.depends('line_ids')
+    @api.depends('line_ids','freight_int_value','siscomex_value')
     def _compute_di(self):
         for di in self:
             total_fob_vl = sum(line.amount_value for line in di.line_ids)
@@ -17,12 +17,60 @@ class ImportDeclaration(models.Model):
             total_weight = sum((line.weight_unit * line.quantity) for line in di.line_ids)
             total_cif = sum(line.cif_value for line in di.line_ids)
             total_cif_afrmm = sum(line.cif_afrmm_value for line in di.line_ids)
+
+            total_bc_ii = sum(line.ii_base_calculo for line in di.line_ids)
+            total_ii = sum(line.ii_valor for line in di.line_ids)
+
+            total_bc_ipi = sum(line.ipi_base_calculo for line in di.line_ids)
+            total_ipi = sum(line.ipi_valor for line in di.line_ids)
+
+            total_bc_pis = sum(line.pis_base_calculo for line in di.line_ids)
+            total_pis = sum(line.pis_valor for line in di.line_ids)
+
+            total_bc_cofins = sum(line.cofins_base_calculo for line in di.line_ids)
+            total_cofins = sum(line.cofins_valor for line in di.line_ids)
+
+            total_bc_icms = sum(line.icms_base_calculo for line in di.line_ids)
+            total_icms = sum(line.icms_valor for line in di.line_ids)
+
+            total_bc_icms_st = sum(line.icms_st_base_calculo for line in di.line_ids)
+            total_icms_st = sum(line.icms_st_valor for line in di.line_ids)
+
+            total_imposto = total_ii + total_ipi + total_icms + total_icms_st
+            total_depesa = total_pis + total_cofins + di.siscomex_value
+            total_nota = total_cif_afrmm + total_imposto + total_depesa
+
             vals = {
                 'total_weight': total_weight,
                 'total_fob_vl': total_fob_vl,
                 'total_fob_lc': total_fob_lc,
                 'total_cif': total_cif,
                 'total_cif_afrmm': total_cif_afrmm,
+                'total_produtos': total_cif_afrmm,
+                'total_bc_ii': total_bc_ii,
+                'total_ii': total_ii,
+                'total_bc_ipi': total_bc_ipi,
+                'total_ipi': total_ipi,
+                'total_bc_pis': total_bc_pis,
+                'total_pis': total_pis,
+                'total_bc_cofins': total_bc_cofins,
+                'total_cofins': total_cofins,
+                'total_bc_icms': total_bc_icms,
+                'total_icms': total_icms,
+                'total_bc_icms_st': total_bc_icms_st,
+                'total_icms_st': total_icms_st,
+                'total_imposto': total_imposto,
+                'total_depesa': total_depesa,
+                'total_nota': total_nota,
+                'espelho_bc_icms': total_bc_icms,
+                'espelho_vl_icms': total_icms,
+                'espelho_vl_icms_st': total_icms_st,
+                'espelho_vl_ii': total_ii,
+                'espelho_vl_ipi': total_ipi,
+                'espelho_vl_other': total_depesa,
+                'espelho_produtos': total_cif_afrmm,
+                'espelho_frete': di.freight_int_value,
+                'espelho_total_nfe': total_nota,
             }
             di.update(vals)
 
@@ -51,12 +99,12 @@ class ImportDeclaration(models.Model):
         for di in self:
             di.siscomex_converted_vl = di.siscomex_value
 
+    state = fields.Selection(DI_STATE, string='Situação', default='draft')
+
     partner_id = fields.Many2one('res.partner', string='Exportador', readonly=True, states=DI_STATES)
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     tax_cambial = fields.Float('Tx. Cambial', digits=(12,6), default=0.00, readonly=True, states=DI_STATES)
-
-    state = fields.Selection(DI_STATE, string='Situação', default='draft')
     
     invoice_id = fields.Many2one('account.invoice', 'Fatura', ondelete='cascade', index=True, readonly=True, states=DI_STATES)
     name = fields.Char('Número da DI', size=10, required=True, readonly=True, states=DI_STATES)
@@ -86,13 +134,14 @@ class ImportDeclaration(models.Model):
     exporting_code = fields.Char('Código do Exportador', required=True, size=60, readonly=True, states=DI_STATES)
     additional_information = fields.Text('Informações Adicionais', readonly=True, states=DI_STATES)
 
-    company_id = fields.Many2one('res.company', 'Empresa', default=lambda self: self.env.user.company_id.id, readonly=True, states=DI_STATES)
+    company_id = fields.Many2one('res.company', 'Empresa', default=lambda self: self.env.user.company_id.id)#, readonly=True, states=DI_STATES)
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id', string="Moeda Empresa", readonly=True)
-    currency_purchase_id = fields.Many2one('res.currency', string="Moeda Compra", required=True, default=lambda self: self.env.user.company_id.currency_id.id, readonly=True, states=DI_STATES)
+    currency_purchase_id = fields.Many2one('res.currency', string="Moeda Compra", required=True, default=lambda self: self.env.user.company_id.currency_id.id)#, readonly=True, states=DI_STATES)
 
     afrmm_value = fields.Float('Valor AFRMM', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     siscomex_value = fields.Float('Valor SISCOMEX', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    freight_int_value = fields.Float('Valor Frete Interno', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     tax_cambial = fields.Float('Taxa Cambial', digits=(12,6), default=0.00, readonly=True, states=DI_STATES)
     
@@ -109,7 +158,36 @@ class ImportDeclaration(models.Model):
     total_fob_lc = fields.Float('Total FOB', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
     total_cif = fields.Float(string='Total CIF', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
     total_cif_afrmm = fields.Float(string='Total CIF+AFRMM', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_produtos = fields.Float(string='Total Produtos', compute='_compute_di', digits=dp.get_precision('Account'))
 
+    total_imposto = fields.Float(string='Total Imposto', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_depesa = fields.Float(string='Total Despesa', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_nota = fields.Float(string='Total nota', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+
+    total_bc_ii = fields.Float(string='Total BC II', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_ii = fields.Float(string='Total II', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_bc_ipi = fields.Float(string='Total BC IPI', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_ipi = fields.Float(string='Total IPI', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_bc_pis = fields.Float(string='Total BC PIS', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_pis = fields.Float(string='Total PIS', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_bc_cofins = fields.Float(string='Total BC COFINS', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_cofins = fields.Float(string='Total COFINS', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_bc_icms = fields.Float(string='Total BC ICMS', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_icms = fields.Float(string='Total ICMS', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_bc_icms_st = fields.Float(string='Total BC ICMS ST', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+    total_icms_st = fields.Float(string='Total ICMS ST', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
+
+    # Espelhos da NFe
+    espelho_bc_icms = fields.Float(string='BC ICMS', compute='_compute_di', digits=dp.get_precision('Account'))
+    espelho_vl_icms = fields.Float(string='Valor ICMS', compute='_compute_di', digits=dp.get_precision('Account'))
+    espelho_vl_icms_st = fields.Float(string='Valor ICMS ST', compute='_compute_di', digits=dp.get_precision('Account'))
+    espelho_vl_ii = fields.Float(string='Valor II', compute='_compute_di', digits=dp.get_precision('Account'))
+    espelho_vl_ipi = fields.Float(string='Valor IPI', compute='_compute_di', digits=dp.get_precision('Account'))
+    espelho_vl_other = fields.Float(string='Outras Despesas', compute='_compute_di', digits=dp.get_precision('Account'))
+    espelho_produtos = fields.Float(string='Valor Produtos', compute='_compute_di', digits=dp.get_precision('Account'))
+    espelho_frete = fields.Float(string='Valor Frete', compute='_compute_di', digits=dp.get_precision('Account'))
+    espelho_total_nfe = fields.Float(string='Total NFe', compute='_compute_di', digits=dp.get_precision('Account'))
+    
 class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'

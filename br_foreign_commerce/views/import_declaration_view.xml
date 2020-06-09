@@ -18,6 +18,7 @@
                 <field name="state_id"/>
                 <field name="date_release"/>
                 <field name="type_transportation"/>
+                <field name="state"/>
             </tree>
         </field>
     </record>
@@ -200,12 +201,13 @@
 									<field name="siscomex_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									<field name="freight_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 									<field name="insurance_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
+									<field name="freight_int_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 								</group>
 								<group colspan="4" class="oe_subtotal_footer oe_right">
-									<field name="total_fob_vl" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
-									<field name="total_fob_lc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-									<field name="total_cif" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-									<field name="total_cif_afrmm" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_imposto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_depesa" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_nota" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 			                    </group>
 		                    </group>
 	                    </page>
@@ -216,11 +218,52 @@
                         			<field name="insurance_converted_vl" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                         			<field name="afrmm_converted_vl" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                         			<field name="siscomex_converted_vl" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                        		</group>
-                        		<group string="Totais">
-                        			<field name="total_weight"/>
                         			<field name="total_desembaraco_vl" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                         		</group>
+                        		<group string="Diversos">
+                        			<field name="total_weight"/>
+									<field name="total_fob_vl" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
+									<field name="total_fob_lc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_cif" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_cif_afrmm" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                        		</group>
+                        	</group>
+                        	<group>
+                        		<group string="Base Cálculo">
+									<field name="total_bc_ii" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_bc_ipi" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_bc_pis" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_bc_cofins" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_bc_icms" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_bc_icms_st" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                        		</group>
+                        		<group string="Impostos Calculados">
+									<field name="total_ii" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_ipi" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_pis" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_cofins" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_icms" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="total_icms_st" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                        		</group>
+                        	</group>
+                        </page>
+                        <page string="Espelho eDoc">
+                        	<group>
+                        		<group>
+									<field name="espelho_bc_icms" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="espelho_vl_icms" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="espelho_vl_ii" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="espelho_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                        		</group>
+                        		<group>
+									<field name="espelho_frete" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="espelho_vl_ipi" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="espelho_vl_other" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									<field name="espelho_vl_icms_st" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                        		</group>
+                        	</group>
+                        	<group colspan="4">
+								<field name="espelho_total_nfe" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                         	</group>
                         </page>
 	                </notebook>
