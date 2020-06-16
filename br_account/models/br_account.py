@@ -173,7 +173,19 @@ class ImportDeclaration(models.Model):
     _name = 'br_account.import.declaration'
     _description = """Declaração de Importação"""
 
-    invoice_id = fields.Many2one('account.invoice', 'Fatura', ondelete='cascade', index=True)
+    def _compute_invoice(self):
+        for di in self:
+            inv_lines = self.env['account.invoice.line'].search([('import_declaration_ids','in',[di.id])])
+            inv_ids = []
+            for inv_line in inv_lines:
+                if inv_line.invoice_id.id not in inv_ids:
+                    inv_ids.append(inv_line.invoice_id.id)
+            invoices = self.env['account.invoice'].browse(inv_ids)
+            di.invoice_ids = invoices
+            di.invoice_count = len(invoices)
+
+    invoice_ids = fields.Many2many('account.invoice', compute="_compute_invoice", string='Bills', store=False)
+    invoice_count = fields.Integer(compute="_compute_invoice", string='# Faturas', copy=False, default=0, store=False)
     name = fields.Char('Número da DI', size=10, required=True)
     date_registration = fields.Date('Data de Registro', required=True)
     state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", required=True)
@@ -202,7 +214,6 @@ class ImportDeclaration(models.Model):
     exporting_code = fields.Char('Código do Exportador', required=True, size=60)
     additional_information = fields.Text('Informações Adicionais')
     line_ids = fields.One2many('br_account.import.declaration.line','import_declaration_id', 'Linhas da DI')
-
 
 class ImportDeclarationLine(models.Model):
     _name = 'br_account.import.declaration.line'

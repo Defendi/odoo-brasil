@@ -36,4 +36,15 @@
         </field>
     </record>
 
+    <record id="view_invoice_supplier_di_form" model="ir.ui.view">
+        <field name="name">account.invoice.di.purchase</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+            <field name="reference" position="after" >
+                 <field name="import_id" attrs="{'readonly': [('state','not in',['draft'])], 'invisible': ['|', ('state', '=', 'purchase'), ('type', '=', 'in_refund')]}" class="oe_edit_only" options="{'no_create': True}"/>
+            </field>
+        </field>
+    </record>
+
 </odoo>
