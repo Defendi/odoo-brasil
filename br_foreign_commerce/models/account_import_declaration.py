@@ -28,6 +28,30 @@ class ImportDeclaration(models.Model):
         else:
             return 0
 
+    def _calc_ratio_di(self):
+        self.ensure_one()
+        total_weight = sum((line.weight_unit * line.quantity) for line in self.line_ids)
+        total_fob_lc = sum(((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial for line in self.line_ids)
+        tItens = len(self.line_ids)
+        smPrWeight = 0.0
+        smPrValue = 0.0
+        inlines = {}
+        for contador, line in enumerate(self.line_ids):
+            if contador+1 < tItens:
+                amount_value_cl = ((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial
+                weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100
+                value_part = self._calc_ratio(amount_value_cl, total_fob_lc) * 100
+            else:
+                weight_part = 100 - smPrWeight
+                value_part = 100 - smPrValue
+            if bool(inlines.get(line.name,False)):
+                inlines[line.name][line.sequence_addition] = (line.id,weight_part,value_part)
+            else:
+                inlines[line.name] = {line.sequence_addition: (line.id,weight_part,value_part)}
+            smPrWeight += weight_part
+            smPrValue += value_part
+        return inlines
+
     def _calcule_di(self):
         freight_converted_vl = self.freight_value * self.tax_cambial
         insurance_converted_vl = self.insurance_value * self.tax_cambial
@@ -151,19 +175,18 @@ class ImportDeclaration(models.Model):
     def _compute_di(self):
         for DI in self:
             vals = DI._calcule_di()
-            vals.pop('line_ids')
             DI.update(vals)
 
-#     def _compute_invoice(self):
-#         for di in self:
-#             inv_lines = self.env['account.invoice.line'].search([('import_declaration_ids','in',[di.id])])
-#             inv_ids = []
-#             for inv_line in inv_lines:
-#                 if inv_line.invoice_id.id not in inv_ids:
-#                     inv_ids.append(inv_line.invoice_id.id)
-#             invoices = self.env['account.invoice'].browse(inv_ids)
-#             di.invoice_ids = invoices
-#             di.invoice_count = len(invoices)
+    def _compute_invoice(self):
+        for di in self:
+            inv_lines = self.env['account.invoice.line'].search([('import_declaration_ids','in',[di.id])])
+            inv_ids = []
+            for inv_line in inv_lines:
+                if inv_line.invoice_id.id not in inv_ids:
+                    inv_ids.append(inv_line.invoice_id.id)
+            invoices = self.env['account.invoice'].browse(inv_ids)
+            di.invoice_ids = invoices
+            di.invoice_count = len(invoices)
 
     state = fields.Selection(DI_STATE, string='Situação', default='draft')
     active = fields.Boolean(default=True)
@@ -259,37 +282,37 @@ class ImportDeclaration(models.Model):
     espelho_frete = fields.Float(string='Valor Frete', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_total_nfe = fields.Float(string='Total NFe', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
 
-#     @api.multi
-#     def action_view_invoice(self):
-# 
-#         action = self.env.ref('account.action_invoice_tree2')
-#         result = action.read()[0]
-# 
-#         #override the context to get rid of the default filtering
-#         result['context'] = {'type': 'in_invoice', 'default_import_id': self.id}
-# 
-#         if not self.invoice_ids:
-#             # Choose a default account journal in the same currency in case a new invoice is created
-#             journal_domain = [
-#                 ('type', '=', 'purchase'),
-#                 ('company_id', '=', self.company_id.id),
-#                 ('currency_id', '=', self.currency_id.id),
-#             ]
-#             default_journal_id = self.env['account.journal'].search(journal_domain, limit=1)
-#             if default_journal_id:
-#                 result['context']['default_journal_id'] = default_journal_id.id
-#         else:
-#             # Use the same account journal than a previous invoice
-#             result['context']['default_journal_id'] = self.invoice_ids[0].journal_id.id
-# 
-#         #choose the view_mode accordingly
-#         if len(self.invoice_ids) != 1:
-#             result['domain'] = "[('id', 'in', " + str(self.invoice_ids.ids) + ")]"
-#         elif len(self.invoice_ids) == 1:
-#             res = self.env.ref('account.invoice_supplier_form', False)
-#             result['views'] = [(res and res.id or False, 'form')]
-#             result['res_id'] = self.invoice_ids.id
-#         return result
+    @api.multi
+    def action_view_invoice(self):
+ 
+        action = self.env.ref('account.action_invoice_tree2')
+        result = action.read()[0]
+ 
+        #override the context to get rid of the default filtering
+        result['context'] = {'type': 'in_invoice', 'default_import_id': self.id}
+ 
+        if not self.invoice_ids:
+            # Choose a default account journal in the same currency in case a new invoice is created
+            journal_domain = [
+                ('type', '=', 'purchase'),
+                ('company_id', '=', self.company_id.id),
+                ('currency_id', '=', self.currency_id.id),
+            ]
+            default_journal_id = self.env['account.journal'].search(journal_domain, limit=1)
+            if default_journal_id:
+                result['context']['default_journal_id'] = default_journal_id.id
+        else:
+            # Use the same account journal than a previous invoice
+            result['context']['default_journal_id'] = self.invoice_ids[0].journal_id.id
+ 
+        #choose the view_mode accordingly
+        if len(self.invoice_ids) != 1:
+            result['domain'] = "[('id', 'in', " + str(self.invoice_ids.ids) + ")]"
+        elif len(self.invoice_ids) == 1:
+            res = self.env.ref('account.invoice_supplier_form', False)
+            result['views'] = [(res and res.id or False, 'form')]
+            result['res_id'] = self.invoice_ids.id
+        return result
     
 class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
@@ -392,10 +415,17 @@ class ImportDeclarationLine(models.Model):
     @api.depends('quantity','price_unit','amount_discount','weight_unit','tax_ii_id','tax_ipi_id',
                  'ipi_inclui_ii_base','tax_pis_id','tax_cofins_id','tax_icms_id','tax_icms_st_id')
     def _compute_line(self):
-#         for line in self:
-#             vals = line._calcule_line(0.0,0.0,0.0,0.0,0.0,0.0)
-#             line.update(vals)
-        pass
+        for line in self:
+            vlfreight = line.import_declaration_id.freight_value * line.import_declaration_id.tax_cambial
+            vlInsurance = line.import_declaration_id.insurance_value * line.import_declaration_id.tax_cambial
+            vlAfrmm = line.import_declaration_id.afrmm_value
+            vlSiscomex = line.import_declaration_id.siscomex_value
+            res = line.import_declaration_id._calc_ratio_di()
+            pw = res[line.name][line.sequence_addition][1]
+            pv = res[line.name][line.sequence_addition][2]
+            vals = line._calcule_line(pw,pv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex)
+            line.update(vals)
+#     def _calcule_line(self, txFreight, txValue, vlFreight, vlInsurance, vlAfrmm, vlSiscomex):
     
     import_declaration_id = fields.Many2one('br_account.import.declaration', 'DI', ondelete='cascade')
     currency_id = fields.Many2one('res.currency', related='import_declaration_id.currency_id', readonly=True)
@@ -491,8 +521,10 @@ class ImportDeclarationLine(models.Model):
             self.weight_unit = self.product_id.weight
             self.uom_id = self.product_id.uom_id
 
-#     @api.onchange('weight_unit')
-#     def _set_weight_unit(self):
-#         res = self.import_declaration_id._sum_weight(self)
-#         self.freight_part = self.import_declaration_id._calc_ratio(self.amount_weight,res)*100
-
+    @api.constrains('name', 'sequence_addition')
+    def _check_name_sequence(self):
+        for line in self.import_declaration_id.line_ids:
+            if line.id != self.id:
+                if line.name == self.name and line.sequence_addition == self.sequence_addition:
+                    raise UserError('Mesmo número de sequencia para a adição.')
+                    

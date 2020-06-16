@@ -39,7 +39,7 @@
 	                </header>
 	            	<sheet>
 	                    <div class="oe_button_box" name="button_box">
-	                        <button type="object"  name="action_view_invoice" class="oe_stat_button" icon="fa-pencil-square-o" attrs="{'invisible':[('state', 'in', ('draft','done'))]}"><!-- ,('invoice_ids','=',[])]}">  -->
+	                        <button type="object"  name="action_view_invoice" class="oe_stat_button" icon="fa-pencil-square-o" attrs="{'invisible':[('state', 'in', ('done'))]}"><!-- ,('invoice_ids','=',[])]}">  -->
 	                            <field name="invoice_count" widget="statinfo" string="Faturas"/>
 	                            <field name='invoice_ids' invisible="1"/>
 	                        </button> 
@@ -178,24 +178,24 @@
 											                    <field name="amount_weight"/>
 											                    <field name="amount_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 											                    <field name="tax_cambial"/>
-											                    <field name="amount_value_cl" string="Valor FOB" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-											                    <field name="freight_total" string="Frete Total" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="amount_value_cl" string="Valor FOB"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  --> 
+											                    <field name="freight_total" string="Frete Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="freight_part" string="Frete %"/>
-											                    <field name="freight_value" string="Frete Valor" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-											                    <field name="insurance_total" string="Seguro Total" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="freight_value" string="Frete Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="insurance_total" string="Seguro Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="insurance_part" string="Seguro %"/>
-											                    <field name="insurance_value" string="Seguro Valor" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="insurance_value" string="Seguro Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 										                	</group>
 										                	<group>
-											                    <field name="afrmm_total" string="AFRMM Total" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="afrmm_total" string="AFRMM Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="afrmm_part" string="AFRMM %"/>
-											                    <field name="afrmm_value" string="AFRMM Valor" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-											                    <field name="siscomex_total" string="SISCOMEX Total" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="afrmm_value" string="AFRMM Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="siscomex_total" string="SISCOMEX Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="siscomex_part" string="SISCOMEX %"/>
-											                    <field name="siscomex_value" string="SISCOMEX Valor" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-											                    <field name="outras_depesas" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-											                    <field name="cif_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-											                    <field name="cif_afrmm_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="siscomex_value" string="SISCOMEX Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="outras_depesas"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="cif_value"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="cif_afrmm_value"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                </group>
 											            </group>
 										            </page>
