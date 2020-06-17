@@ -9,7 +9,19 @@ _logger = logging.getLogger(__name__)
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
+    @api.one
+    @api.depends('invoice_line_ids.price_subtotal',
+                 'invoice_line_ids.price_total',
+                 'invoice_line_ids.ii_valor_despesas',
+                 'tax_line_ids.amount',
+                 'currency_id', 'company_id')
+    def _compute_amount(self):
+        super(AccountInvoice, self)._compute_amount()
+        self.total_despesas_aduana = sum(l.ii_valor_despesas for l in self.invoice_line_ids)
+        self.amount_total = self.total_bruto - self.total_desconto + self.total_tax + self.total_despesas_aduana
+        
     import_id = fields.Many2one(comodel_name='br_account.import.declaration',string='Declaração Importação', readonly=True, states={'draft': [('readonly', False)]})
+    total_despesas_aduana = fields.Float(string='Desp.Aduana ( + )', digits=dp.get_precision('Account'), store=True, compute="_compute_amount")
 
     def _prepare_invoice_line_from_di_line(self, line_id):
         invoice_line = self.env['account.invoice.line']

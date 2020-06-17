@@ -228,7 +228,6 @@
                 <field name="total_bruto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                 <field name="total_desconto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                 <field name="total_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                <field name="total_despesas_aduana" widget='monetary' options="{'currency_field': 'currency_id'}" invisible="1"/>
             </field>
             <field name="move_name" position="attributes">
             	<attribute name="invisible">0</attribute>
@@ -483,7 +482,6 @@
                 <field name="total_bruto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                 <field name="total_desconto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
                 <field name="total_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                <field name="total_despesas_aduana" widget='monetary' options="{'currency_field': 'currency_id'}" invisible="1"/>
            </field>
             <field name="move_name" position="attributes">
             	<attribute name="invisible">0</attribute>
@@ -705,7 +703,8 @@
                                 </group>
                             </group>
                         </page>
-                        <page name="ii" string="II" invisible="1"> <!-- attrs="{'invisible': [('product_type','=', 'service')]}">  --> 
+                        <!-- 
+                        <page name="ii" string="II" attrs="{'invisible': [('product_type','=', 'service')]}"> 
                             <group string="Detalhes do Imposto de Importação">
                                 <field name="ii_rule_id" />
                                 <field name="ii_valor_despesas"/>
@@ -716,10 +715,10 @@
                                 <field name="ii_valor"/>
                             </group>
                             <group name="import_declaration" string="Declaração de Importação">
-                                <field name="import_declaration_ids" colspan="4" nolabel="1" widget="many2many"
-                                    domain="[('invoice_id', '=', parent)]" context="{'search_default_invoice_id': parent.id}" />
+                                <field name="import_declaration_ids" colspan="4" nolabel="1" widget="many2many" domain="[('invoice_id', '=', parent)]" context="{'search_default_invoice_id': parent.id}" />
                             </group>
                         </page>
+                         -->
                         <page name="retencoes" string="Retenções" attrs="{'invisible': [('product_type','!=', 'service')]}">
                             <group>
                                 <group string="CSLL">

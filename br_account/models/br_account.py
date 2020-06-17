@@ -184,6 +184,7 @@ class ImportDeclaration(models.Model):
             di.invoice_ids = invoices
             di.invoice_count = len(invoices)
 
+    invoice_id = fields.Many2one('account.invoice', 'Fatura', ondelete='cascade', index=True)
     invoice_ids = fields.Many2many('account.invoice', compute="_compute_invoice", string='Bills', store=False)
     invoice_count = fields.Integer(compute="_compute_invoice", string='# Faturas', copy=False, default=0, store=False)
     name = fields.Char('Número da DI', size=10, required=True)
