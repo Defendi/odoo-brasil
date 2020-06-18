@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-	<menuitem id="menu_foreign_commerce" name="Foreign Commerce" 
+	<menuitem id="menu_foreign_commerce" name="Comércio Exterior" 
 	          groups="account.group_account_user,account.group_account_manager,account.group_account_invoice" 
 	          web_icon="br_foreign_commerce,static/description/icon_mn.png" sequence="50"/>
-	<menuitem id="menu_fc_import" name="Import" parent="menu_foreign_commerce" sequence="5"/>
-	<menuitem id="menu_fc_export" name="Export" parent="menu_foreign_commerce" sequence="5"/>
+	<menuitem id="menu_fc_import" name="Importação" parent="menu_foreign_commerce" sequence="5"/>
+	<menuitem id="menu_fc_export" name="Exportação" parent="menu_foreign_commerce" sequence="5"/>
 
     <record id="view_br_fc_import_declaration_tree" model="ir.ui.view">
         <field name="name">br_fc.import.declaration.tree</field>
@@ -13,7 +13,7 @@
         <field name="arch" type="xml">
         	<tree position="replace">
 	            <tree>
-	            	<field name="id"/>
+	            	<field name="id" groups="base.group_no_one"/>
 	                <field name="name"/>
 	                <field name="invoice_id" invisible="1"/>
 	                <field name="company_id"/>
@@ -37,12 +37,12 @@
 	            <form string="Declaração de Importação">
 	                <header>
 	                    <button string="Confirmar" name="confirm" type="object" states="draft" class="oe_highlight"/>
-	                    <button string="Reabrir" name="reopen" type="object" states="to_invoice"/>
+	                    <button string="Reabrir" name="reopen" type="object" states="to_invoice" groups="base.group_no_one"/>
 						<field name="state" widget="statusbar" statusbar_visible="draft,to_invoice,done"/>
 	                </header>
 	            	<sheet>
 	                    <div class="oe_button_box" name="button_box">
-	                        <button type="object"  name="action_view_invoice" class="oe_stat_button" icon="fa-pencil-square-o" attrs="{'invisible':[('state', 'in', ('done'))]}"><!-- ,('invoice_ids','=',[])]}">  -->
+	                        <button type="object"  name="action_view_invoice" class="oe_stat_button" icon="fa-pencil-square-o" attrs="{'invisible':[('state', 'in', ('draft','done')),('invoice_ids','=',[])]}">
 	                            <field name="invoice_count" widget="statinfo" string="Faturas"/>
 	                            <field name='invoice_ids' invisible="1"/>
 	                        </button> 
@@ -177,7 +177,7 @@
 										                	<field name="manufacturer_description" nolabel="1"/>
 										                </group>
 										            </page>
-							                        <page string="Cálculo BC">                  
+							                        <page string="Cálculo BC" groups="base.group_no_one">                  
 										                <group>
 										                	<group>
 											                    <field name="amount_weight"/>
@@ -254,7 +254,6 @@
 							            </form>
 			                        </field>
 			                    </group>
-								<!-- Peguei da invoice_supplier_form -->
 								<group>
 									<group>
 										<field name="afrmm_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
@@ -266,6 +265,8 @@
 									</group>
 									<group colspan="4" class="oe_subtotal_footer oe_right">
 										<field name="total_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="total_fob_lc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="total_cif_afrmm" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_imposto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_depesa" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_nota" widget='monetary' options="{'currency_field': 'currency_id'}"/>
@@ -273,14 +274,6 @@
 			                    </group>
 		                    </page>
 	                        <page string="Calculos">
-	                        	<group>
-	                        		<group string="Despesas Desembaraço">
-	                        		</group>
-	                        		<group string="Diversos">
-										<field name="total_fob_lc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="total_cif_afrmm" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-	                        		</group>
-	                        	</group>
 	                        	<group>
 	                        		<group string="Base Cálculo">
 										<field name="total_bc_ii" widget='monetary' options="{'currency_field': 'currency_id'}"/>
@@ -337,7 +330,11 @@
         <field name="arch" type="xml">
             <search>
             	<field name="name" />
+            	<field name="partner_id"/>
                 <field name="invoice_id" />
+                <filter name="filter_inactive" string="Arquivado" domain="[('active','=',False)]"/>
+                <filter name="group_partner_id" string="Fornecedor" icon="terp-partner" context="{'group_by':'partner_id'}"/>
+                <filter name="group_status" string="Situação" icon="terp-partner" context="{'group_by':'state'}"/>
             </search>
         </field>
     </record>
@@ -367,7 +364,7 @@
 	    <field name="act_window_id" ref="action_br_fc_import_declaration"/>
 	</record>
 	
-	<menuitem id="menu_fc_import" name="Import" parent="menu_foreign_commerce" sequence="5"/>
-   <menuitem id="menu_fc_import_declaration" name="Declaração de Importação" parent="br_foreign_commerce.menu_fc_import"
+	<menuitem id="menu_fc_import" name="Importação" parent="menu_foreign_commerce" sequence="5"/>
+    <menuitem id="menu_fc_import_declaration" name="Declaração de Importação" parent="br_foreign_commerce.menu_fc_import"
         action="action_br_fc_import_declaration" sequence="5" />	
 </odoo>
