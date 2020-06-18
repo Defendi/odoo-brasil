@@ -23,11 +23,19 @@ class AccountInvoice(models.Model):
     import_id = fields.Many2one(comodel_name='br_account.import.declaration',string='Declaração Importação', readonly=True, states={'draft': [('readonly', False)]})
     total_despesas_aduana = fields.Float(string='Desp.Aduana ( + )', digits=dp.get_precision('Account'), store=True, compute="_compute_amount")
 
-    def _prepare_invoice_line_from_di_line(self, line_id):
+    def _prepare_invoice_line_from_di_line(self, line):
+        data = {}
         invoice_line = self.env['account.invoice.line']
-        line = self.env['br_account.import.declaration.line'].browse([line_id])
-        data = {
+        account = invoice_line.get_invoice_line_account('in_invoice', line.product_id, False, self.env.user.company_id)
+        fpos = line.import_declaration_id.fiscal_position_id or line.import_declaration_id.partner_id.property_account_position_id
+        if fpos:
+            vals = fpos.map_tax_extra_values(line.company_id, line.product_id, line.import_declaration_id.partner_id, False)
+            for key, value in vals.items():
+                data[key] = value.id if isinstance(value, models.Model) else value
+        data.update({
             'name': line.product_id.name,
+            'fiscal_classification_id': line.product_id.fiscal_classification_id.id,
+            'icms_origem': '1',
             'origin': line.import_declaration_id.name,
             'uom_id': line.uom_id.id,
             'product_id': line.product_id.id,
@@ -39,15 +47,23 @@ class AccountInvoice(models.Model):
             'icms_base_calculo_manual': line.icms_base_calculo,
             'tax_icms_id': line.tax_icms_id.id,
             'ipi_base_calculo_manual': line.ipi_base_calculo,
+            'ipi_tipo': 'percent',
             'tax_ipi_id': line.tax_ipi_id.id,
             'pis_base_calculo_manual': line.pis_base_calculo,
+            'pis_tipo': 'percent',
             'tax_pis_id': line.tax_pis_id.id,
             'cofins_base_calculo_manual': line.cofins_base_calculo,
+            'cofins_tipo': 'percent',
             'tax_cofins_id': line.tax_cofins_id.id,
             'ii_base_calculo': line.ii_base_calculo,
             'tax_ii_id': line.tax_ii_id.id,
-        }
-        account = invoice_line.get_invoice_line_account('in_invoice', line.product_id, False, self.env.user.company_id)
+            'ii_aliquota': line.tax_ii_id.amount,
+            'issqn_tipo': 'N',
+            'icms_tipo_base': '3',
+            'icms_st_tipo_base': '4',
+            'company_fiscal_type': line.import_declaration_id.company_id.fiscal_type,
+            'import_declaration_ids': [(6, 0, [line.import_declaration_id.id])]
+        })
         if account:
             data['account_id'] = account.id
         return data
@@ -59,11 +75,15 @@ class AccountInvoice(models.Model):
         self.env.context = dict(self.env.context, from_import_order_change=True)
         self.type = 'out_invoice'
         self.partner_id = self.import_id.partner_id.id
-
+        self.issuer = '1'
+        fpos = self.import_id.fiscal_position_id or self.import_id.partner_id.property_account_position_id
+        if fpos:
+            self.product_document_id = fpos.product_document_id
+            self.product_serie_id = fpos.product_serie_id
         new_line = []
         new_line.append((5,))
         for line in self.import_id.line_ids:
-            data = self._prepare_invoice_line_from_di_line(line.id)
+            data = self._prepare_invoice_line_from_di_line(line)
             new_line.append((0, 0, data))
         self.invoice_line_ids = new_line
         self.fiscal_position_id = self.import_id.fiscal_position_id.id

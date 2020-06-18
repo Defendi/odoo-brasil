@@ -13,6 +13,11 @@ class ImportDeclaration(models.Model):
     def confirm(self):
         for di in self:
             di.state = 'to_invoice'
+
+    @api.multi
+    def reopen(self):
+        for di in self:
+            di.state = 'draft'
  
     @api.multi
     def recalculate(self):
@@ -192,7 +197,7 @@ class ImportDeclaration(models.Model):
     active = fields.Boolean(default=True)
 
     partner_id = fields.Many2one('res.partner', string='Exportador', readonly=True, states=DI_STATES)
-    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position')#, readonly=True, states=DI_STATES)
+    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True, states=DI_STATES)
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     tax_cambial = fields.Float('Tx. Cambial', digits=(12,6), default=0.00)#, readonly=True, states=DI_STATES)
@@ -282,6 +287,19 @@ class ImportDeclaration(models.Model):
     espelho_frete = fields.Float(string='Valor Frete', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_total_nfe = fields.Float(string='Total NFe', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
 
+    @api.onchange('fiscal_position_id')
+    def _onchange_fiscal_position_id(self):
+        fpos = self.fiscal_position_id or self.partner_id.property_account_position_id
+        if fpos:
+            for line in self.line_ids:
+                vals = fpos.map_tax_extra_values(self.company_id, line.product_id, self.partner_id, False)
+                line.tax_ii_id = vals.get('tax_ii_id',False)
+                line.tax_ipi_id = vals.get('tax_ipi_id',False)
+                line.tax_pis_id = vals.get('tax_pis_id',False)
+                line.tax_cofins_id = vals.get('tax_cofins_id',False)
+                line.tax_icms_id = vals.get('tax_icms_id',False)
+                line.tax_icms_st_id = vals.get('tax_icms_st_id',False)
+
     @api.multi
     def action_view_invoice(self):
  
@@ -313,7 +331,7 @@ class ImportDeclaration(models.Model):
             result['views'] = [(res and res.id or False, 'form')]
             result['res_id'] = self.invoice_ids.id
         return result
-    
+
 class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
@@ -425,15 +443,18 @@ class ImportDeclarationLine(models.Model):
             pv = res[line.name][line.sequence_addition][2]
             vals = line._calcule_line(pw,pv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex)
             line.update(vals)
-#     def _calcule_line(self, txFreight, txValue, vlFreight, vlInsurance, vlAfrmm, vlSiscomex):
+
+    def _get_sequence(self):
+        return '001'
     
     import_declaration_id = fields.Many2one('br_account.import.declaration', 'DI', ondelete='cascade')
+    company_id = fields.Many2one('res.company', related='import_declaration_id.company_id', readonly=True)
     currency_id = fields.Many2one('res.currency', related='import_declaration_id.currency_id', readonly=True)
     currency_purchase_id = fields.Many2one('res.currency', related='import_declaration_id.currency_purchase_id', readonly=True)
     tax_cambial = fields.Float(related='import_declaration_id.tax_cambial', readonly=True, store=True)
     
     name = fields.Char('Adição', size=3, required=True)
-    sequence_addition = fields.Char('Sequencia', size=3, required=True)
+    sequence_addition = fields.Char('Sequencia', size=3, required=True, default=_get_sequence)
     product_id = fields.Many2one('product.product', string='Produto', ondelete='restrict', index=True)
     manufacturer_code = fields.Char('Código Fabricante', size=60, required=True)
     manufacturer_description = fields.Char('Descrição Fabricante')
@@ -520,11 +541,20 @@ class ImportDeclarationLine(models.Model):
             self.manufacturer_description = self.product_id.name
             self.weight_unit = self.product_id.weight
             self.uom_id = self.product_id.uom_id
+            fpos = self.import_declaration_id.fiscal_position_id or self.import_declaration_id.partner_id.property_account_position_id
+            if fpos:
+                vals = fpos.map_tax_extra_values(self.company_id, self.product_id, self.import_declaration_id.partner_id, False)
+                self.tax_ii_id = vals.get('tax_ii_id',False)
+                self.tax_ipi_id = vals.get('tax_ipi_id',False)
+                self.tax_pis_id = vals.get('tax_pis_id',False)
+                self.tax_cofins_id = vals.get('tax_cofins_id',False)
+                self.tax_icms_id = vals.get('tax_icms_id',False)
+                self.tax_icms_st_id = vals.get('tax_icms_st_id',False)
 
-    @api.constrains('name', 'sequence_addition')
-    def _check_name_sequence(self):
-        for line in self.import_declaration_id.line_ids:
-            if line.id != self.id:
-                if line.name == self.name and line.sequence_addition == self.sequence_addition:
-                    raise UserError('Mesmo número de sequencia para a adição.')
+#     @api.constrains('name', 'sequence_addition')
+#     def _check_name_sequence(self):
+#         for line in self.import_declaration_id.line_ids:
+#             if line.id != self.id:
+#                 if line.name == self.name and line.sequence_addition == self.sequence_addition:
+#                     raise UserError('Mesmo número de sequencia para a adição.')
                     
