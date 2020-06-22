@@ -47,6 +47,7 @@ class AccountFiscalPositionTaxRule(models.Model):
     cst_cofins = fields.Selection(CST_PIS_COFINS, string="CST COFINS")
     cst_ipi = fields.Selection(CST_IPI, string="CST IPI")
     enq_ipi = fields.Many2one('br_account.enquadramento.ipi', string="Enquadramento IPI")
+    cla_ipi = fields.Char(string="Clas.Enquadram.", size=5)
     cfop_id = fields.Many2one('br_account.cfop', string="CFOP")
     tax_id = fields.Many2one('account.tax', string="Imposto")
     tax_icms_st_id = fields.Many2one('account.tax', string="ICMS ST",

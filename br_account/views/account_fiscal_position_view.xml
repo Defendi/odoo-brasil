@@ -16,6 +16,7 @@
                         <field name="cfop_id" domain="[('internal_type', '=', 'normal')]" attrs="{'invisible': [('domain', 'not in', ('icms', 'issqn'))]}"/>
                         <field name="icms_benef" attrs="{'invisible': [('domain', '!=', 'icms')]}" />
                         <field name="enq_ipi" attrs="{'invisible': [('domain', '!=', 'ipi')]}" />
+                        <field name="cla_ipi" attrs="{'invisible': [('domain', '!=', 'ipi')]}" />
                     </group>
                     <group>
                         <field name="cst_icms" attrs="{'invisible': [('domain', '!=', 'icms')]}" />
