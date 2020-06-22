@@ -109,6 +109,8 @@
                 <field name="ipi_aliquota" invisible="1" />
                 <field name="ipi_cst" invisible="1" />
                 <field name="ipi_base_calculo_manual" invisible="1" />
+                <field name="ipi_codigo_enquadramento" invisible="1" />
+                <field name="ipi_classe_enquadramento" invisible="1" />
                 <field name="pis_rule_id" invisible="1" />
                 <field name="tax_pis_id" invisible="1" />
                 <field name="pis_cst" invisible="1" />
@@ -363,6 +365,8 @@
                 <field name="ipi_aliquota" invisible="1" />
                 <field name="ipi_cst" invisible="1" />
                 <field name="ipi_base_calculo_manual" invisible="1" />
+                <field name="ipi_codigo_enquadramento" invisible="1" />
+                <field name="ipi_classe_enquadramento" invisible="1" />
                 <field name="pis_rule_id" invisible="1" />
                 <field name="tax_pis_id" invisible="1" />
                 <field name="pis_cst" invisible="1" />
@@ -658,6 +662,8 @@
                             <group string="Detalhes do IPI">
                                 <group>
                                     <field name="ipi_cst"/>
+					                <field name="ipi_codigo_enquadramento" />
+					                <field name="ipi_classe_enquadramento" />
                                     <field name="ipi_tipo"/>
                                     <field name="ipi_rule_id" />
                                 </group>

@@ -352,6 +352,8 @@ class AccountInvoiceLine(models.Model):
     ipi_aliquota = fields.Float('IPI %', digits=(12,4), default=0.00, compute='_compute_price', store=True)
     ipi_cst = fields.Selection(CST_IPI, string='CST IPI')
     ipi_base_calculo_manual = fields.Float('Base IPI Manual', digits=dp.get_precision('Account'), default=0.00)
+    ipi_codigo_enquadramento = fields.Many2one('br_account.enquadramento.ipi', 'Cod.Enquadramento')
+    ipi_classe_enquadramento = fields.Char(string="Clas.Enquadram.", size=5)
 
     # =========================================================================
     # PIS

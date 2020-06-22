@@ -21,8 +21,7 @@ class ProductFiscalClassification(models.Model):
 
     # IPI
     classe_enquadramento = fields.Char(string="Classe Enquadr.", size=5)
-    codigo_enquadramento = fields.Char(
-        string="Cód. Enquadramento", size=3, default='999')
+    codigo_enquadramento = fields.Char(string="Cód. Enquadramento", size=3, default='999')
     tax_ipi_id = fields.Many2one('account.tax', string="Alíquota IPI", domain=[('domain', '=', 'ipi')])
     ipi_tipo = fields.Selection( [('percent', 'Percentual')], 'Tipo do IPI', required=True, default='percent')
     ipi_reducao_bc = fields.Float('% Redução Base', required=True, digits=dp.get_precision('Account'),default=0.00)

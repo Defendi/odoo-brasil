@@ -390,7 +390,7 @@ class InvoiceEletronic(models.Model):
 
         if not partner.number:
             errors.append('Destinatário / Endereço - Número')
-        elif not partner.number.isdigit():
+        elif not partner.number.isdigit() and str(partner.number).upper() != 'S/N':
             errors.append('Destinatário / Endereço - Número - Contém caracteres inválidos')
 
         if partner.country_id.id == company.partner_id.country_id.id:

@@ -373,4 +373,17 @@ class BrAccountBeneficioFiscalCST(models.Model):
     state_id = fields.Many2one(related='beneficio_id.state_id',store=True)
     dt_start = fields.Date(related='beneficio_id.dt_start',store=True)
     dt_end = fields.Date(related='beneficio_id.dt_end',store=True)
-    
+
+class BrAccountEnquadramentoIPI(models.Model):
+    _name = 'br_account.enquadramento.ipi'
+    _description = """Código de enquadramento do IPI"""
+    _order = 'display_name'
+
+    def _compute_display_name(self):
+        for reg in self:
+            reg.display_name = '['+reg.code or ''+'] '+reg.name or ''
+
+    display_name = fields.Char("Name", compute="_compute_display_name",store=True,index=True)
+    code = fields.Char('Código',size=3, required=True,index=True)
+    name = fields.Char('Descrição', required=True)
+    grupo = fields.Char('Grupo CST', size=15, required=True)

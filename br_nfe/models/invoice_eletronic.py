@@ -443,8 +443,8 @@ class InvoiceEletronic(models.Model):
                     'vICMSSTRet': "%.02f" % item.icms_st_retido,
                 },
                 'IPI': {
-                    'clEnq': item.classe_enquadramento_ipi or '',
-                    'cEnq': item.codigo_enquadramento_ipi,
+                    'clEnq': item.ipi_classe_enquadramento or '',
+                    'cEnq': item.ipi_codigo_enquadramento.code or '999',
                     'CST': item.ipi_cst,
                     'vBC': "%.02f" % item.ipi_base_calculo,
                     'pIPI': "%.04f" % item.ipi_aliquota,
