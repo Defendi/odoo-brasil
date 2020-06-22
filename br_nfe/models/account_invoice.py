@@ -107,7 +107,7 @@ class AccountInvoice(models.Model):
         res['finalidade_emissao'] = inv.fiscal_position_id.finalidade_emissao
         res['informacoes_legais'] = inv.fiscal_comment
         res['informacoes_complementares'] = inv.comment
-        res['numero_fatura'] = inv.number
+        res['numero_fatura'] = numero_nfe
         res['fatura_bruto'] = inv.total_bruto
         res['fatura_desconto'] = inv.total_desconto
         res['fatura_liquido'] = inv.amount_total
@@ -167,7 +167,7 @@ class AccountInvoice(models.Model):
         count = 1
         for parcela in inv.receivable_move_line_ids.sorted(lambda x: x.name):
             duplicatas.append((0, None, {
-                'numero_duplicata': "%03d" % count,
+                'numero_duplicata': "%05d/%02d" % (numero_nfe,count),
                 'data_vencimento': parcela.date_maturity,
                 'valor': parcela.credit or parcela.debit,
             }))
