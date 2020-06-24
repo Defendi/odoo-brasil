@@ -409,6 +409,43 @@
         </field>
     </record>
 
+    <record id="view_br_account_enquadramento_ipi_tree" model="ir.ui.view">
+        <field name="name">br_account.enquadramento.ipi.tree</field>
+        <field name="model">br_account.enquadramento.ipi</field>
+        <field name="arch" type="xml">
+            <tree string="Enquadramento IPI">
+	        	<field name="code"/>
+	            <field name="grupo"/>
+	            <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_br_account_enquadramento_ipi_form" model="ir.ui.view">
+        <field name="name">br_account.enquadramento.ipi.form</field>
+        <field name="model">br_account.enquadramento.ipi</field>
+        <field name="arch" type="xml">
+            <form string="Enquadramento IPI">
+            	<sheet>
+	                <group colspan="4">
+			        	<field name="code"/>
+			            <field name="grupo"/>
+			            <field name="name"/>
+	                </group>
+	            </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="br_account_enquadramento_ipi_action" model="ir.actions.act_window">
+        <field name="name">Enquadramento IPI</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">br_account.enquadramento.ipi</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_type">form</field>
+        <field name="view_id" ref="view_br_account_enquadramento_ipi_tree"/>
+    </record>
+
     <record id="br_account_cfop_action" model="ir.actions.act_window">
         <field name="name">CFOP</field>
         <field name="type">ir.actions.act_window</field>
@@ -570,5 +607,11 @@
     name="Beneficio Fiscal"
     parent="br_account.menu_br_account_fiscal_manager"
     action="action_br_account_beneficio_fiscal"/>
+
+    <menuitem
+    id="menu_action_br_account_enquadramento_ipi"
+    name="Enquadramento IPI"
+    parent="br_account.menu_br_account_fiscal_manager"
+    action="br_account_enquadramento_ipi_action"/>
 
 </odoo>

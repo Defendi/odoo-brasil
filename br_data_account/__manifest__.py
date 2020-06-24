@@ -13,6 +13,7 @@
     ],
     'data':[
         'data/br_account.beneficio.fiscal.csv',
+        'data/br_account.enquadramento.ipi.csv',
     ],
     'post_init_hook': 'post_init',
     'category': 'Localisation',
