@@ -234,6 +234,8 @@ class AccountFiscalPosition(models.Model):
                 # IPI
                 'ipi_cst': rules[0].cst_ipi,
                 'ipi_reducao_bc': rules[0].reducao_ipi,
+                'ipi_codigo_enquadramento': rules[0].enq_ipi,
+                'ipi_classe_enquadramento': rules[0].cla_ipi,
                 # PIS
                 'pis_cst': rules[0].cst_pis,
                 # PIS
