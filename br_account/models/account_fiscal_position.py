@@ -35,6 +35,10 @@ class AccountFiscalPositionTaxRule(models.Model):
     service_analytic_ids = fields.Many2many(
         'account.analytic.account', string="Conta",
         relation="account_analytic_account_ret_tax_rule_service_relation")
+    
+    service_type_ids = fields.Many2many(
+        'br_account.service.type', string="Tipos Serviço",
+        relation="br_account_service_type_ret_tax_rule_service_relation")
 
     product_fiscal_classification_ids = fields.Many2many(
         'product.fiscal.classification', string="Classificação Fiscal",
@@ -74,6 +78,11 @@ class AccountFiscalPositionTaxRule(models.Model):
         string="ICMS Intra", domain=[('domain', '=', 'icms_intra')])
     tax_icms_fcp_id = fields.Many2one(
         'account.tax', string="% FCP", domain=[('domain', '=', 'fcp')])
+    issqn_tipo = fields.Selection([('N', 'Normal'),
+                                   ('R', 'Retida'),
+                                   ('S', 'Substituta'),
+                                   ('I', 'Isenta')],
+                                  string='Tipo do ISSQN', default='N')
 
 class AccountFiscalPosition(models.Model):
     _inherit = 'account.fiscal.position'
@@ -156,7 +165,24 @@ class AccountFiscalPosition(models.Model):
                             ('fiscal_type', '=', type_inv)], limit=1)
         return fpos
 
-    def _filter_rules(self, fpos_id, type_tax, partner, product, state, analytic):
+    @api.model
+    def map_tax_extra_values(self, product, partner, fiscal_classification, service_type, issqn_tipo, analytic):
+        to_state = partner.state_id
+        to_fiscal_type = product.fiscal_type
+        to_fiscal_category = product.fiscal_category_id
+        to_fiscal_classification = fiscal_classification if bool(fiscal_classification) else product.fiscal_classification_id
+        to_service_type = service_type if bool(service_type) else product.service_type_id
+
+        taxes = ('icms', 'simples', 'ipi', 'pis', 'cofins',
+                 'issqn', 'ii', 'irrf', 'csll', 'inss', 'outros')
+        res = {}
+        for tax in taxes:
+            vals = self._filter_rules(self.id, tax, to_fiscal_type, to_fiscal_category, 
+                                      to_fiscal_classification, to_service_type, issqn_tipo, to_state, analytic)
+            res.update({k: v for k, v in vals.items() if v})
+        return res
+
+    def _filter_rules(self, fpos_id, type_tax, fiscal_type, fiscal_category, fiscal_classification, service_type, issqn_tipo, state, analytic):
         rule_obj = self.env['account.fiscal.position.tax.rule']
         domain = [('fiscal_position_id', '=', fpos_id),
                   ('domain', '=', type_tax)]
@@ -169,7 +195,7 @@ class AccountFiscalPosition(models.Model):
                 # Quanto mais alto, mais adequada está a regra em relacao ao
                 # faturamento
                 rules_points[rule.id] = self._calculate_points(
-                    rule, product, state, partner, analytic)
+                    rule, fiscal_type, fiscal_category, fiscal_classification, service_type, issqn_tipo, state, analytic)
 
             # Calcula o maior valor para os resultados obtidos
             greater_rule = max([(v, k) for k, v in rules_points.items()])
@@ -218,20 +244,7 @@ class AccountFiscalPosition(models.Model):
         else:
             return{}
 
-    @api.model
-    def map_tax_extra_values(self, company, product, partner, analytic):
-        to_state = partner.state_id
-
-        taxes = ('icms', 'simples', 'ipi', 'pis', 'cofins',
-                 'issqn', 'ii', 'irrf', 'csll', 'inss', 'outros')
-        res = {}
-        for tax in taxes:
-            vals = self._filter_rules(
-                self.id, tax, partner, product, to_state, analytic)
-            res.update({k: v for k, v in vals.items() if v})
-        return res
-
-    def _calculate_points(self, rule, product, state, partner, analytic):
+    def _calculate_points(self, rule, fiscal_type, fiscal_category, fiscal_classification, service_type, issqn_tipo, state, analytic):
         """Calcula a pontuação das regras. A pontuação aumenta de acordo
         com os 'matches'. Não havendo match(exceto quando o campo não está
         definido) retorna o valor -1, que posteriormente será tratado como
@@ -242,34 +255,44 @@ class AccountFiscalPosition(models.Model):
 
         # Verifica o tipo do produto. Se sim, avança para calculo da pontuação
         # Se não, retorna o valor -1 (a regra será descartada)
-        if product.fiscal_type == rule.tipo_produto:
+        if fiscal_type == rule.tipo_produto:
 
             # Verifica a categoria fiscal. Se contido, adiciona 1 ponto
             # Se não, retorna valor -1 (a regra será descartada)
-            if product.fiscal_category_id in rule.fiscal_category_ids:
+            if fiscal_category in rule.fiscal_category_ids:
                 rule_points += 1
             elif len(rule.fiscal_category_ids) > 0:
                 return -1
 
-            # Verifica produtos. Se contido, adiciona 1 ponto
-            # Se não, retorna -1
-            if product.fiscal_classification_id in\
-                    rule.product_fiscal_classification_ids:
-                rule_points += 1
-            elif len(rule.product_fiscal_classification_ids) > 0:
-                return -1
+            if fiscal_type == 'product':
+                # Verifica produtos. Se contido, adiciona 1 ponto
+                # Se não, retorna -1
+                if fiscal_classification in rule.product_fiscal_classification_ids:
+                    rule_points += 1
+                elif len(rule.product_fiscal_classification_ids) > 0:
+                    return -1
+    
+                # Verifica o estado. Se contido, adiciona 1 ponto
+                # Se não, retorna -1
+                if state in rule.state_ids:
+                    rule_points += 1
+                elif len(rule.state_ids) > 0:
+                    return -1
 
-            # Verifica o estado. Se contido, adiciona 1 ponto
-            # Se não, retorna -1
-            if state in rule.state_ids:
-                rule_points += 1
-            elif len(rule.state_ids) > 0:
-                return -1
-
-            if product.fiscal_type == 'service' and bool(analytic):
+            if fiscal_type == 'service':
+                if  issqn_tipo == rule.issqn_tipo:
+                    rule_points += 1
+                elif bool(rule.issqn_tipo):
+                    return -1
+                
                 if analytic in rule.service_analytic_ids:
                     rule_points += 1
                 elif len(rule.service_analytic_ids) > 0:
+                    return -1
+                
+                if service_type in rule.service_type_ids:
+                    rule_points += 1
+                elif len(rule.service_type_ids) > 0:
                     return -1
         else:
             return -1

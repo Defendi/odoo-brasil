@@ -932,9 +932,11 @@ class InvoiceEletronicItem(models.Model):
     def compute_map_tax(self):
         res = {}
         if self.product_id and self.fiscal_position_id:
-            map_tax = self.fiscal_position_id.map_tax_extra_values(self.invoice_eletronic_id.company_id, 
-                                                                   self.product_id, 
+            map_tax = self.fiscal_position_id.map_tax_extra_values(self.product_id, 
                                                                    self.invoice_eletronic_id.partner_id,
+                                                                   False,
+                                                                   False,
+                                                                   False,
                                                                    False)
             res.update(self._update_tax_from_fiscal_position(map_tax))
         return res

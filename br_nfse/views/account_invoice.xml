@@ -71,7 +71,7 @@
         	<field name="fiscal_classification_id" position="after">
         		<field name="codigo_tributacao_municipio" attrs="{'invisible': [('product_type', '!=', 'service')]}"/> 
         	</field>
-        	<field name="service_type_id" position="after">
+        	<field name="issqn_tipo" position="after">
         		<field name="country_id" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>
         		<field name="state_id" domain="[('country_id','=',country_id)]" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>
         		<field name="city_id" domain="[('state_id','=',state_id)]" options="{'no_create': True, 'no_create_edit': True}" attrs="{'invisible': [('issqn_tipo', 'in', ('N','I'))]}"/>
