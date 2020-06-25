@@ -39,3 +39,5 @@
 "access_br_account_beneficio_fiscal","access_br_account_fiscal_document","model_br_account_beneficio_fiscal","account.group_account_manager",1,1,1,1
 "access_br_account_beneficio_fiscal_cst_user","access_br_account_beneficio_fiscal_cst_user","model_br_account_beneficio_fiscal_cst","account.group_account_user",1,0,0,0
 "access_br_account_beneficio_fiscal_cst","access_br_account_fiscal_document_cst","model_br_account_beneficio_fiscal_cst","account.group_account_manager",1,1,1,1
+"access_br_account_enquadramento_ipi_user_rule","access_br_account_enquadramento_ipi_user","model_br_account_enquadramento_ipi","account.group_account_user",1,0,0,0
+"access_br_account_enquadramento_ipi_manager_rule","access_br_account_enquadramento_ipi_manager","model_br_account_enquadramento_ipi","account.group_account_manager",1,1,1,1
