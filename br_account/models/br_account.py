@@ -372,4 +372,29 @@ class BrAccountBeneficioFiscalCST(models.Model):
     state_id = fields.Many2one(related='beneficio_id.state_id',store=True)
     dt_start = fields.Date(related='beneficio_id.dt_start',store=True)
     dt_end = fields.Date(related='beneficio_id.dt_end',store=True)
-    
+
+class BrAccountEnquadramentoIPI(models.Model):
+    _name = 'br_account.enquadramento.ipi'
+    _description = """Código de enquadramento do IPI"""
+    _order = 'code'
+
+    code = fields.Char('Código',size=3, required=True,index=True)
+    name = fields.Char('Descrição', required=True,index=True)
+    grupo = fields.Char('Grupo CST', size=15, required=True)
+
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        args = args or []
+        recs = self.browse()
+        if name:
+            recs = self.search([('code', operator, name)] + args, limit=limit)
+        if not recs:
+            recs = self.search([('name', operator, name)] + args, limit=limit)
+        return recs.name_get()
+
+    @api.multi
+    def name_get(self):
+        result = []
+        for rec in self:
+            result.append((rec.id, "%s - %s" % (rec.code, rec.name or '')))
+        return result

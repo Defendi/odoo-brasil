@@ -16,11 +16,8 @@ class InvoiceEletronicItem(models.Model):
 
     cest = fields.Char(string="CEST", size=10, readonly=True, states=STATE,
                        help="Código Especificador da Substituição Tributária")
-    classe_enquadramento_ipi = fields.Char(
-        string="Classe Enquadramento", size=5, readonly=True, states=STATE)
-    codigo_enquadramento_ipi = fields.Char(
-        string="Classe Enquadramento", size=3, default='999',
-        readonly=True, states=STATE)
+    ipi_classe_enquadramento = fields.Char(string="Classe Enquadramento", size=5, readonly=True, states=STATE, old_name='classe_enquadramento_ipi')
+    ipi_codigo_enquadramento = fields.Many2one('br_account.enquadramento.ipi',string="Código Enquadramento", readonly=True, states=STATE, old_name='codigo_enquadramento_ipi')
 
     import_declaration_ids = fields.Many2many('br_account.import.declaration', string='Declaração de Importação')
 

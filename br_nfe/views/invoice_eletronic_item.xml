@@ -9,8 +9,8 @@
                 <field name="cest" />
             </field>
             <field name="ipi_cst" position="after">
-                <field name="classe_enquadramento_ipi" />
-                <field name="codigo_enquadramento_ipi" />
+                <field name="ipi_classe_enquadramento" />
+                <field name="ipi_codigo_enquadramento" />
             </field>
             <group name="icms_substituicao" position="after">
                 <group name="icms_interestaual">

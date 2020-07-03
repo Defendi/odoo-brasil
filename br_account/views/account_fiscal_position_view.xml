@@ -15,6 +15,8 @@
                         <field name="tax_id" domain="[('domain', '=', domain)]" />
                         <field name="cfop_id" domain="[('internal_type', '=', 'normal')]" attrs="{'invisible': [('domain', 'not in', ('icms', 'issqn'))]}"/>
                         <field name="icms_benef" attrs="{'invisible': [('domain', '!=', 'icms')]}" />
+                        <field name="enq_ipi" attrs="{'invisible': [('domain', '!=', 'ipi')]}" />
+                        <field name="cla_ipi" attrs="{'invisible': [('domain', '!=', 'ipi')]}" />
                     </group>
                     <group>
                         <field name="cst_icms" attrs="{'invisible': [('domain', '!=', 'icms')]}" />
@@ -52,10 +54,12 @@
                     <group>
                         <field name="l10n_br_issqn_deduction" />
                     </group>
-                    <group></group>
+                    <group>
+                    </group>
                 </group>
                 <group string="Aplicar esta regra quando:">
                     <field name="tipo_produto" />
+                    <field name="issqn_tipo" attrs="{'invisible': [('tipo_produto', '=', 'product')]}"/>
                 </group>
                 <group string="Estados" attrs="{'invisible': [('tipo_produto', '=', 'service')]}">
                     <field name="state_ids" widget="many2many_tags" nolabel="1"/>
@@ -65,6 +69,9 @@
                 </group>
                 <group string="Classificação Fiscal" attrs="{'invisible': [('tipo_produto', '=', 'service')]}">
                     <field name="product_fiscal_classification_ids" widget="many2many_tags" nolabel="1"/>
+                </group>
+                <group string="Tipos de Serviço" attrs="{'invisible': [('tipo_produto', '=', 'product')]}">
+                    <field name="service_type_ids" widget="many2many_tags" nolabel="1"/>
                 </group>
                 <group string="Centro Custo/Contrato" attrs="{'invisible': [('tipo_produto', '=', 'product')]}">
                     <field name="service_analytic_ids" widget="many2many_tags" nolabel="1"/>

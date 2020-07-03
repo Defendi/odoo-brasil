@@ -109,6 +109,8 @@
                 <field name="ipi_aliquota" invisible="1" />
                 <field name="ipi_cst" invisible="1" />
                 <field name="ipi_base_calculo_manual" invisible="1" />
+                <field name="ipi_codigo_enquadramento" invisible="1" />
+                <field name="ipi_classe_enquadramento" invisible="1" />
                 <field name="pis_rule_id" invisible="1" />
                 <field name="tax_pis_id" invisible="1" />
                 <field name="pis_cst" invisible="1" />
@@ -363,6 +365,8 @@
                 <field name="ipi_aliquota" invisible="1" />
                 <field name="ipi_cst" invisible="1" />
                 <field name="ipi_base_calculo_manual" invisible="1" />
+                <field name="ipi_codigo_enquadramento" invisible="1" />
+                <field name="ipi_classe_enquadramento" invisible="1" />
                 <field name="pis_rule_id" invisible="1" />
                 <field name="tax_pis_id" invisible="1" />
                 <field name="pis_cst" invisible="1" />
@@ -566,6 +570,7 @@
                                 <group>
                                     <field name="cfop_id" domain="[('internal_type', '=', 'normal')]" attrs="{'invisible': [('product_type', '=', 'service')]}"/>
                                     <field name="fiscal_classification_id" attrs="{'invisible': [('product_type', '=', 'service')]}"/>
+                                    <field name="service_type_id" attrs="{'required': [('product_type','=', 'service')],'invisible': [('product_type', '=', 'product')]}" domain="[('internal_type','=','normal')]"/>
                                     <field name="account_id" domain="[('deprecated', '=', False),('user_type_id', '&lt;&gt;', 'view')]" groups="account.group_account_user"/>
                                     <field name="account_analytic_id" domain="[('company_id', '=', parent.company_id)]" groups="analytic.group_analytic_accounting"/>
                                     <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags" options="{'color_field': 'color'}"/>
@@ -643,7 +648,6 @@
                             <group>
                                 <group>
                                     <field name="issqn_tipo"/>
-                                    <field name="service_type_id" attrs="{'required': [('product_type','=', 'service')]}" domain="[('internal_type','=','normal')]"/>
                                 </group>
                                 <group>
                                     <field name="l10n_br_issqn_deduction" />
@@ -658,6 +662,8 @@
                             <group string="Detalhes do IPI">
                                 <group>
                                     <field name="ipi_cst"/>
+					                <field name="ipi_codigo_enquadramento" />
+					                <field name="ipi_classe_enquadramento" />
                                     <field name="ipi_tipo"/>
                                     <field name="ipi_rule_id" />
                                 </group>

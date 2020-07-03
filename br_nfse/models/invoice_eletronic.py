@@ -60,13 +60,13 @@ class InvoiceEletronicItem(models.Model):
     service_type_id = fields.Many2one('br_account.service.type','Tipo de Serviço')
     codigo_tributacao_municipio = fields.Char(string="Cód. Tribut. Munic.", size=20, readonly=True,help="Código de Tributação no Munípio", states=STATE)
 
-    @api.onchange('issqn_tipo')
-    def _onchange_issqn_tipo(self):
-        if self.issqn_tipo in ('R','S'):
-            self.country_id = self.invoice_id.partner_id.country_id
-            self.state_id = self.invoice_id.partner_id.state_id
-            self.city_id = self.invoice_id.partner_id.city_id
-        else:
-            self.country_id = self.invoice_id.company_id.country_id
-            self.state_id = self.invoice_id.company_id.state_id
-            self.city_id = self.invoice_id.company_id.city_id
+#     @api.onchange('issqn_tipo')
+#     def _onchange_issqn_tipo(self):
+#         if self.issqn_tipo in ('R','S'):
+#             self.country_id = self.invoice_id.partner_id.country_id
+#             self.state_id = self.invoice_id.partner_id.state_id
+#             self.city_id = self.invoice_id.partner_id.city_id
+#         else:
+#             self.country_id = self.invoice_id.company_id.country_id
+#             self.state_id = self.invoice_id.company_id.state_id
+#             self.city_id = self.invoice_id.company_id.city_id

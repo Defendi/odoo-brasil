@@ -353,6 +353,8 @@ class AccountInvoiceLine(models.Model):
     ipi_aliquota = fields.Float('IPI %', digits=(12,4), default=0.00, compute='_compute_price', store=True)
     ipi_cst = fields.Selection(CST_IPI, string='CST IPI')
     ipi_base_calculo_manual = fields.Float('Base IPI Manual', digits=dp.get_precision('Account'), default=0.00)
+    ipi_codigo_enquadramento = fields.Many2one('br_account.enquadramento.ipi', 'Cod.Enquadramento')
+    ipi_classe_enquadramento = fields.Char(string="Clas.Enquadram.", size=5)
 
     # =========================================================================
     # PIS
@@ -549,7 +551,8 @@ class AccountInvoiceLine(models.Model):
         fpos = self.invoice_id.fiscal_position_id
         if fpos:
             vals = fpos.map_tax_extra_values(
-                self.company_id, self.product_id, self.invoice_id.partner_id,self.account_analytic_id)
+                self.product_id, self.invoice_id.partner_id, self.fiscal_classification_id, 
+                self.service_type_id, self.issqn_tipo, self.account_analytic_id)
 
             for key, value in vals.items():
                 if value and key in self._fields:
@@ -604,16 +607,22 @@ class AccountInvoiceLine(models.Model):
         
     @api.onchange('product_id')
     def _br_account_onchange_product_id(self):
-        self.product_type = self.product_id.fiscal_type
-        self.icms_origem = self.product_id.origin
-        ncm = self.product_id.fiscal_classification_id
-        service = self.product_id.service_type_id
-        self.fiscal_classification_id = ncm.id
-        self.service_type_id = service.id
-        self._set_extimated_taxes(self.product_id.lst_price)
-        if self.product_id:
-            self.account_analytic_id = self.invoice_id.account_analytic_id
-            self.analytic_tag_ids = self.invoice_id.analytic_tag_ids
+        if len(self.product_id) > 0:
+            self.product_type = self.product_id.fiscal_type
+            self.icms_origem = self.product_id.origin
+            ncm = self.product_id.fiscal_classification_id
+            service = self.product_id.service_type_id
+            self.fiscal_classification_id = ncm.id
+            self.service_type_id = service.id
+            self._set_extimated_taxes(self.product_id.lst_price)
+            if self.product_id:
+                self.account_analytic_id = self.invoice_id.account_analytic_id
+                self.analytic_tag_ids = self.invoice_id.analytic_tag_ids
+
+    @api.onchange('fiscal_classification_id','service_type_id','issqn_tipo','account_analytic_id')
+    def _br_account_onchange_fiscal_values_id(self):
+        if len(self.product_id) > 0:
+            self._set_taxes()
 
     def _update_invoice_line_ids(self):
         other_taxes = self.invoice_line_tax_ids.filtered(
