@@ -579,14 +579,15 @@
                                     <field name="tributos_estimados_estaduais" />
                                     <field name="tributos_estimados_municipais" />
                                     <field name="tributos_estimados" />
-                                    <field name="calculate_tax" groups="base.group_no_one" readonly="1" />
+                                    <field name="calculate_tax" groups="base.group_no_one" readonly="1"/>
                                 </group>
                             </group>
-                            <field name="invoice_line_tax_ids" groups="base.group_no_one" readonly="1" />
+                            
+                            <field name="invoice_line_tax_ids" colspan="4" groups="base.group_no_one" readonly="1"  nolabel="1"/>
                             <label for="name"/>
-                            <field name="name"/>
+                            <field name="name" nolabel="1"/>
                             <label for="informacao_adicional"/>
-                            <field name="informacao_adicional"/>
+                            <field name="informacao_adicional" nolabel="1"/>
                         </page>
                         <page name="icms" string="ICMS" attrs="{'invisible': [('product_type', '=', 'service')]}">
                             <group name="detalhes_icms" string="Detalhes do ICMS">

@@ -30,8 +30,16 @@
                             <field name="tow_rntc"/>
                         </group>
                         <group name="package_info" string="Volume">
-                            <field name="weight"/>
-                            <field name="weight_net"/>
+							<label for="weight"/>
+							<div class="o_row">
+								<field name="weight"/>
+								<span>kg</span>
+							</div>
+							<label for="weight_net"/>
+							<div class="o_row">
+								<field name="weight_net"/>
+								<span>kg</span>
+							</div>
                             <field name="number_of_packages"/>
                             <field name="kind_of_packages"/>
                             <field name="brand_of_packages"/>
@@ -111,6 +119,13 @@
                 <field name="valor_seguro" attrs="{'invisible': [('product_type', '=', 'service')]}" />
                 <field name="outras_despesas" attrs="{'invisible': [('product_type', '=', 'service')]}" />
                 <field name="price_total" string="(=) Total" attrs="{'invisible': [('product_type', '=', 'service')]}" />
+            </field>
+            <field name="company_id" position="after">
+				<label for="weight" groups="base.group_no_one"/>
+				<div class="o_row" groups="base.group_no_one">
+					<field name="weight"/>
+					<span>kg</span>
+				</div>
             </field>
         </field>
     </record>

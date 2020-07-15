@@ -1,7 +1,4 @@
-# © 2016 Danimar Ribeiro, Trustcode
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
-{  # pylint: disable=C8101,C8103
+{
     'name': 'Odoo Brasil - WMS Accounting',
     'summary': """Realiza o link entre faturas e o estoque e logistica""",
     'description': 'Odoo Brasil - WMS Accounting',
@@ -19,6 +16,7 @@
     'data': [
         'views/account_invoice.xml',
         'views/stock_picking.xml',
+        'views/product_package_view.xml',
         'reports/account_invoice.xml',
     ],
     'auto_install': True,

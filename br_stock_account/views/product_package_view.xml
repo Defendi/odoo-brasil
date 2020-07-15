@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_br_stock_account_product_packaging_form" model="ir.ui.view">
+        <field name="name">br.stock.account.product.packaging.form</field>
+        <field name="model">product.packaging</field>
+        <field name="inherit_id" ref="product.product_packaging_form_view"/>
+        <field name="arch" type="xml">
+            <field name="qty" position="before">
+				<label for="weight"/>
+				<div class="o_row">
+					<field name="weight"/>
+					<span>kg</span>
+				</div>
+            </field>
+        </field>
+    </record>
+</odoo>
