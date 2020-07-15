@@ -306,8 +306,8 @@ class InvoiceEletronic(models.Model):
 
         price_precis = dp.get_precision('Product Price')(self.env.cr)
         qty_precis = dp.get_precision('Product Unit of Measure')(self.env.cr)
-        qty_frmt = '{:.%sf}' % qty_precis[1]
-        price_frmt = '{:.%sf}' % price_precis[1]
+        qty_frmt = '{:.%sf}' % qty_precis[1] if qty_precis[1] <= 4 else '{:.4f}'
+        price_frmt = '{:.%sf}' % price_precis[1] if price_precis[1] <= 4 else '{:.4f}'
         prod = {
             'cProd': item.code,
             'cEAN': item.product_id.barcode or 'SEM GTIN',
