@@ -58,6 +58,10 @@ class SaleOrder(models.Model):
         digits=dp.get_precision('Account'), store=True,
         help="The discount amount.")
 
+    # Dados para pivot
+    date_order = fields.Datetime(related='order_id.date_order', string='Order Date', readonly=True, store=True)
+    categ_id = fields.Many2one('product.category', 'Categoria',related='product_id.categ_id', readonly=True, store=True)
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
