@@ -94,14 +94,14 @@
         <field name="act_window_id" ref="action_br_purchase_order_line_report"/>
     </record>
 
-    <record id="action_account_analytic_purchase_overdue_all_pivot" model="ir.actions.act_window.view">
+    <record id="action_br_purchase_order_line_report_pivot" model="ir.actions.act_window.view">
         <field name="sequence" eval="2"/>
         <field name="view_mode">pivot</field>
         <field name="view_id" ref="view_br_purchase_order_line_pivot"/>
         <field name="act_window_id" ref="action_br_purchase_order_line_report"/>
     </record>
 
-    <record id="action_account_analytic_sale_overdue_all_graph" model="ir.actions.act_window.view">
+    <record id="action_br_purchase_order_line_report_graph" model="ir.actions.act_window.view">
         <field name="sequence" eval="3"/>
         <field name="view_mode">graph</field>
         <field name="view_id" ref="view_br_purchase_order_line_graph"/>
