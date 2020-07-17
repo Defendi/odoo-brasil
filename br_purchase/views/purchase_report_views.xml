@@ -108,6 +108,7 @@
         <field name="act_window_id" ref="action_br_purchase_order_line_report"/>
     </record>
 
+
     <menuitem id="purchase_report_orders_itens" name="Itens Comprados" parent="purchase.purchase_report" sequence="10"
         action="action_br_purchase_order_line_report"/>
 
