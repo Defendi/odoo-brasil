@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="dayoff_confraternizacao_universal_20" model="hr.holidays.dayoff">
+            <field name="name">Confraternização Universal</field>
+            <field name="date_from">2020-01-01 00:00:00</field>
+            <field name="date_to">2020-01-01 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_carnaval_20" model="hr.holidays.dayoff">
+            <field name="name">Carnaval</field>
+            <field name="date_from">2020-02-24 00:00:00</field>
+            <field name="date_to">2020-02-26 14:00:00</field>
+            <field name="number_of_days">2.5</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_paixao_cristo_20" model="hr.holidays.dayoff">
+            <field name="name">Paixão de Cristo</field>
+            <field name="date_from">2020-04-10 00:00:00</field>
+            <field name="date_to">2020-04-10 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_tiradentes_20" model="hr.holidays.dayoff">
+            <field name="name">Tiradentes</field>
+            <field name="date_from">2020-04-21 00:00:00</field>
+            <field name="date_to">2020-04-21 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_trabalho_20" model="hr.holidays.dayoff">
+            <field name="name">Dia do Trabalho</field>
+            <field name="date_from">2020-05-01 00:00:00</field>
+            <field name="date_to">2020-05-01 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_corpus_christi_20" model="hr.holidays.dayoff">
+            <field name="name">Corpus Christi</field>
+            <field name="date_from">2020-06-11 00:00:00</field>
+            <field name="date_to">2020-06-11 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_independencia_brasil_20" model="hr.holidays.dayoff">
+            <field name="name">Dia da Independência</field>
+            <field name="date_from">2020-09-07 00:00:00</field>
+            <field name="date_to">2020-09-07 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_padroeira_20" model="hr.holidays.dayoff">
+            <field name="name">Padroeira do Brasil</field>
+            <field name="date_from">2020-10-12 00:00:00</field>
+            <field name="date_to">2020-10-12 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_finados_20" model="hr.holidays.dayoff">
+            <field name="name">Finados</field>
+            <field name="date_from">2020-11-02 00:00:00</field>
+            <field name="date_to">2020-11-02 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_proclamacao_20" model="hr.holidays.dayoff">
+            <field name="name">Proclamação República</field>
+            <field name="date_from">2020-11-15 00:00:00</field>
+            <field name="date_to">2020-11-15 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_natal_20" model="hr.holidays.dayoff">
+            <field name="name">Natal</field>
+            <field name="date_from">2020-12-25 00:00:00</field>
+            <field name="date_to">2020-12-25 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_confraternizacao_universal_21" model="hr.holidays.dayoff">
+            <field name="name">Confraternização Universal</field>
+            <field name="date_from">2021-01-01 00:00:00</field>
+            <field name="date_to">2021-01-01 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_carnaval_21" model="hr.holidays.dayoff">
+            <field name="name">Carnaval</field>
+            <field name="date_from">2021-02-15 00:00:00</field>
+            <field name="date_to">2021-02-17 14:00:00</field>
+            <field name="number_of_days">2.5</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_paixao_cristo_21" model="hr.holidays.dayoff">
+            <field name="name">Paixão de Cristo</field>
+            <field name="date_from">2021-04-02 00:00:00</field>
+            <field name="date_to">2021-04-02 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_tiradentes_21" model="hr.holidays.dayoff">
+            <field name="name">Tiradentes</field>
+            <field name="date_from">2021-04-21 00:00:00</field>
+            <field name="date_to">2021-04-21 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_trabalho_21" model="hr.holidays.dayoff">
+            <field name="name">Dia do Trabalho</field>
+            <field name="date_from">2021-05-01 00:00:00</field>
+            <field name="date_to">2021-05-01 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_corpus_christi_21" model="hr.holidays.dayoff">
+            <field name="name">Corpus Christi</field>
+            <field name="date_from">2021-06-03 00:00:00</field>
+            <field name="date_to">2021-06-03 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_independencia_brasil_21" model="hr.holidays.dayoff">
+            <field name="name">Dia da Independência</field>
+            <field name="date_from">2021-09-07 00:00:00</field>
+            <field name="date_to">2021-09-07 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_padroeira_21" model="hr.holidays.dayoff">
+            <field name="name">Padroeira do Brasil</field>
+            <field name="date_from">2021-10-12 00:00:00</field>
+            <field name="date_to">2021-10-12 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_finados_21" model="hr.holidays.dayoff">
+            <field name="name">Finados</field>
+            <field name="date_from">2021-11-02 00:00:00</field>
+            <field name="date_to">2021-11-02 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_proclamacao_21" model="hr.holidays.dayoff">
+            <field name="name">Proclamação República</field>
+            <field name="date_from">2021-11-15 00:00:00</field>
+            <field name="date_to">2021-11-15 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+        <record id="dayoff_natal_21" model="hr.holidays.dayoff">
+            <field name="name">Natal</field>
+            <field name="date_from">2021-12-25 00:00:00</field>
+            <field name="date_to">2021-12-25 23:59:59</field>
+            <field name="number_of_days">1</field>
+            <field name="status_id" ref="hr_holidays.holiday_status_cl"/>
+            <field name="auto_confirm" eval="True"/>
+        </record>
+
+    </data>
+</odoo>
