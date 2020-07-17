@@ -23,6 +23,7 @@
                 <field name="valor_bruto" widget="monetary"/>
                 <field name="valor_desconto" widget="monetary"/>
                 <field name="price_total" widget="monetary"/>
+                <field name="state"/>
             </tree>
         </field>
     </record>
@@ -35,11 +36,14 @@
             	<field name="order_id"/>
                 <field name="partner_id"/>
                 <field name="product_id"/>
+                <filter string="Cotações" name="quotes" domain="[('state','=','draft')]"/>
+                <filter string="Ordens" name="orders" domain="[('state','!=','draft'),('state','!=','cancel')]"/>
                 <group expand="1" string="Group By">
                     <filter string="Parceiro" name="group_partner_id" context="{'group_by':'partner_id'}"/>
                     <filter string="Categoria" name="group_categ_id" context="{'group_by':'categ_id'}"/>
                     <filter string="Produto" name="group_product_id" context="{'group_by':'product_id'}"/>
-                    <filter string="Data" name="group_date_order" context="{'group_by':'date_order'}"/>
+                    <filter string="Mês" name="group_date_order" context="{'group_by':'date_order'}"/>
+                    <filter string="Situação" name="group_state" context="{'group_by':'state'}"/>
                 </group>
             </search>
         </field>
