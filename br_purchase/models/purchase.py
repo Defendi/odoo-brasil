@@ -187,7 +187,7 @@ class PurchaseOrderLine(models.Model):
         default=0.0)
 
     valor_desconto = fields.Float(
-        compute='_compute_amount', string='Vlr. Desc. (-)', store=True,
+        compute='_compute_amount', string='Desconto (-)', store=True,
         digits=dp.get_precision('Sale Price'))
     valor_bruto = fields.Float(
         compute='_compute_amount', string='Vlr. Bruto', store=True,
@@ -195,6 +195,11 @@ class PurchaseOrderLine(models.Model):
     valor_liquido  = fields.Float(
         compute='_compute_amount', string='Vlr. Bruto', store=False,
         digits=dp.get_precision('Sale Price'))
+
+    # Dados para pivot
+    date_order = fields.Datetime(related='order_id.date_order', string='Order Date', readonly=True, store=True)
+    categ_id = fields.Many2one('product.category', 'Categoria',related='product_id.categ_id', readonly=True, store=True)
+
     
     def _update_tax_from_ncm(self):
         if self.product_id:

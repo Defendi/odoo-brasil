@@ -14,6 +14,7 @@
     ],
     'data': [
         'views/purchase_view.xml',
+        'views/purchase_report_views.xml',
         'views/account_invoice.xml',
         'views/res_partner.xml',
         'views/res_config_settings_views.xml',
