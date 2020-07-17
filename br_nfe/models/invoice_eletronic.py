@@ -499,7 +499,7 @@ class InvoiceEletronic(models.Model):
             'indFinal': self.ind_final or '1',
             'indPres': self.ind_pres or '1',
             'procEmi': 0,
-            'softEmi': paramObj.get_param('NFe.softEmi'),
+            'softEmi': paramObj.sudo().get_param('NFe.softEmi'),
         }
         # Documentos Relacionados
         documentos = []
@@ -794,14 +794,14 @@ class InvoiceEletronic(models.Model):
             'infCpl': self.informacoes_complementares or '',
             'infAdFisco': self.informacoes_legais or '',
         }
-        cnpjtec = paramObj.get_param('NFe.infRespTec.cnpj')
+        cnpjtec = paramObj.sudo().get_param('NFe.infRespTec.cnpj')
         if cnpjtec:
             cnpjtec = re.sub('[^0-9]', '', cnpjtec)
         infRespTec = {
             'CNPJ': cnpjtec or '',
-            'xContato': paramObj.get_param('NFe.infRespTec.xContato') or '',
-            'email': paramObj.get_param('NFe.infRespTec.email') or '',
-            'fone': paramObj.get_param('NFe.infRespTec.fone') or '',
+            'xContato': paramObj.sudo().get_param('NFe.infRespTec.xContato') or '',
+            'email': paramObj.sudo().get_param('NFe.infRespTec.email') or '',
+            'fone': paramObj.sudo().get_param('NFe.infRespTec.fone') or '',
         }
         compras = {
             'xNEmp': self.nota_empenho or '',
