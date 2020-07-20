@@ -713,7 +713,9 @@ class InvoiceEletronicItem(models.Model):
          ('1', '1 - Lista Negativa (valor)'),
          ('2', '2 - Lista Positiva (valor)'),
          ('3', '3 - Lista Neutra (valor)'),
-         ('4', '4 - Margem Valor Agregado (%)'), ('5', '5 - Pauta (valor)')],
+         ('4', '4 - Margem Valor Agregado (%)'), 
+         ('5', '5 - Pauta (valor)'),
+         ('6', '6 - Valor da Operação')],
         string='Tipo Base ICMS ST', required=True, default='4',
         readonly=True, states=STATE)
     icms_st_aliquota_mva = fields.Float(string='% MVA', digits=(12,4),readonly=True, states=STATE)

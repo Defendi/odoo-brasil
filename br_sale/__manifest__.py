@@ -15,6 +15,7 @@
     ],
     'data': [
         'reports/sale_order.xml',
+        'reports/sale_report_views.xml',
         'views/br_sale.xml',
         'views/sale_view.xml',
         'security/ir.model.access.csv',

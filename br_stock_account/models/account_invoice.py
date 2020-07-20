@@ -12,6 +12,7 @@ class AccountInvoice(models.Model):
     @api.one
     @api.depends('invoice_line_ids.price_subtotal',
                  'invoice_line_ids.price_total',
+                 'invoice_line_ids.weight',
                  'tax_line_ids.amount',
                  'currency_id', 'company_id')
     def _compute_amount(self):
@@ -27,6 +28,8 @@ class AccountInvoice(models.Model):
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
         self.amount_total_company_signed = self.amount_total * sign
         self.amount_total_signed = self.amount_total * sign
+        self.weight = sum(l.weight for l in lines)
+        self.weight_net = sum(l.weight for l in lines)
 
     total_seguro = fields.Float(
         string='Seguro ( + )', digits=dp.get_precision('Account'),
@@ -59,8 +62,8 @@ class AccountInvoice(models.Model):
         'res.country.state', 'UF da Placa do Reboque')
     tow_rntc = fields.Char('RNTC Reboque', size=20)
 
-    weight = fields.Float(string='Peso Bruto', help="O peso bruto em Kg.")
-    weight_net = fields.Float('Peso Líquido', help="O peso líquido em Kg.")
+    weight = fields.Float(string='Peso Bruto', help="O peso bruto em Kg.", digits=(12,3))
+    weight_net = fields.Float('Peso Líquido', help="O peso líquido em Kg.", digits=(12,3))
     number_of_packages = fields.Integer('Nº Volumes')
     kind_of_packages = fields.Char('Espécie', size=60)
     brand_of_packages = fields.Char('Marca', size=60)
@@ -118,13 +121,19 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
-    valor_frete = fields.Float(
-        '(+) Frete', digits=dp.get_precision('Account'), default=0.00)
-    valor_seguro = fields.Float(
-        '(+) Seguro', digits=dp.get_precision('Account'), default=0.00)
-    outras_despesas = fields.Float(
-        '(+) Despesas', digits=dp.get_precision('Account'), default=0.00)
+    valor_frete = fields.Float('(+) Frete', digits=dp.get_precision('Account'), default=0.00)
+    valor_seguro = fields.Float('(+) Seguro', digits=dp.get_precision('Account'), default=0.00)
+    outras_despesas = fields.Float('(+) Despesas', digits=dp.get_precision('Account'), default=0.00)
+    weight = fields.Float(string='Peso', help="O peso em Kg.", digits=(12,3))
 
+    @api.onchange('product_id','quantity')
+    def _br_stock_account_onchange_product_id(self):
+        if len(self.product_id) > 0:
+            if self.product_id.fiscal_type == 'product':
+                self.weight = self.product_id.weight * self.quantity
+#             volume = self.env['prduct.packaging'].search([('product_id','=',self.product_id.id),('name','ilike','volume')],limit=1)
+#             if len(volume) > 0:
+                
     def _prepare_tax_context(self):
         res = super(AccountInvoiceLine, self)._prepare_tax_context()
         res.update({
@@ -142,3 +151,4 @@ class AccountInvoiceLine(models.Model):
         total = self.valor_bruto - self.valor_desconto + self.valor_frete + \
             self.valor_seguro + self.outras_despesas
         self.update({'price_total': total})
+
