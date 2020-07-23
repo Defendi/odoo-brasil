@@ -79,6 +79,16 @@ class AccountInvoice(models.Model):
     def _prepare_edoc_vals(self, inv, inv_lines, serie_id):
         res = super(AccountInvoice, self)._prepare_edoc_vals(
             inv, inv_lines, serie_id)
+
+        res['volume_ids'] = [(0, None, {
+            'peso_bruto': inv.weight,
+            'peso_liquido': inv.weight_net,
+            'quantidade_volumes': inv.number_of_packages,
+            'especie': inv.kind_of_packages,
+            'marca': inv.brand_of_packages,
+            'numeracao': inv.notation_of_packages,
+        })]
+
         res['valor_frete'] = inv.total_frete
         res['valor_despesas'] = inv.total_despesas
         res['valor_seguro'] = inv.total_seguro
@@ -94,14 +104,6 @@ class AccountInvoice(models.Model):
             'placa_veiculo': (inv.tow_plate or '').upper(),
         })]
 
-        res['volume_ids'] = [(0, None, {
-            'peso_bruto': inv.weight,
-            'peso_liquido': inv.weight_net,
-            'quantidade_volumes': inv.number_of_packages,
-            'especie': inv.kind_of_packages,
-            'marca': inv.brand_of_packages,
-            'numeracao': inv.notation_of_packages,
-        })]
 
         res['uf_saida_pais_id'] = inv.uf_saida_pais_id.id
         res['local_embarque'] = inv.local_embarque
