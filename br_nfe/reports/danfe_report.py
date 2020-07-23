@@ -6,7 +6,7 @@ import base64
 import logging
 from lxml import etree
 from io import BytesIO
-from odoo import models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -45,8 +45,12 @@ class IrActionsReport(models.Model):
 
         if cce_list:
             for cce in cce_list:
-                cce_xml = base64.decodestring(cce.datas)
-                cce_xml_element.append(etree.fromstring(cce_xml))
+                if len(cce.datas) > 0:
+                    cce_xml = base64.decodestring(cce.datas)
+                    cce_xml_element.append(etree.fromstring(cce_xml))
+                else:
+                    _logger.error("O XML da carta de correção está zerado ou é inválido.", exc_info=True)
+                    
 
         logo = False
         if nfe.invoice_id.company_id.logo:
