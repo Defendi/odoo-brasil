@@ -328,12 +328,15 @@ class PuchaseOrderLine(models.Model):
 #             desconto = line.order_id.currency_id.round(desconto)
             desconto = line.valor_desconto
             tx_desc = (desconto / valor_bruto) * 100 if valor_bruto > 0.0 else 0.0
+            
+            taxas = taxes['total_included'] - taxes['total_excluded']
 
             line.update({
-                'price_tax': taxes['total_included'] - taxes['total_excluded'],
+                'price_tax': taxas,
                 'price_total': taxes['total_included'],
                 'price_subtotal': taxes['total_excluded'],
                 'valor_bruto': valor_bruto,
                 'discount': tx_desc,
-                'valor_liquido': valor_bruto - desconto,
+                'valor_liquido': (valor_bruto - desconto) + taxas + line.valor_seguro + line.outras_despesas +
+                                 line.valor_frete + line.valor_aduana,
             })
