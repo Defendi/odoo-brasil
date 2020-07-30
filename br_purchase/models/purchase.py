@@ -60,8 +60,11 @@ class PurchaseOrder(models.Model):
         digits=dp.get_precision('Account'), store=True,
         help="The discount amount.")
 
-    account_analytic_id = fields.Many2one('account.analytic.account', 'Centro Custo', copy=True)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', copy=True)
+    account_analytic_id = fields.Many2one('account.analytic.account', 'Centro Custo', copy=True, states=READONLY_STATES)
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Rótulos Custo', copy=True, states=READONLY_STATES)
+    name = fields.Char('Order Reference', required=True, index=True, copy=False, default='New', states=READONLY_STATES)
+    origin = fields.Char('Source Document', copy=False, states=READONLY_STATES)
+    partner_ref = fields.Char('Vendor Reference', copy=False, states=READONLY_STATES)
 
     @api.onchange('fiscal_position_id')
     def _compute_tax_id(self):
