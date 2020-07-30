@@ -10,7 +10,7 @@
 				<attribute name="options">{'no_quick_create': '1', 'no_quick_edit': '1', 'always_reload': True}</attribute>
 			</xpath>
 			<xpath expr="//button[@name='print_quotation']" position="after">
-            	<button name="print_ordem" string="Imprimir OC" type="object" states="purchase" class="oe_highlight" groups="base.group_user"/>
+            	<button name="print_ordem" string="Imprimir OC" type="object" states="purchase,done" class="oe_highlight" groups="base.group_user"/>
 			</xpath>        	
         	<field name="date_order" position="after">
         		<field name="deadline_order" attrs="{'invisible': [('state', 'not in', ('draft', 'sent', 'to aprove'))]}"/>
