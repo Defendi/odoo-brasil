@@ -13,12 +13,18 @@
                             <field name="currency_id" invisible="1"/>
                             <field name="partner_type" invisible="1"/>
                             <field name="amount_residual" invisible="1"/>
+                            <field name="late_payment" invisible="1"/>
                             <field name="partner_id"/>
                             <field name="move_line_id"/>
+                            <field name="date_maturity"/>
                             <field name="invoice_id" attrs="{'invisible': [('invoice_id', '=', False)]}"/>
                             <field name="journal_id"/>
                             <field name="amount"/>
                             <field name="payment_date"/>
+                            <!-- 
+                            <field name="interest" attrs="{'invisible': [('late_payment', '=', False)]}"/>
+                            <field name="penalty"/>
+                             -->
                             <field name="communication"/>
                         </group>
                     </group>

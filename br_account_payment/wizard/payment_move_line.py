@@ -4,17 +4,25 @@
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError
 
-
 class PaymentAccountMoveLine(models.TransientModel):
     _name = 'payment.account.move.line'
     _description = 'Assistente Para Lançamento de Pagamentos'
 
+    @api.depends('payment_date')
+    def _late_payment(self):
+        if self.payment_date > self.move_line_id.date_maturity:
+            self.late_payment = True
+        else:
+            self.late_payment = False
+            
     company_id = fields.Many2one(
         'res.company', related='journal_id.company_id',
         string='Exmpresa', readonly=True
     )
     move_line_id = fields.Many2one(
         'account.move.line', readonly=True, string='Conta à Pagar/Receber')
+    date_maturity = fields.Date(related='move_line_id.date_maturity',string='Vencimento',readonly=True)
+    
     invoice_id = fields.Many2one(
         'account.invoice', readonly=True, string='Fatura')
     partner_type = fields.Selection(
@@ -40,9 +48,18 @@ class PaymentAccountMoveLine(models.TransientModel):
         related='move_line_id.amount_residual',
         currency_field='currency_id'
     )
+
     amount = fields.Monetary(
         string='Valor do Pagamento', required=True,
     )
+    interest = fields.Monetary(
+        string='Juros', required=True, default=0.0)
+
+    penalty = fields.Monetary(
+        string='Multa', required=True, default=0.0)
+
+    late_payment = fields.Boolean(compute="_late_payment",string="Em atraso")
+
 
     @api.model
     def default_get(self, fields):
