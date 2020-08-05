@@ -8,12 +8,18 @@ class PaymentAccountMoveLine(models.TransientModel):
     _name = 'payment.account.move.line'
     _description = 'Assistente Para Lançamento de Pagamentos'
 
+    @api.one
     @api.depends('payment_date')
     def _late_payment(self):
         if self.payment_date > self.move_line_id.date_maturity:
             self.late_payment = True
         else:
             self.late_payment = False
+    
+    @api.one
+    @api.depends('penalty','interest','principal')
+    def _pay_amount(self):
+        self.pay_amount = (self.penalty + self.interest + self.principal)
             
     company_id = fields.Many2one(
         'res.company', related='journal_id.company_id',
@@ -49,29 +55,24 @@ class PaymentAccountMoveLine(models.TransientModel):
         currency_field='currency_id'
     )
 
-    amount = fields.Monetary(
-        string='Valor do Pagamento', required=True,
-    )
-    interest = fields.Monetary(
-        string='Juros', required=True, default=0.0)
-
-    penalty = fields.Monetary(
-        string='Multa', required=True, default=0.0)
-
+    principal = fields.Monetary(string='Principal', required=True, oldname='amount', default=0.0)
+    interest = fields.Monetary(string='Juros', required=True, default=0.0)
+    penalty = fields.Monetary(string='Multa', required=True, default=0.0)
+    
+    pay_amount = fields.Monetary(compute="_pay_amount",string='Pagamento')
     late_payment = fields.Boolean(compute="_late_payment",string="Em atraso")
-
 
     @api.model
     def default_get(self, fields):
         rec = super(PaymentAccountMoveLine, self).default_get(fields)
         move_line_id = rec.get('move_line_id', False)
-        amount = 0
+        principal = 0
         if not move_line_id:
             raise UserError(
                 _("Não foi selecionada nenhuma linha de cobrança."))
         move_line = self.env['account.move.line'].browse(move_line_id)
         if move_line[0].amount_residual:
-            amount = move_line[0].amount_residual if \
+            principal = move_line[0].amount_residual if \
                 rec['partner_type'] == 'customer' else \
                 move_line[0].amount_residual * -1
 #         if move_line[0].invoice_id:
@@ -79,7 +80,7 @@ class PaymentAccountMoveLine(models.TransientModel):
 #         else:
 #             raise UserError(_("A linha de cobrança selecionada não possui nenhuma fatura relacionada."))
         rec.update({
-            'amount': amount,
+            'principal': principal,
             'invoice_id': move_line[0].invoice_id.id,
         })
         return rec
@@ -93,7 +94,7 @@ class PaymentAccountMoveLine(models.TransientModel):
         real_amount_residual = self.amount_residual if \
             self.partner_type == 'customer' else \
             self.amount_residual * -1
-        if self.amount > real_amount_residual:
+        if self.principal > real_amount_residual:
             raise ValidationError(_(
                 'O valor do pagamento não pode ser maior '
                 'que o valor da parcela.'))

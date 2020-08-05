@@ -19,13 +19,12 @@
                             <field name="date_maturity"/>
                             <field name="invoice_id" attrs="{'invisible': [('invoice_id', '=', False)]}"/>
                             <field name="journal_id"/>
-                            <field name="amount"/>
+                            <field name="principal"/>
                             <field name="payment_date"/>
-                            <!-- 
                             <field name="interest" attrs="{'invisible': [('late_payment', '=', False)]}"/>
-                            <field name="penalty"/>
-                             -->
+                            <field name="penalty" attrs="{'invisible': [('late_payment', '=', False)]}"/>
                             <field name="communication"/>
+                            <field name="pay_amount"/>
                         </group>
                     </group>
                 </sheet>
