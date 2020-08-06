@@ -12,10 +12,6 @@ class PaymentMode(models.Model):
     boleto = fields.Boolean(string="Boleto?")
     nosso_numero_sequence = fields.Many2one(
         'ir.sequence', string='Seq. do Nosso Número')
-    late_payment_fee = fields.Float(string=u"Percentual Multa",
-                                    digits=dp.get_precision('Account'))
-    late_payment_interest = fields.Float(string=u"Juros de Mora ao Mês",
-                                         digits=dp.get_precision('Account'))
     instrucoes = fields.Text(string='Instruções')
     boleto_carteira = fields.Char('Carteira', size=3)
     boleto_modalidade = fields.Char('Modalidade', size=2)

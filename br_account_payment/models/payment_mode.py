@@ -10,18 +10,14 @@ class PaymentMode(models.Model):
     _order = 'name'
 
     name = fields.Char(string='Name', required=True, translate=True)
-    type = fields.Selection(
-        [('receivable', 'Recebível'), ('payable', 'Pagável')],
-        string="Tipo de Transação", default='receivable')
-    company_id = fields.Many2one(
-        'res.company', string='Company', ondelete='restrict')
+    type = fields.Selection([('receivable', 'Recebível'), ('payable', 'Pagável')],string="Tipo de Transação", default='receivable')
+    company_id = fields.Many2one('res.company', string='Company', ondelete='restrict')
     active = fields.Boolean(string='Active', default=True)
-    journal_id = fields.Many2one(
-        'account.journal', string="Journal",
-        domain=[('type', 'in', ('cash', 'bank'))])
+    journal_id = fields.Many2one('account.journal', string="Journal",domain=[('type', 'in', ('cash', 'bank'))])
     # TODO Remove this fields latter on, from now on we use just journal_id
-    bank_account_id = fields.Many2one(
-        'res.partner.bank', string="Bank Account", ondelete='restrict')
+    bank_account_id = fields.Many2one('res.partner.bank', string="Bank Account", ondelete='restrict')
+    late_payment_fee = fields.Float(string="Percentual Multa",digits=(12,2))
+    late_payment_interest = fields.Float(string="Juros de Mora ao Mês",digits=(12,2))
     l10n_br_environment = fields.Selection(
         [('test', 'Teste'),
          ('production', 'Produção')],

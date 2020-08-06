@@ -6,10 +6,12 @@ from odoo import api, fields, models
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
 
-    move_line_id = fields.Many2one('account.move.line',
-                                   string="Linha de fatura")
-    total_moves = fields.Integer(
-        'Linha(s)', compute='_compute_open_moves')
+    move_line_id = fields.Many2one('account.move.line', string="Linha de fatura")
+    total_moves = fields.Integer('Linha(s)', compute='_compute_open_moves')
+
+    discount    = fields.Monetary(string='Desconto', default=0.0, currency_field='currency_id')
+    interest    = fields.Monetary(string='Juros', default=0.0, currency_field='currency_id')
+    fee         = fields.Monetary(string='Multa', default=0.0, currency_field='currency_id')
 
     @api.depends('partner_id', 'partner_type')
     def _compute_open_moves(self):
