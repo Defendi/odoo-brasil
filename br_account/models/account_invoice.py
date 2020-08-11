@@ -45,6 +45,9 @@ class AccountInvoice(models.Model):
         self.inss_value = sum(abs(l.inss_valor) for l in lines)
         self.outros_base = sum(l.outros_base_calculo for l in lines)
         self.outros_value = sum(abs(l.outros_valor) for l in lines)
+        # FCP
+        self.total_fcp = sum(l.icms_fcp for l in lines)
+        self.total_fcp_st = sum(l.icms_fcp_st for l in lines)
 
         # Retenções
         self.issqn_retention = sum(
@@ -84,6 +87,13 @@ class AccountInvoice(models.Model):
         self.amount_total_signed = self.amount_total * sign
         self.taxa_icms_credito = (self.valor_icms_credito / (self.total_bruto - self.total_desconto)) * 100 \
                                 if (self.total_bruto - self.total_desconto) > 0.0 else 0.0 
+
+    @api.one
+    @api.depends('move_id.line_ids')
+    def _total_icms(self):
+        lines = self.invoice_line_ids
+        self.total_icms_valor_credito = sum(
+            l.icms_valor_credito for l in lines)
 
     @api.one
     @api.depends('move_id.line_ids')
@@ -314,7 +324,15 @@ class AccountInvoice(models.Model):
         store=True,
         digits=dp.get_precision('Account'),
         compute='_compute_amount')
-
+    total_fcp = fields.Float(
+        string="Total FCP", store=True, compute='_compute_amount',
+        help=u'Total do Fundo de Combate à Pobreza (FCP)')
+    total_fcp_st = fields.Float(
+        string="Total FCP ST", store=True, compute='_compute_amount',
+        help=u'Total do Fundo de Combate à Pobreza ST (FCP ST)')
+    total_icms_valor_credito = fields.Float(
+        string='Total de ICMS valor Crédito', compute='_total_icms',
+        store=True, digits=dp.get_precision('Account'))
     total_despesas_aduana = fields.Float(
         string='Desp.Aduana ( + )', 
         digits=dp.get_precision('Account'))
@@ -457,9 +475,9 @@ class AccountInvoice(models.Model):
                         res[contador]['price'] += tax_dict['amount'] 
                         
                     
-                if (not tax.account_id or not tax.deduced_account_id):
+                if tax.price_include and (not tax.account_id or not tax.deduced_account_id):
                     if tax_dict['amount'] > 0.0:  # Negativo é retido
-                        res[contador]['price'] -= round(tax_dict['amount'], 2)
+                        res[contador]['price'] -= tax_dict['amount']
 
             contador += 1
         return res

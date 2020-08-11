@@ -60,8 +60,10 @@ class AccountFiscalPositionTaxRule(models.Model):
     icms_aliquota_diferimento = fields.Float("% Diferimento")
     incluir_ipi_base = fields.Boolean(string="Incl. IPI na base ICMS")
     reducao_icms = fields.Float(string="Redução de base")
+    reducao_aliquota_icms = fields.Float(string="% Redução aliquota")
     reducao_icms_st = fields.Float(string="Redução de base ST")
     reducao_ipi = fields.Float(string="Redução de base IPI")
+    icms_aliquota_reducao_base = fields.Float(string="Aliquota Redução base")
     l10n_br_issqn_deduction = fields.Float(string="% Dedução de base ISSQN")
     aliquota_mva = fields.Float(string="Alíquota MVA")
     icms_st_aliquota_deducao = fields.Float(
@@ -78,6 +80,9 @@ class AccountFiscalPositionTaxRule(models.Model):
         string="ICMS Intra", domain=[('domain', '=', 'icms_intra')])
     tax_icms_fcp_id = fields.Many2one(
         'account.tax', string="% FCP", domain=[('domain', '=', 'fcp')])
+    tax_icms_fcp_st_id = fields.Many2one(
+        'account.tax', string=u"% FCP ST", domain=[('domain', '=', 'fcpst')])
+    preco_pauta = fields.Float(string="Preço de Pauta")
     issqn_tipo = fields.Selection([('N', 'Normal'),
                                    ('R', 'Retida'),
                                    ('S', 'Substituta'),

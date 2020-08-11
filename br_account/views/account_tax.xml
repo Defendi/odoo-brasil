@@ -18,6 +18,11 @@
                 <field name="difal_por_dentro" />
                 <field name="icms_st_incluso" />
             </field>
+            <field name="tax_adjustment" position="after">
+                <field name="allow_credit_utilization" attrs="{'invisible':['|', 
+                    ('type_tax_use','!=','purchase')],
+                    'readonly':['|',('price_include','=',False),('account_id','in',False)]}"/>
+            </field>
         </field>
     </record>
 

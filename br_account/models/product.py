@@ -10,6 +10,7 @@ from odoo import models, fields, api, tools
 from odoo.exceptions import UserError
 from odoo.tools import pycompat
 from .cst import ORIGEM_PROD
+from odoo.addons import decimal_precision as dp
 
 _logger = logging.getLogger(__name__)
 
@@ -104,6 +105,17 @@ class ProductTemplate(models.Model):
     description_fiscal = fields.Text(
         'Fiscal Description', translate=True,
         help="Descrição do produto a ser inserido nas Faturas. ")
+    uom_imposto_id = fields.Many2one(
+        'product.uom', 'Medida de Imposto',
+        help="Default Unit of Measure used for all stock operation.")
+    uom_fator_imposto = fields.Float(
+        'Fator de Imposto', digits=dp.get_precision('Product Unit of Measure'),
+        help="Fator de conversão da unidade de medida do imposto.")
+    weight_gross = fields.Float(
+        'Gross Weight',
+        digits=dp.get_precision('Stock Weight'), store=True,
+        help="The weight of the contents in Kg, including any packaging, etc.")
+    icms_benef = fields.Many2one('br_account.beneficio.fiscal', string="Benificio Fiscal")
 
     @api.onchange('type')
     def onchange_product_type(self):

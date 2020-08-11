@@ -41,6 +41,7 @@ class AccountTaxTemplate(models.Model):
                                ('icms_inter', 'Difal - Alíquota Inter'),
                                ('icms_intra', 'Difal - Alíquota Intra'),
                                ('fcp', 'FCP'),
+                               ('fcpst', 'FCP ST'),
                                ('csll', 'CSLL'),
                                ('irrf', 'IRRF'),
                                ('inss', 'INSS'),
@@ -72,6 +73,7 @@ class AccountTax(models.Model):
                                ('icms_inter', 'Difal - Alíquota Inter'),
                                ('icms_intra', 'Difal - Alíquota Intra'),
                                ('fcp', 'FCP'),
+                               ('fcpst', 'FCP ST'),
                                ('csll', 'CSLL'),
                                ('irrf', 'IRRF'),
                                ('inss', 'INSS'),
@@ -80,11 +82,13 @@ class AccountTax(models.Model):
     difal_por_dentro = fields.Boolean(string="Calcular Difal por Dentro?")
     icms_st_incluso = fields.Boolean(
         string="Incluir ICMS ST na Base de Calculo?")
+    allow_credit_utilization = fields.Boolean(
+        string="Permite Aprov. de Crédito")
 
     @api.onchange('domain')
     def _onchange_domain_tax(self):
         if self.domain in ('icms', 'pis', 'cofins', 'issqn', 'ii',
-                           'icms_inter', 'icms_intra', 'fcp'):
+                           'icms_inter', 'icms_intra', 'fcp', 'fcpst'):
             self.price_include = True
             self.amount_type = 'division'
         if self.domain in ('icmsst', 'ipi'):
@@ -105,6 +109,7 @@ class AccountTax(models.Model):
             'sequence': tax.sequence,
             'account_id': tax.account_id.id,
             'refund_account_id': tax.refund_account_id.id,
+            'allow_credit_utilization': tax.allow_credit_utilization,
             'analytic': tax.analytic
         }
 
@@ -116,13 +121,12 @@ class AccountTax(models.Model):
         vals = self._tax_vals(ipi_tax)
         base_tax = self.calc_ipi_base(price_base)
         vals['domain'] = 'ipi'
-        vals['amount'] = round(ipi_tax._compute_amount(base_tax, 1.0),precision)
         if 'ipi_base_calculo_manual' in self.env.context and\
                 self.env.context['ipi_base_calculo_manual'] > 0:
             vals['base'] = self.env.context['ipi_base_calculo_manual']
         else:
             vals['base'] = base_tax
-        vals['amount'] = ipi_tax._compute_amount(vals['base'], 1.0)
+        vals['amount'] = round(ipi_tax._compute_amount(vals['base'], 1.0),precision)
         return [vals]
 
     def calc_ipi_base(self, price_base):
@@ -145,17 +149,17 @@ class AccountTax(models.Model):
         if not icms_tax:
             return []
         vals = self._tax_vals(icms_tax)
+
         vals['domain'] = 'icms'
         vals['operacao'] = 0.00
         base_icms = self.calc_icms_base(price_base, ipi_value)
+
         diferimento_icms = False
         if "icms_aliquota_diferimento" in self.env.context:
             diferimento_icms = self.env.context['icms_aliquota_diferimento']
 
-        if 'icms_base_calculo_manual' in self.env.context and\
-                self.env.context['icms_base_calculo_manual'] > 0:
-            vals['amount'] = icms_tax._compute_amount(
-                self.env.context['icms_base_calculo_manual'], 1.0)
+        if 'icms_base_calculo_manual' in self.env.context and self.env.context['icms_base_calculo_manual'] > 0:
+            vals['amount'] = icms_tax._compute_amount(self.env.context['icms_base_calculo_manual'], 1.0)
             vals['base'] = self.env.context['icms_base_calculo_manual']
         else:
             vals['amount'] = icms_tax._compute_amount(base_icms, 1.0)
@@ -163,9 +167,7 @@ class AccountTax(models.Model):
         if diferimento_icms and diferimento_icms > 0.0:
             vals['operacao'] = vals['amount']
             vals['amount'] *= 1 - (diferimento_icms / 100.0)
-
         vals['amount'] = round(vals['amount'],precision)
-        
         return [vals]
 
     def calc_icms_base(self, price_base, ipi_value):
@@ -188,17 +190,23 @@ class AccountTax(models.Model):
 
         return base_icms * (1 - (reducao_icms / 100.0))
 
-    def _compute_icms_st(self, price_base, ipi_value, icms_value):
+    def _compute_icms_st(self, price_base, ipi_value, icms_value, quantity, factor_uom=None, factor_imp=None, uom_imposto=None):
         precision = self.env['decimal.precision'].precision_get('Account')
         icmsst_tax = self.filtered(lambda x: x.domain == 'icmsst')
         if not icmsst_tax:
             return []
+        
         vals = self._tax_vals(icmsst_tax)
         vals['domain'] = 'icmsst'
 
+        base_icms = price_base
         base_icmsst = price_base + ipi_value
         reducao_icmsst = 0.0
         aliquota_mva = 0.0
+        icms_st_tipo_base = 4
+        preco_pauta = 0.0
+        deducao_st_simples = 0.0
+
         if "icms_st_aliquota_reducao_base" in self.env.context:
             reducao_icmsst = self.env.context['icms_st_aliquota_reducao_base']
         if "icms_st_aliquota_mva" in self.env.context:
@@ -209,36 +217,63 @@ class AccountTax(models.Model):
             base_icmsst += self.env.context["valor_seguro"]
         if "outras_despesas" in self.env.context:
             base_icmsst += self.env.context["outras_despesas"]
-
-        base_icmsst *= 1 - (reducao_icmsst / 100.0)  # Redução
-
-        deducao_st_simples = 0.0
+        if "icms_st_tipo_base" in self.env.context:
+            icms_st_tipo_base = self.env.context['icms_st_tipo_base']
+        if "icms_st_preco_pauta" in self.env.context:
+            preco_pauta = self.env.context['icms_st_preco_pauta']
         if "icms_st_aliquota_deducao" in self.env.context:
             deducao_st_simples = self.env.context["icms_st_aliquota_deducao"]
+        if 'icms_st_base_calculo_manual' in self.env.context and \
+                self.env.context['icms_st_base_calculo_manual'] > 0:
+            base_icms = self.env.context['icms_base_calculo_manual']
+            base_icmsst = self.env.context['icms_st_base_calculo_manual']
+            base_icmsst *= 1 - (reducao_icmsst / 100.0)  # Redução
+        else:
+            base_icmsst *= 1 - (reducao_icmsst / 100.0)  # Redução
+            base_icmsst *= 1 + aliquota_mva / 100.0  # Aplica MVA
+
+        if factor_uom:
+            quantity = quantity * factor_uom
+        else:
+            factor_uom = 1
+
+        if factor_imp:
+            if uom_imposto == None or uom_imposto.factor == 0:
+                uom_imposto.factor = 1
+            preco_pauta = preco_pauta / uom_imposto.factor * factor_imp
+
+        base_icmsst_pauta = preco_pauta * quantity
 
         if deducao_st_simples:
-            icms_value = base_icmsst * (deducao_st_simples / 100.0)
+            icms_value = base_icms * (deducao_st_simples / 100.0)
 
-        base_icmsst *= 1 + aliquota_mva / 100.0  # Aplica MVA
-        if 'icms_st_base_calculo_manual' in self.env.context and\
-                self.env.context['icms_st_base_calculo_manual'] > 0:
-            base_icmsst = self.env.context['icms_st_base_calculo_manual']
-        if icmsst_tax.icms_st_incluso:
-            icmsst = round(
-                ((base_icmsst - icms_value)*(icmsst_tax.amount / 100.0) / (
-                    1 - icmsst_tax.amount / 100.0)) - icms_value, precision)
+        valor_unitario = 0
+        if quantity > 0:
+            valor_unitario = (price_base / quantity / factor_uom)
         else:
+            valor_unitario = preco_pauta
+        if valor_unitario == 0 or valor_unitario > preco_pauta:
+            icms_st_tipo_base = '4'
             icmsst = round(
-                (base_icmsst * (icmsst_tax.amount / 100.0)) - icms_value, precision)
+                (base_icmsst * (icmsst_tax.amount / 100.0)) - icms_value, 2)
+        else:
+            icms_st_tipo_base = '5'
+            base_icmsst = base_icmsst_pauta
+            icmsst = round(
+                (base_icmsst_pauta * (icmsst_tax.amount / 100.0)) - icms_value, 2)
+
         vals['amount'] = round(icmsst,precision) if icmsst >= 0.0 else 0.0
         vals['base'] = base_icmsst
+        vals['tipo_base_st'] = icms_st_tipo_base
+
         return [vals]
 
-    def _compute_difal(self, price_base, ipi_value):
+    def _compute_difal(self, price_base, ipi_value, tem_difal=True):
         precision = self.env['decimal.precision'].precision_get('Account')
         icms_inter = self.filtered(lambda x: x.domain == 'icms_inter')
         icms_intra = self.filtered(lambda x: x.domain == 'icms_intra')
         icms_fcp = self.filtered(lambda x: x.domain == 'fcp')
+        
         if not icms_inter or not icms_intra:
             return []
         vals_fcp = None
@@ -262,8 +297,6 @@ class AccountTax(models.Model):
 
         base_icms *= 1 - (reducao_icms / 100.0)
         interestadual = icms_inter._compute_amount(base_icms, 1.0)
-        vals_inter['base'] = base_icms
-        vals_intra['base'] = base_icms
 
         if icms_inter.difal_por_dentro or icms_intra.difal_por_dentro:
             base_icms = base_icms - interestadual
@@ -275,13 +308,23 @@ class AccountTax(models.Model):
             icms_inter_part = self.env.context["icms_aliquota_inter_part"]
         else:
             icms_inter_part = 100.0
-        vals_inter['amount'] = round((interno - interestadual) *
-                                     (100 - icms_inter_part) / 100, precision)
-        vals_intra['amount'] = round((interno - interestadual) *
-                                     icms_inter_part / 100, precision)
+        
+        if tem_difal is True: 
+            vals_inter['base'] = base_icms
+            vals_intra['base'] = base_icms
+    
+            vals_inter['amount'] = round((interno - interestadual) *
+                                         (100 - icms_inter_part) / 100, precision)
+            vals_intra['amount'] = round((interno - interestadual) *
+                                         icms_inter_part / 100, precision)
+        else:
+            vals_inter['base'] = 0.0
+            vals_intra['base'] = 0.0
+            vals_inter['amount'] = 0.0
+            vals_intra['amount'] = 0.0
 
         taxes = [vals_inter, vals_intra]
-        if vals_fcp:
+        if vals_fcp and tem_difal:
             fcp = icms_fcp._compute_amount(base_icms, 1.0)
             vals_fcp['amount'] = fcp
             vals_fcp['base'] = base_icms
@@ -362,6 +405,34 @@ class AccountTax(models.Model):
             taxes.append(vals)
         return taxes
 
+    def _compute_fcp_icms(self, price_base):
+        icms_fcp = self.filtered(lambda x: x.domain == 'fcp')
+        vals_fcp = None
+        if icms_fcp:
+            vals_fcp = self._tax_vals(icms_fcp)
+
+        if vals_fcp:
+            fcp = icms_fcp._compute_amount(price_base, 1.0)
+            vals_fcp['amount'] = fcp
+            vals_fcp['base'] = price_base
+            return [vals_fcp]
+        else:
+            return []
+
+    def _compute_fcp_icms_st(self, price_base):
+        icms_fcp_st = self.filtered(lambda x: x.domain == 'fcpst')
+        vals_fcp = None
+        if icms_fcp_st:
+            vals_fcp = self._tax_vals(icms_fcp_st)
+
+        if vals_fcp:
+            fcp = icms_fcp_st._compute_amount(price_base, 1.0)
+            vals_fcp['amount'] = fcp
+            vals_fcp['base'] = price_base
+            return [vals_fcp]
+        else:
+            return []
+
     def _compute_others(self, price_base):
         precision = self.env['decimal.precision'].precision_get('Account')
         others = self.filtered(lambda x: x.domain == 'outros' or not x.domain)
@@ -373,29 +444,49 @@ class AccountTax(models.Model):
         vals['base'] = price_base
         return [vals]
 
-    def sum_taxes(self, price_base):
+    def sum_taxes(self, price_base, product=None, quantity=1.0, factor_uom=None, partner=None):
         ipi = self._compute_ipi(price_base)
         icms = self._compute_icms(
             price_base,
             ipi[0]['amount'] if ipi else 0.0)
+
+        uom_fator_imposto = None
+        uom_imposto_id = None
+        if product:
+            uom_fator_imposto = product.uom_fator_imposto
+            uom_imposto_id = product.uom_imposto_id
+
+        
         icmsst = self._compute_icms_st(
             price_base,
             ipi[0]['amount'] if ipi else 0.0,
-            icms[0]['amount'] if icms else 0.0)
+            icms[0]['amount'] if icms else 0.0,
+            quantity,
+            factor_uom,
+            uom_fator_imposto,
+            uom_imposto_id)
+        
+        fcp = []
+        fcpst = []
+        tem_difal = True if partner and partner.indicador_ie_dest == '9' else False
         difal = self._compute_difal(
-            price_base, ipi[0]['amount'] if ipi else 0.0)
+            price_base, ipi[0]['amount'] if ipi else 0.0,tem_difal)
+        if not difal:
+            fcp = self._compute_fcp_icms(price_base)
+            fcpst = self._compute_fcp_icms_st(
+                icmsst[0]['base'] if icmsst else 0.0)
 
-        taxes = icms + icmsst + difal + ipi
+        taxes = icms + icmsst + difal + ipi + fcp + fcpst
         taxes += self._compute_pis_cofins(price_base)
         taxes += self._compute_issqn(price_base)
         taxes += self._compute_ii(price_base)
         taxes += self._compute_retention(price_base)
-        #taxes += self._compute_others(price_base)
+        taxes += self._compute_others(price_base)
         return taxes
 
     @api.multi
     def compute_all(self, price_unit, currency=None, quantity=1.0,
-                    product=None, partner=None, fisc_pos=None):
+                    product=None, partner=None, factor_uom=None, fisc_pos=None):
 
         precision = self.env['decimal.precision'].precision_get('Account')
         exists_br_tax = len(self.filtered(lambda x: x.domain)) > 0
@@ -406,7 +497,7 @@ class AccountTax(models.Model):
             return res
 
         price_base = price_unit * quantity
-        taxes = self.sum_taxes(price_base)
+        taxes = self.sum_taxes(price_base, product, quantity, factor_uom, partner)
         total_included = total_excluded = price_base
 
         for tax in taxes:
@@ -414,9 +505,17 @@ class AccountTax(models.Model):
             if not tax_id.price_include:
                 total_included += round(tax['amount'], precision)
 
+        # retorna o valor dos impostos que permitem utilização de crédito
+        total_allow_credit = 0
+        for tax in taxes:
+            tax_id = self.filtered(lambda x: x.id == tax['id'])
+            if tax_id.allow_credit_utilization:
+                total_allow_credit += round(tax['amount'], 2)
+
         return {
             'taxes': sorted(taxes, key=lambda k: k['sequence']),
             'total_excluded': total_excluded,
             'total_included': total_included,
+            'total_allow_credit': total_allow_credit,
             'base': price_base,
         }

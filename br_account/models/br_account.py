@@ -311,6 +311,8 @@ class AccountDocumentRelated(models.Model):
     def translate_document_type(self, code):
         if code == '55':
             return 'nfe'
+        elif code == '65':
+            return 'nfce'
         elif code == '04':
             return 'nfrural'
         elif code == '57':

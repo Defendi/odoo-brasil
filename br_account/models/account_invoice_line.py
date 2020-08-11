@@ -42,7 +42,9 @@ class AccountInvoiceLine(models.Model):
             'ii_base_calculo': self.ii_base_calculo,
             'issqn_base_calculo': self.issqn_base_calculo,
             'icms_aliquota_inter_part': self.icms_aliquota_inter_part,
+            'icms_st_preco_pauta': self.icms_st_preco_pauta,
             'l10n_br_issqn_deduction': self.l10n_br_issqn_deduction,
+            'icms_st_tipo_base': self.icms_st_tipo_base,
         }
 
     @api.one
@@ -60,12 +62,13 @@ class AccountInvoiceLine(models.Model):
                  'icms_base_calculo_manual', 'ipi_base_calculo_manual',
                  'pis_base_calculo_manual', 'cofins_base_calculo_manual',
                  'icms_st_aliquota_deducao', 'ii_base_calculo',
-                 'icms_aliquota_inter_part', 'l10n_br_issqn_deduction')
+                 'icms_aliquota_inter_part', 'icms_st_preco_pauta',
+                 'icms_st_tipo_base', 'tax_icms_fcp_st_id',
+                 'icms_valor_diferido', 'l10n_br_issqn_deduction')
     def _compute_price(self):
         _logger.info('>>> Calculando linha %s' % str(self.ids))
         currency = self.invoice_id and self.invoice_id.currency_id or None
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
- 
         valor_bruto = self.price_unit * self.quantity
         desconto = valor_bruto * self.discount / 100.0
         subtotal = valor_bruto - desconto
@@ -78,12 +81,14 @@ class AccountInvoiceLine(models.Model):
  
             taxes = tax_ids.compute_all(
                 price, currency, self.quantity, product=self.product_id,
-                partner=self.invoice_id.partner_id)
+                partner=self.invoice_id.partner_id, factor_uom=self.uom_id.factor_inv)
  
         icms = ([x for x in taxes['taxes']
                  if x['id'] == self.tax_icms_id.id]) if taxes else []
         icmsst = ([x for x in taxes['taxes']
                    if x['id'] == self.tax_icms_st_id.id]) if taxes else []
+        icms_fcp_st = ([x for x in taxes['taxes']
+                        if x['id'] == self.tax_icms_fcp_st_id.id]) if taxes else []
         icms_inter = (
             [x for x in taxes['taxes']
              if x['id'] == self.tax_icms_inter_id.id]) if taxes else []
@@ -117,6 +122,19 @@ class AccountInvoiceLine(models.Model):
             price_subtotal_signed = self.invoice_id.currency_id.compute(
                 price_subtotal_signed, self.invoice_id.company_id.currency_id)
         sign = self.invoice_id.type in ['in_refund', 'out_refund'] and -1 or 1
+
+        self.icms_aliquota_credito = 0.0
+        company = self.env['res.company'].browse(self.env.user.company_id.id)
+        if self.company_fiscal_type != '3' and self.icms_csosn_simples in ('101', '201'):
+            vals = []
+            fpos = self.invoice_id.fiscal_position_id or self.invoice_id.partner_id.property_account_position_id
+            if fpos:
+                vals = fpos.map_tax_extra_values(company,
+                                                 self.product_id, self.invoice_id.partner_id)
+                if vals and vals.get('icms_aliquota_credito', False):
+                    self.icms_aliquota_credito = vals['icms_aliquota_credito']
+                else:
+                    self.icms_aliquota_credito = company.icms_aliquota_credito
  
         if self.icms_aliquota_credito:
             # Calcular o valor da base_icms para o calculo de
@@ -128,29 +146,54 @@ class AccountInvoiceLine(models.Model):
  
             base_icms_credito = subtotal + valor_frete \
                 + valor_seguro + outras_despesas
+            self.icms_valor_credito = base_icms_credito * \
+                (self.icms_aliquota_credito / 100)
         else:
-            base_icms_credito = 0.0
+            self.icms_valor_credito = 0.0
  
         price_subtotal_signed = price_subtotal_signed * sign
+
+        if icmsst:
+            tipo_base_st = icmsst[0].get('tipo_base_st')
+        else:
+            tipo_base_st = None
+
+        icms_valor_operacao = 0.0
+        if taxes is not False:
+            for tax in taxes['taxes']:
+                tax_id = self.env['account.tax'].browse(tax['id'])
+                if tax_id.domain == 'icms':
+                    if self.icms_cst_normal and self.icms_cst_normal in ('51') and self.company_fiscal_type == '3':
+                        icms_valor_operacao = tax.get('icms_valor_operacao')
+
+        self.icms_valor = sum([x['amount'] for x in icms])
         dif_icms_dif = (self.icms_valor - self.icms_valor_diferido)
+
         self.update({
             'price_total': taxes['total_included'] if taxes else subtotal,
-            'price_tax': taxes['total_included'] - taxes['total_excluded']
-            if taxes else 0,
+            'price_tax': taxes['total_included'] - taxes['total_excluded'] if taxes else 0,
             'price_subtotal': taxes['total_excluded'] if taxes else subtotal,
             'price_subtotal_signed': price_subtotal_signed,
             'valor_bruto': self.quantity * self.price_unit,
             'valor_desconto': desconto,
             'icms_base_calculo': sum([x['base'] for x in icms]),
             'icms_valor': sum([x['amount'] for x in icms]),
+            'icms_valor_operacao': icms_valor_operacao,
             'icms_aliquota': sum([self.env['account.tax'].browse([x['id']]).amount for x in icms]) / len(icms) if len(icms) > 0 else 0.0,
+            'icms_aliquota_diferimento': self.icms_aliquota_diferimento,
             'icms_valor_diferido': sum([x['operacao'] for x in icms]),
+            'icms_base_calculo_fcp': sum([x['base'] for x in icms_fcp]),
+            'icms_fcp': sum([x['amount'] for x in icms_fcp]),
+            'icms_fcp_uf_dest': sum([x['amount'] for x in icms_fcp]),
+            'icms_st_tipo_base': tipo_base_st if tipo_base_st else '4',
+
             'icms_st_base_calculo': sum([x['base'] for x in icmsst]),
             'icms_st_valor': sum([x['amount'] for x in icmsst]),
+            'icms_base_calculo_fcp_st': sum([x['base'] for x in icms_fcp_st]),
+
             'icms_bc_uf_dest': sum([x['base'] for x in icms_inter]),
             'icms_uf_remet': sum([x['amount'] for x in icms_inter]),
             'icms_uf_dest': sum([x['amount'] for x in icms_intra]),
-            'icms_fcp_uf_dest': sum([x['amount'] for x in icms_fcp]),
             'icms_valor_credito': base_icms_credito * (self.icms_aliquota_credito / 100),
             'ipi_base_calculo': sum([x['base'] for x in ipi]),
             'ipi_valor': sum([x['amount'] for x in ipi]),
@@ -175,6 +218,7 @@ class AccountInvoiceLine(models.Model):
             'outros_base_calculo': sum([x['base'] for x in outros]),
             'outros_valor': sum([x['amount'] for x in outros]),
             'icms_valor_diferido_dif': dif_icms_dif*-1 if dif_icms_dif < 0 else dif_icms_dif,
+            'tem_difal': self.tem_difal if self.invoice_id.partner_id and self.invoice_id.partner_id.indicador_ie_dest == '9' else False,
         })
 
     @api.multi
@@ -244,27 +288,23 @@ class AccountInvoiceLine(models.Model):
          ('2', '2 - Preço Tabelado Máximo (valor)'),
          ('3', '3 - Valor da Operação')],
         'Tipo Base ICMS', required=True, default='3')
-    incluir_ipi_base = fields.Boolean(
-        string="Incl. Valor IPI?",
-        help="Se marcado o valor do IPI inclui a base de cálculo")
-    icms_base_calculo = fields.Float(
-        'Base ICMS', required=True, compute='_compute_price', store=True,
-        digits=dp.get_precision('Account'), default=0.00)
-    icms_valor = fields.Float(
-        'Valor ICMS', required=True, compute='_compute_price', store=True,
-        digits=dp.get_precision('Account'), default=0.00)
-    icms_aliquota = fields.Float(
-        'ICMS %', digits=(12,4), default=0.00)
-    icms_aliquota_reducao_base = fields.Float(
-        'Red. Base ICMS %', digits=(12,4),
-        default=0.00)
-    icms_base_calculo_manual = fields.Float(
-        'Base ICMS Manual', digits=dp.get_precision('Account'), default=0.00)
+    incluir_ipi_base = fields.Boolean(string="Incl. Valor IPI?",help="Se marcado o valor do IPI inclui a base de cálculo")
+    icms_base_calculo = fields.Float('Base ICMS', required=True, compute='_compute_price', store=True, digits=dp.get_precision('Account'), default=0.00)
+    icms_valor = fields.Float('Valor ICMS', required=True, compute='_compute_price', store=True, digits=dp.get_precision('Account'), default=0.00)
+    icms_aliquota = fields.Float('ICMS %', digits=(12,4), default=0.00)
+    icms_aliquota_reducao_base = fields.Float('Red. Base ICMS %', digits=(12,4), default=0.00)
+    icms_base_calculo_manual = fields.Float('Base ICMS Manual', digits=dp.get_precision('Account'), default=0.00)
+    icms_valor_operacao = fields.Float('Valor ICMS Operação', store=True, digits=dp.get_precision('Account'))
+    tax_icms_fcp_id = fields.Many2one('account.tax', string="% FCP", domain=[('domain', '=', 'fcp')])
+    icms_fcp = fields.Float(string='Valor FCP', compute='_compute_price', digits=dp.get_precision('Discount'))
+    icms_aliquota_fcp = fields.Float(string='% FCP', digits=(12,4), states={'edit': [('readonly', False)]})
+    icms_base_calculo_fcp = fields.Float('Base FCP', compute='_compute_price', store=True, digits=dp.get_precision('Account'))
 
     # =========================================================================
-    # ICMS Diferido
+    # ICMS Diferido (diferimento)
     # =========================================================================
 
+    icms_valor_operacao = fields.Float('Valor ICMS Operação', store=True, compute='_compute_price', digits=dp.get_precision('Account'), default=0.00)
     icms_aliquota_diferimento = fields.Float("Diferimento %", digits=(12,4), default=0.0)
     icms_valor_diferido = fields.Float('Vl ICMS diferido', required=True, compute='_compute_price', store=True, digits=dp.get_precision('Account'), default=0.00)
     icms_valor_diferido_dif = fields.Float('Vl diferenca ICMS diferido', compute='_compute_price',store=True, digits=dp.get_precision('Account'), default=0.00)
@@ -288,6 +328,11 @@ class AccountInvoiceLine(models.Model):
     icms_st_aliquota_reducao_base = fields.Float('Red. Base ST %',digits=(12,4),default=0.00)
     icms_st_aliquota_mva = fields.Float('MVA Ajustado ST %',digits=(12,4), default=0.00)
     icms_st_base_calculo_manual = fields.Float('Base ICMS ST Manual', digits=(12,4),default=0.00)
+    tax_icms_fcp_st_id = fields.Many2one('account.tax', string="% FCP ST", domain=[('domain', '=', 'fcpst')])
+    icms_fcp_st = fields.Float(string='Valor FCP', compute='_compute_price', digits=dp.get_precision('Discount'))
+    icms_aliquota_fcp_st = fields.Float(string='% FCP ST', readonly=True, states={'edit': [('readonly', False)]})
+    icms_base_calculo_fcp_st = fields.Float('Base FCP ST', compute='_compute_price', store=True, digits=dp.get_precision('Account'))
+    icms_st_preco_pauta = fields.Float('Preço de Pauta', digits=dp.get_precision('Discount'))
 
     # =========================================================================
     # ICMS Difal
@@ -296,7 +341,6 @@ class AccountInvoiceLine(models.Model):
     icms_bc_uf_dest = fields.Float('Base ICMS', compute='_compute_price',digits=dp.get_precision('Account'))
     tax_icms_inter_id = fields.Many2one('account.tax', help="Alíquota utilizada na operação Interestadual",string="ICMS Inter", domain=[('domain', '=', 'icms_inter')])
     tax_icms_intra_id = fields.Many2one('account.tax', help="Alíquota interna do produto no estado destino",string="ICMS Intra", domain=[('domain', '=', 'icms_intra')])
-    tax_icms_fcp_id = fields.Many2one('account.tax', string="% FCP", domain=[('domain', '=', 'fcp')])
     icms_aliquota_inter_part = fields.Float('% Partilha', default=0.0, digits=(12,4))
     icms_fcp_uf_dest = fields.Float(string='Valor FCP', compute='_compute_price',digits=dp.get_precision('Account'))
     icms_uf_dest = fields.Float('ICMS Destino', compute='_compute_price',digits=dp.get_precision('Account'))
@@ -429,8 +473,20 @@ class AccountInvoiceLine(models.Model):
     outros_valor = fields.Float('Valor Outras Ret.', required=True, digits=dp.get_precision('Account'), default=0.00, compute='_compute_price', store=True)
     outros_aliquota = fields.Float('Outros %', default=0.00, digits=(12,4), store=True)
 
-    informacao_adicional = fields.Text(string="Informações Adicionais")
+    # =========================================================================
+    # Dados para fretes
+    # =========================================================================
+    weight = fields.Float(string='Peso Bruto', help="O peso bruto em Kg.", digits=(12,3))
+    weight_net = fields.Float('Peso Líquido', help="O peso líquido em Kg.", digits=(12,3))
+#     number_of_packages = fields.Integer('Nº Volumes')
+#     kind_of_packages = fields.Char('Espécie', size=60)
+#     brand_of_packages = fields.Char('Marca', size=60)
+#     notation_of_packages = fields.Char('Numeração', size=60)
 
+    # =========================================================================
+    # Outros
+    # =========================================================================
+    informacao_adicional = fields.Text(string="Informações Adicionais")
     account_analytic_id = fields.Many2one('account.analytic.account', string='Analytic Account')
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
 
@@ -630,7 +686,7 @@ class AccountInvoiceLine(models.Model):
             lambda x: not x.domain)
         self.invoice_line_tax_ids = other_taxes | self.tax_icms_id | \
             self.tax_icms_st_id | self.tax_icms_inter_id | \
-            self.tax_icms_intra_id | self.tax_icms_fcp_id | \
+            self.tax_icms_intra_id | self.tax_icms_fcp_id | self.tax_icms_fcp_st_id | \
             self.tax_ipi_id | self.tax_pis_id | \
             self.tax_cofins_id | self.tax_issqn_id | self.tax_ii_id | \
             self.tax_csll_id | self.tax_irrf_id | self.tax_inss_id | \

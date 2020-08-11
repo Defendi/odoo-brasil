@@ -566,6 +566,16 @@
                                     <field name="price_unit"/>
                                     <field name="discount" groups="sale.group_discount_per_so_line" string="(-) Desconto (%)"/>
                                     <field name="price_subtotal" string="(=) Valor Líquido" />
+									<label for="weight"/>
+									<div class="o_row">
+										<field name="weight"/>
+										<span>kg</span>
+									</div>
+									<label for="weight_net"/>
+									<div class="o_row">
+										<field name="weight_net"/>
+										<span>kg</span>
+									</div>
                                 </group>
                                 <group>
                                     <field name="cfop_id" domain="[('internal_type', '=', 'normal')]" attrs="{'invisible': [('product_type', '=', 'service')]}"/>
@@ -607,18 +617,23 @@
                                     <field name="icms_aliquota_reducao_base"/>
                                     <field name="tax_icms_id" />
                                     <field name="icms_aliquota" groups="base.group_no_one" readonly="1"/>
-                                    <field name="icms_valor_diferido" attrs="{'invisible': [('icms_cst_normal', '!=', '51')] }"/>
+                                    <field name="icms_valor_operacao" groups="base.group_no_one" readonly="1"/>
                                     <field name="icms_aliquota_diferimento" attrs="{'invisible': [('icms_cst_normal', '!=', '51')] }"/>
+                                    <field name="icms_valor_diferido" attrs="{'invisible': [('icms_cst_normal', '!=', '51')] }"/>
                                     <field name="icms_valor_diferido_dif" attrs="{'invisible': [('icms_cst_normal', '!=', '51')] }"/>
                                     <field name="icms_valor"/>
                                     <field name="icms_aliquota_credito" attrs="{'invisible': [('company_fiscal_type', '==', '3')] }" />
                                     <field name="icms_valor_credito" attrs="{'invisible': [('company_fiscal_type', '==', '3')] }" />
+                                    <field name="icms_base_calculo_fcp" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '==', '3')]}" />
+                                    <field name="tax_icms_fcp_id" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '==', '3')]}"/>
+                                    <field name="icms_fcp" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '==', '3')]}"/>
                                 </group>
                             </group>
                             <group name="substituicao_icms" string="Substituição Tributária ICMS">
                                 <group>
                                     <field name="icms_st_tipo_base" groups="base.group_no_one" readonly="1"/>
                                     <field name="icms_st_aliquota_mva"/>
+                                    <field name="icms_st_preco_pauta" attrs="{'invisible': [('icms_st_tipo_base', '!=', '5')]}"/>
                                     <field name="icms_st_base_calculo_manual" groups="br_account.group_edit_bases_calculo"/>
                                     <field name="icms_st_base_calculo"/>
                                     <field name="icms_st_aliquota_reducao_base"/>
@@ -626,6 +641,9 @@
                                     <field name="icms_st_aliquota" groups="base.group_no_one" readonly="1"/>
                                     <field name="icms_st_aliquota_deducao" />
                                     <field name="icms_st_valor"/>
+                                    <field name="icms_base_calculo_fcp_st" attrs="{'invisible': [('icms_cst_normal', 'not in', ('10', '30', '70', '90')), ('icms_csosn_simples', 'not in', ('201', '202', '203', '900'))]}"/>
+                                    <field name="tax_icms_fcp_st_id" attrs="{'invisible': [('icms_cst_normal', 'not in', ('10', '30', '70', '90')), ('icms_csosn_simples', 'not in', ('201', '202', '203', '900'))]}"/>
+                                    <field name="icms_fcp_st" attrs="{'invisible': [('icms_cst_normal', 'not in', ('10', '30', '70', '90')), ('icms_csosn_simples', 'not in', ('201', '202', '203', '900'))]}"/>
                                 </group>
                                 <group name="icms_st_retido" attrs="{'invisible': [('tem_difal', '!=', False)]}">
                                     <field name="icms_substituto" />
@@ -637,7 +655,7 @@
                                     <field name="icms_bc_uf_dest" />
                                     <field name="tax_icms_inter_id" />
                                     <field name="tax_icms_intra_id" />
-                                    <field name="tax_icms_fcp_id" />
+                                    <!-- <field name="tax_icms_fcp_id" />  -->
                                     <field name="icms_aliquota_inter_part" />
                                     <field name="icms_fcp_uf_dest" />
                                     <field name="icms_uf_dest" />

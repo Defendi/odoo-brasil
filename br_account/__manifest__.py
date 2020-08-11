@@ -26,6 +26,7 @@
         'views/product_fiscal_classification.xml',
         'views/account_invoice_refund.xml',
         'views/res_config_settings.xml',
+        'views/res_partner.xml',
         'wizard/br_product_fiscal_classification_wizard.xml',
         'security/ir.model.access.csv',
         'reports/br_papers_format.xml',

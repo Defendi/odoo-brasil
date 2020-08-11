@@ -120,13 +120,6 @@
                 <field name="outras_despesas" attrs="{'invisible': [('product_type', '=', 'service')]}" />
                 <field name="price_total" string="(=) Total" attrs="{'invisible': [('product_type', '=', 'service')]}" />
             </field>
-            <field name="company_id" position="after">
-				<label for="weight" groups="base.group_no_one"/>
-				<div class="o_row" groups="base.group_no_one">
-					<field name="weight"/>
-					<span>kg</span>
-				</div>
-            </field>
         </field>
     </record>
 

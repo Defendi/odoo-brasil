@@ -34,6 +34,8 @@ class ResCompany(models.Model):
         'br_account.cnae', 'res_company_br_account_cnae',
         'company_id', 'cnae_id', 'CNAE Secundários')
 
+    icms_aliquota_credito = fields.Float(string="% Crédito de ICMS do SN")
+
     accountant_id = fields.Many2one('res.partner', string="Contador")
     crc_number  = fields.Char("CRC No.", size=30)
     crc_state_id = fields.Many2one("res.country.state", 'UF')

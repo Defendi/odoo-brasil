@@ -1,8 +1,10 @@
 import logging
+import re
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.addons import decimal_precision as dp
+
 
 _logger = logging.getLogger(__name__)
 
@@ -101,4 +103,19 @@ class AccountInvoice(models.Model):
             
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
+
+    import_export_group_ids = fields.One2many('account.export.group', 'account_inv_line_id', 'Grupo de Exportação')
+
+    @api.onchange("import_export_group_ids")
+    def _onchange_account_inv_line_id(self):
+        res = {}
+        import_exp_group = self.import_export_group_ids
+        for import_line in import_exp_group:
+            if import_line.key_nfe and not import_line.qty_export:
+                clear_value = re.sub('[^0-9\.]', '', str(self.quantity)).split('.')                
+                import_line.qty_export = clear_value[0]
+            else:
+                import_line.qty_export = import_line.qty_export
+
+        return res
 
