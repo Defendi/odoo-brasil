@@ -17,19 +17,3 @@ class AccountInvoice(models.Model):
         res['ii_valor_despesas'] = line.valor_aduana
         return res
 
-    total_despesas_aduana = fields.Float(
-        string='Desp. Aduaneiras ( + )', digits=dp.get_precision('Account'),
-        compute="_compute_amount")
-
-    @api.one
-    @api.depends('invoice_line_ids.price_subtotal',
-                 'invoice_line_ids.price_total',
-                 'tax_line_ids.amount',
-                 'currency_id', 'company_id')
-    def _compute_amount(self):
-        super(AccountInvoice, self)._compute_amount()
-        lines = self.invoice_line_ids
-        self.total_despesas_aduana = sum(l.ii_valor_despesas for l in lines)
-        self.amount_total = self.total_bruto - self.total_desconto + \
-            self.total_tax + self.total_frete + self.total_seguro + \
-            self.total_despesas

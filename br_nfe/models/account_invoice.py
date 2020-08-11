@@ -233,31 +233,32 @@ class AccountInvoice(models.Model):
 
         di_importacao = []
         for di in invoice_line.import_declaration_ids:
-            adicoes = []
-            for di_line in di.line_ids:
-                adicoes.append((0, None, {
-                    'sequence': di_line.sequence,
-                    'name': di_line.name,
-                    'manufacturer_code': di_line.manufacturer_code,
-                    'amount_discount': di_line.amount_discount,
-                    'drawback_number': di_line.drawback_number,
-                }))
-
-            di_importacao.append((0, None, {
-                'name': di.name,
-                'date_registration': di.date_registration,
-                'state_id': di.state_id.id,
-                'location': di.location,
-                'date_release': di.date_release,
-                'type_transportation': di.type_transportation,
-                'afrmm_value': di.afrmm_value,
-                'type_import': di.type_import,
-                'thirdparty_cnpj': di.thirdparty_cnpj,
-                'thirdparty_state_id': di.thirdparty_state_id.id,
-                'exporting_code': di.exporting_code,
-                'line_ids': adicoes,
-            }))
-        vals['import_declaration_ids'] = di_importacao
+            di_importacao.append(di.id)
+#             adicoes = []
+#             for di_line in di.line_ids:
+#                 adicoes.append((0, None, {
+#                     'sequence': di_line.sequence,
+#                     'name': di_line.name,
+#                     'manufacturer_code': di_line.manufacturer_code,
+#                     'amount_discount': di_line.amount_discount,
+#                     'drawback_number': di_line.drawback_number,
+#                 }))
+# 
+#             di_importacao.append((0, None, {
+#                 'name': di.name,
+#                 'date_registration': di.date_registration,
+#                 'state_id': di.state_id.id,
+#                 'location': di.location,
+#                 'date_release': di.date_release,
+#                 'type_transportation': di.type_transportation,
+#                 'afrmm_value': di.afrmm_value,
+#                 'type_import': di.type_import,
+#                 'thirdparty_cnpj': di.thirdparty_cnpj,
+#                 'thirdparty_state_id': di.thirdparty_state_id.id,
+#                 'exporting_code': di.exporting_code,
+#                 'line_ids': adicoes,
+#             }))
+        vals['import_declaration_ids'] = [(6,0,di_importacao)]
         vals['informacao_adicional'] = invoice_line.informacao_adicional
         return vals
 

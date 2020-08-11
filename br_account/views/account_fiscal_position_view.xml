@@ -145,7 +145,7 @@
                 <attribute name="invisible">1</attribute>
             </page>
             <page name="tax_mapping" position="before">
-                <page string="Regras de Impostos">
+                <page name="tax_rules" string="Regras de Impostos">
                     <group name="icms_rules" string="Regras de ICMS">
                         <field nolabel="1" name="icms_tax_rule_ids" context="{'default_fiscal_position_id': id, 'default_domain': 'icms'}">
                             <tree>
@@ -207,7 +207,7 @@
                     <group name="csll_rules" string="Regras de CSLL">
                         <field nolabel="1" name="csll_tax_rule_ids" context="{'default_fiscal_position_id': id, 'default_domain': 'csll'}" />
                     </group>
-                    <group name="ii_rules" string="Regras de II">
+                    <group name="ii_rules" string="Regras de II" invisible="1">
                         <field nolabel="1" name="ii_tax_rule_ids" context="{'default_fiscal_position_id': id, 'default_domain': 'ii'}" />
                     </group>
                 </page>

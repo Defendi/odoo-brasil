@@ -15,6 +15,7 @@ class AccountInvoice(models.Model):
                  'tax_line_ids.amount',
                  'currency_id', 'company_id')
     def _compute_amount(self):
+        _logger.info('>>> Calculando...')
         super(AccountInvoice, self)._compute_amount()
         lines = self.invoice_line_ids
         self.total_tax = sum(l.price_tax for l in lines)
@@ -71,7 +72,11 @@ class AccountInvoice(models.Model):
             l.tributos_estimados_municipais for l in lines)
         self.total_tributos_estimados = sum(
             l.tributos_estimados for l in lines)
+#         self.total_despesas_aduana = sum(
+#             l.ii_valor_despesas for l in lines)
         # TOTAL
+#         self.amount_total = self.total_bruto - \
+#             self.total_desconto + self.total_tax + self.total_despesas_aduana
         self.amount_total = self.total_bruto - \
             self.total_desconto + self.total_tax
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
@@ -309,6 +314,10 @@ class AccountInvoice(models.Model):
         store=True,
         digits=dp.get_precision('Account'),
         compute='_compute_amount')
+
+    total_despesas_aduana = fields.Float(
+        string='Desp.Aduana ( + )', 
+        digits=dp.get_precision('Account'))
     
     account_analytic_id = fields.Many2one('account.analytic.account', 'Centro Custo', old_name='account_analitic_id',
                                           copy=True, readonly=True, states={'draft': [('readonly', False)]})

@@ -62,6 +62,7 @@ class AccountInvoiceLine(models.Model):
                  'icms_st_aliquota_deducao', 'ii_base_calculo',
                  'icms_aliquota_inter_part', 'l10n_br_issqn_deduction')
     def _compute_price(self):
+        _logger.info('>>> Calculando linha %s' % str(self.ids))
         currency = self.invoice_id and self.invoice_id.currency_id or None
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
  

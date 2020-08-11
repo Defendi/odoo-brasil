@@ -341,7 +341,7 @@ class InvoiceEletronic(models.Model):
             for adi in di.line_ids:
                 adicoes.append({
                     'nAdicao': adi.name,
-                    'nSeqAdic': adi.sequence,
+                    'nSeqAdic': adi.sequence_addition,
                     'cFabricante': adi.manufacturer_code,
                     'vDescDI': "%.02f" % adi.amount_discount
                     if adi.amount_discount else '',

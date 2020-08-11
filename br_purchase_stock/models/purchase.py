@@ -282,7 +282,7 @@ class PuchaseOrderLine(models.Model):
     valor_frete = fields.Float(
         'Frete', default=0.0, digits=dp.get_precision('Account'))
     valor_aduana = fields.Float(
-        default=0.0, digits=dp.get_precision('Account'))
+        'D.Aduana', default=0.0, digits=dp.get_precision('Account'))
     valor_desconto = fields.Float(
         'Desconto', compute=False, default=0.0, digits=dp.get_precision('Account'))
 

@@ -19,9 +19,7 @@ class InvoiceEletronicItem(models.Model):
     ipi_classe_enquadramento = fields.Char(string="Classe Enquadramento", size=5, readonly=True, states=STATE, old_name='classe_enquadramento_ipi')
     ipi_codigo_enquadramento = fields.Many2one('br_account.enquadramento.ipi',string="Código Enquadramento", readonly=True, states=STATE, old_name='codigo_enquadramento_ipi')
 
-    import_declaration_ids = fields.One2many(
-        'br_account.import.declaration',
-        'invoice_eletronic_line_id', string='Declaração de Importação')
+    import_declaration_ids = fields.Many2many('br_account.import.declaration', string='Declaração de Importação')
 
     # ----------- ICMS INTERESTADUAL -----------
     tem_difal = fields.Boolean(string='Difal?', readonly=True, states=STATE)
