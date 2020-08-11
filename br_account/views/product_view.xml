@@ -27,9 +27,9 @@
                     <field name="uom_fator_imposto"/>
                 </group>
             </group>
-            <group groups="base.group_no_one">
+            <group>
             	<group>
-	                <button name="render_description" type="object" string="Gerar Descrição"/>
+	                <button name="render_description" type="object" string="Gerar Descrição" groups="base.group_no_one"/>
             	</group>
             </group>
             <group name="description" position="inside">

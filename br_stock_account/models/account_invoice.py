@@ -62,6 +62,13 @@ class AccountInvoice(models.Model):
         'res.country.state', 'UF da Placa do Reboque')
     tow_rntc = fields.Char('RNTC Reboque', size=20)
 
+    weight = fields.Float(string='Peso Bruto', help="O peso bruto em Kg.", digits=(12,3))
+    weight_net = fields.Float('Peso Líquido', help="O peso líquido em Kg.", digits=(12,3))
+    number_of_packages = fields.Integer('Nº Volumes')
+    kind_of_packages = fields.Char('Espécie', size=60)
+    brand_of_packages = fields.Char('Marca', size=60)
+    notation_of_packages = fields.Char('Numeração', size=60)
+
     # Exportação
     uf_saida_pais_id = fields.Many2one(
         'res.country.state', domain=[('country_id.code', '=', 'BR')],

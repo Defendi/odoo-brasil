@@ -63,8 +63,7 @@ class AccountInvoiceLine(models.Model):
                  'pis_base_calculo_manual', 'cofins_base_calculo_manual',
                  'icms_st_aliquota_deducao', 'ii_base_calculo',
                  'icms_aliquota_inter_part', 'icms_st_preco_pauta',
-                 'icms_st_tipo_base', 'tax_icms_fcp_st_id',
-                 'icms_valor_diferido', 'l10n_br_issqn_deduction')
+                 'icms_st_tipo_base', 'tax_icms_fcp_st_id', 'l10n_br_issqn_deduction')
     def _compute_price(self):
         _logger.info('>>> Calculando linha %s' % str(self.ids))
         currency = self.invoice_id and self.invoice_id.currency_id or None
@@ -76,9 +75,7 @@ class AccountInvoiceLine(models.Model):
         self._update_invoice_line_ids()
         if self.invoice_line_tax_ids:
             ctx = self._prepare_tax_context()
- 
             tax_ids = self.invoice_line_tax_ids.with_context(**ctx)
- 
             taxes = tax_ids.compute_all(
                 price, currency, self.quantity, product=self.product_id,
                 partner=self.invoice_id.partner_id, factor_uom=self.uom_id.factor_inv)
@@ -146,10 +143,10 @@ class AccountInvoiceLine(models.Model):
  
             base_icms_credito = subtotal + valor_frete \
                 + valor_seguro + outras_despesas
-            self.icms_valor_credito = base_icms_credito * \
+            icms_valor_credito = base_icms_credito * \
                 (self.icms_aliquota_credito / 100)
         else:
-            self.icms_valor_credito = 0.0
+            icms_valor_credito = 0.0
  
         price_subtotal_signed = price_subtotal_signed * sign
 
@@ -166,8 +163,9 @@ class AccountInvoiceLine(models.Model):
                     if self.icms_cst_normal and self.icms_cst_normal in ('51') and self.company_fiscal_type == '3':
                         icms_valor_operacao = tax.get('icms_valor_operacao')
 
-        self.icms_valor = sum([x['amount'] for x in icms])
-        dif_icms_dif = (self.icms_valor - self.icms_valor_diferido)
+        icms_valor = sum([x['amount'] for x in icms])
+        icms_valor_diferido = sum([x['operacao'] for x in icms]),
+        dif_icms_dif = (icms_valor - icms_valor_diferido)
 
         self.update({
             'price_total': taxes['total_included'] if taxes else subtotal,
@@ -177,11 +175,11 @@ class AccountInvoiceLine(models.Model):
             'valor_bruto': self.quantity * self.price_unit,
             'valor_desconto': desconto,
             'icms_base_calculo': sum([x['base'] for x in icms]),
-            'icms_valor': sum([x['amount'] for x in icms]),
+            'icms_valor': icms_valor,
             'icms_valor_operacao': icms_valor_operacao,
             'icms_aliquota': sum([self.env['account.tax'].browse([x['id']]).amount for x in icms]) / len(icms) if len(icms) > 0 else 0.0,
             'icms_aliquota_diferimento': self.icms_aliquota_diferimento,
-            'icms_valor_diferido': sum([x['operacao'] for x in icms]),
+            'icms_valor_diferido': icms_valor_diferido,
             'icms_base_calculo_fcp': sum([x['base'] for x in icms_fcp]),
             'icms_fcp': sum([x['amount'] for x in icms_fcp]),
             'icms_fcp_uf_dest': sum([x['amount'] for x in icms_fcp]),
@@ -194,7 +192,7 @@ class AccountInvoiceLine(models.Model):
             'icms_bc_uf_dest': sum([x['base'] for x in icms_inter]),
             'icms_uf_remet': sum([x['amount'] for x in icms_inter]),
             'icms_uf_dest': sum([x['amount'] for x in icms_intra]),
-            'icms_valor_credito': base_icms_credito * (self.icms_aliquota_credito / 100),
+            'icms_valor_credito': icms_valor_credito,
             'ipi_base_calculo': sum([x['base'] for x in ipi]),
             'ipi_valor': sum([x['amount'] for x in ipi]),
             'ipi_aliquota': sum([self.env['account.tax'].browse([x['id']]).amount for x in ipi]) / len(ipi) if len(ipi) > 0 else 0.0,

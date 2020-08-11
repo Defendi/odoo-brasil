@@ -15,7 +15,7 @@ class AccountInvoice(models.Model):
                  'tax_line_ids.amount',
                  'currency_id', 'company_id')
     def _compute_amount(self):
-        _logger.info('>>> Calculando...')
+        _logger.info('>>> Calculando fatura %s...' % str(self.id))
         super(AccountInvoice, self)._compute_amount()
         lines = self.invoice_line_ids
         self.total_tax = sum(l.price_tax for l in lines)
