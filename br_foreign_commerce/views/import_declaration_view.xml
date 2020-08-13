@@ -15,7 +15,7 @@
 	            <tree>
 	            	<field name="id" groups="base.group_no_one"/>
 	                <field name="name"/>
-	                <field name="invoice_id" invisible="1"/>
+	                <!-- <field name="invoice_id" invisible="1"/>  -->
 	                <field name="company_id"/>
 	                <field name="date_registration"/>
 	                <field name="location"/>
@@ -58,7 +58,6 @@
 	                    </div>
 		                <group>
 		                    <group>
-		                        <field name="invoice_id" invisible="1"/>
 		                        <field name="partner_id" required="1"/>
 		                        <field name="date_registration"/>
 		                        <field name="state_id" options="{'no_create': True, 'no_create_edit': True}"/>
@@ -331,7 +330,6 @@
             <search>
             	<field name="name" />
             	<field name="partner_id"/>
-                <field name="invoice_id" />
                 <filter name="filter_inactive" string="Arquivado" domain="[('active','=',False)]"/>
                 <filter name="group_partner_id" string="Fornecedor" icon="terp-partner" context="{'group_by':'partner_id'}"/>
                 <filter name="group_status" string="Situação" icon="terp-partner" context="{'group_by':'state'}"/>
