@@ -202,7 +202,7 @@ class ImportDeclaration(models.Model):
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     tax_cambial = fields.Float('Tx. Cambial', digits=(12,6), default=0.00)#, readonly=True, states=DI_STATES)
     
-    invoice_id = fields.Many2one('account.invoice', 'Fatura', ondelete='cascade', index=True, readonly=True, states=DI_STATES)
+#     invoice_id = fields.Many2one('account.invoice', 'Fatura', ondelete='cascade', index=True, readonly=True, states=DI_STATES)
     invoice_ids = fields.Many2many('account.invoice', compute="_compute_invoice", string='Bills', store=False)
     invoice_count = fields.Integer(compute="_compute_invoice", string='# Faturas', copy=False, default=0, store=False)
 
