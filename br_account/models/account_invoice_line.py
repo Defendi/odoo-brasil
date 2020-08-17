@@ -602,6 +602,7 @@ class AccountInvoiceLine(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
+        self.issqn_tipo = 'N'
         domain = super(AccountInvoiceLine,self)._onchange_product_id()
         return domain
         
