@@ -164,7 +164,7 @@ class AccountInvoiceLine(models.Model):
                         icms_valor_operacao = tax.get('icms_valor_operacao')
 
         icms_valor = sum([x['amount'] for x in icms])
-        icms_valor_diferido = sum([x['operacao'] for x in icms]),
+        icms_valor_diferido = sum([x['operacao'] for x in icms])
         dif_icms_dif = (icms_valor - icms_valor_diferido)
 
         self.update({
