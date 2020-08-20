@@ -219,7 +219,7 @@ class AccountInvoice(models.Model):
             invoice_line.tax_icms_fcp_id.amount or 0.0
         vals['icms_uf_remet'] = invoice_line.icms_uf_remet or 0.0
         vals['icms_uf_dest'] = invoice_line.icms_uf_dest or 0.0
-        vals['icms_fcp_uf_dest'] = invoice_line.icms_fcp_uf_dest or 0.0
+        vals['icms_fcp_uf_dest'] = invoice_line.icms_fcp_uf_dest or 0.0 if invoice_line.tem_difal else 0.0
         vals['icms_aliquota_inter_part'] = \
             invoice_line.icms_aliquota_inter_part or 0.0
         vals['icms_substituto'] = invoice_line.icms_substituto or 0.0

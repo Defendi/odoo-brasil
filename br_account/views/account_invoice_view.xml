@@ -626,7 +626,7 @@
                                     <field name="icms_valor_credito" attrs="{'invisible': [('company_fiscal_type', '==', '3')] }" />
                                     <field name="icms_base_calculo_fcp" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '!=', '3')]}" />
                                     <field name="tax_icms_fcp_id" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '!=', '3')]}"/>
-                                    <field name="icms_fcp" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '!=', '3')]}"/>
+                                    <field name="icms_fcp" attrs="{'invisible': ['|','|',('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')),('company_fiscal_type', '!=', '3'),('tem_difal','=',True)]}"/>
                                 </group>
                             </group>
                             <group name="substituicao_icms" string="Substituição Tributária ICMS">

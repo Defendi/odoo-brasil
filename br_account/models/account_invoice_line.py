@@ -45,6 +45,9 @@ class AccountInvoiceLine(models.Model):
             'icms_st_preco_pauta': self.icms_st_preco_pauta,
             'l10n_br_issqn_deduction': self.l10n_br_issqn_deduction,
             'icms_st_tipo_base': self.icms_st_tipo_base,
+            'icms_aliquota_fcp': self.icms_aliquota_fcp,
+            'icms_aliquota_fcp_st': self.icms_aliquota_fcp_st,
+            'tem_difal': self.tem_difal,
         }
 
     @api.one

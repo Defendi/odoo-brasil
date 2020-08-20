@@ -1,5 +1,8 @@
+import logging
 
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 class AccountChartTemplate(models.Model):
     _inherit = 'account.chart.template'
@@ -308,8 +311,10 @@ class AccountTax(models.Model):
             icms_inter_part = self.env.context["icms_aliquota_inter_part"]
         else:
             icms_inter_part = 100.0
+
         
         if tem_difal is True: 
+            _logger.info('>>> Tem difal')
             vals_inter['base'] = base_icms
             vals_intra['base'] = base_icms
     
@@ -468,10 +473,14 @@ class AccountTax(models.Model):
         
         fcp = []
         fcpst = []
-        tem_difal = True if partner and partner.indicador_ie_dest == '9' else False
-        difal = self._compute_difal(
-            price_base, ipi[0]['amount'] if ipi else 0.0,tem_difal)
-        if not difal:
+        if "tem_difal" in self.env.context:
+            tem_difal = self.env.context['tem_difal']
+        else:
+            tem_difal = True if partner and partner.indicador_ie_dest == '9' else False
+             
+        difal = self._compute_difal(price_base, ipi[0]['amount'] if ipi else 0.0,tem_difal)
+         
+        if not tem_difal:
             fcp = self._compute_fcp_icms(price_base)
             fcpst = self._compute_fcp_icms_st(
                 icmsst[0]['base'] if icmsst else 0.0)
