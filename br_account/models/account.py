@@ -22,5 +22,5 @@ class AccountPaymentTerm(models.Model):
     _inherit = 'account.payment.term'
 
     indPag = fields.Selection(
-        [('0', u'Pagamento à Vista'), ('1', u'Pagamento à Prazo')],
+        [('0', 'Pagamento à Vista'), ('1', 'Pagamento à Prazo')],
         'Indicador de Pagamento', default='0')

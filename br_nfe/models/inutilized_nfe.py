@@ -27,6 +27,7 @@ class InutilizedNfe(models.Model):
                                     readonly=True, states=STATE)
     justificativa = fields.Text('Justificativa', required=True,
                                 readonly=True, states=STATE)
+    erro = fields.Text(u'Erros', readonly=True)
     state = fields.Selection([
         ('draft', 'Provisório'),
         ('done', 'Enviado'),
@@ -44,8 +45,7 @@ class InutilizedNfe(models.Model):
     sent_xml = fields.Binary(string="Xml Envio", readonly=True)
     sent_xml_name = fields.Char(string="Xml Envio", size=30, readonly=True)
     received_xml = fields.Binary(string="Xml Recebimento", readonly=True)
-    received_xml_name = fields.Char(
-        string="Xml Recebimento", size=30, readonly=True)
+    received_xml_name = fields.Char(string="Xml Recebimento", size=30, readonly=True)
 
     @api.model
     def create(self, vals):

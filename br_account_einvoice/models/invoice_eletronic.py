@@ -53,7 +53,7 @@ class InvoiceEletronic(models.Model):
             if bool(doc.name):
                 doc.display_name = doc.name
             else:
-                doc.display_name = "Documento Eletrônico Novo"
+                doc.display_name = "Novo eDoc"
 
     display_name = fields.Char("Name", compute="_compute_display_name")
     code = fields.Char('Código', size=100, readonly=True, states=STATE)
@@ -119,6 +119,8 @@ class InvoiceEletronic(models.Model):
     valor_bc_icms = fields.Monetary(
         string="Base de Cálculo ICMS", readonly=True, states=STATE)
     valor_icms = fields.Monetary(
+        string="Total do ICMS", readonly=True, states=STATE)
+    valor_total_icms_credito  = fields.Monetary(
         string="Total do ICMS", readonly=True, states=STATE)
     valor_icms_deson = fields.Monetary(
         string='ICMS Desoneração', readonly=True, states=STATE)
@@ -199,6 +201,9 @@ class InvoiceEletronic(models.Model):
                                 readonly=True, states=STATE)
 
     product_id = fields.Many2one('product.product', related='eletronic_item_ids.product_id', string='Produto')
+
+    total_fcp = fields.Monetary(string="Total FCP", readonly=True, states=STATE)
+    total_fcp_st = fields.Monetary(string="Total FCP ST", readonly=True, states=STATE)
 
     @api.onchange('model')
     def _on_change_model(self):
@@ -707,6 +712,7 @@ class InvoiceEletronicItem(models.Model):
     icms_valor = fields.Float(string='Valor Total', digits=dp.get_precision('Account'), readonly=True, states=STATE)
     icms_valor_credito = fields.Float(string="Valor de Crédito", digits=dp.get_precision('Account'),readonly=True, states=STATE)
     icms_aliquota_credito = fields.Float(string='% de Crédito', digitis=(12,4), readonly=True, states=STATE)
+    icms_valor_operacao = fields.Float('Valor ICMS Operação', digits=dp.get_precision('Account'),readonly=True, states=STATE)
 
     icms_st_tipo_base = fields.Selection(
         [('0', '0- Preço tabelado ou máximo  sugerido'),
@@ -720,6 +726,7 @@ class InvoiceEletronicItem(models.Model):
         readonly=True, states=STATE)
     icms_st_aliquota_mva = fields.Float(string='% MVA', digits=(12,4),readonly=True, states=STATE)
     icms_st_aliquota = fields.Float(string='Alíquota', digits=(12,4),readonly=True, states=STATE)
+    icms_st_preco_pauta = fields.Float('Preço de Pauta', digits=dp.get_precision('Discount'), default=0.00)
     icms_st_base_calculo = fields.Float(string='Base de cálculo', digits=dp.get_precision('Account'),readonly=True, states=STATE)
     icms_st_aliquota_reducao_base = fields.Float(string='% Redução Base', digits=(12,4),readonly=True, states=STATE)
     icms_st_valor = fields.Float(string='Valor Total', digits=dp.get_precision('Account'),readonly=True, states=STATE)
@@ -735,6 +742,14 @@ class InvoiceEletronicItem(models.Model):
 
     icms_motivo_desoneracao = fields.Char(string='Motivo Desoneração', size=2, readonly=True, states=STATE)
     icms_valor_desonerado = fields.Float(string='Valor Desonerado', digits=dp.get_precision('Account'),readonly=True, states=STATE)
+
+    icms_fcp = fields.Float(string='Valor FCP', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    icms_aliquota_fcp = fields.Float(string='% FCP',  digits=(12,4), readonly=True, states=STATE)
+    icms_base_calculo_fcp = fields.Float(string='Base FCP', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+
+    icms_fcp_st = fields.Float(string=u'Valor FCP ST', digits=dp.get_precision('Account'), readonly=True, states=STATE)
+    icms_aliquota_fcp_st = fields.Float(string=u'% FCP ST', digits=(12,4), readonly=True, states=STATE)
+    icms_base_calculo_fcp_st = fields.Float(string=u'Base FCP ST', digits=dp.get_precision('Account'), readonly=True, states=STATE)
 
     # ----------- IPI -------------------
     ipi_cst = fields.Selection(CST_IPI, string='Situação tributária')

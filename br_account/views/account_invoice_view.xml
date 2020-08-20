@@ -624,14 +624,14 @@
                                     <field name="icms_valor"/>
                                     <field name="icms_aliquota_credito" attrs="{'invisible': [('company_fiscal_type', '==', '3')] }" />
                                     <field name="icms_valor_credito" attrs="{'invisible': [('company_fiscal_type', '==', '3')] }" />
-                                    <field name="icms_base_calculo_fcp" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '==', '3')]}" />
-                                    <field name="tax_icms_fcp_id" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '==', '3')]}"/>
-                                    <field name="icms_fcp" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '==', '3')]}"/>
+                                    <field name="icms_base_calculo_fcp" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '!=', '3')]}" />
+                                    <field name="tax_icms_fcp_id" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '!=', '3')]}"/>
+                                    <field name="icms_fcp" attrs="{'invisible': ['|', ('icms_cst_normal', 'not in', ('00', '10', '20', '51', '70', '90')), ('company_fiscal_type', '!=', '3')]}"/>
                                 </group>
                             </group>
                             <group name="substituicao_icms" string="Substituição Tributária ICMS">
                                 <group>
-                                    <field name="icms_st_tipo_base" groups="base.group_no_one" readonly="1"/>
+                                    <field name="icms_st_tipo_base"/>
                                     <field name="icms_st_aliquota_mva"/>
                                     <field name="icms_st_preco_pauta" attrs="{'invisible': [('icms_st_tipo_base', '!=', '5')]}"/>
                                     <field name="icms_st_base_calculo_manual" groups="br_account.group_edit_bases_calculo"/>

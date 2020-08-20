@@ -13,8 +13,10 @@ from datetime import datetime, timezone, timedelta
 from odoo import api, fields, models, _
 from datetime import datetime
 from odoo.exceptions import UserError
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from odoo.addons import decimal_precision as dp
+from calendar import monthrange
 
 _logger = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ try:
     from pytrustnfe.nfe import retorno_autorizar_nfe
     from pytrustnfe.nfe import recepcao_evento_cancelamento
     from pytrustnfe.nfe import consultar_protocolo_nfe
+    from pytrustnfe.nfe import nfe_status_servico
     from pytrustnfe.certificado import Certificado
     from pytrustnfe.utils import ChaveNFe, gerar_chave, gerar_nfeproc, \
         gerar_nfeproc_cancel
@@ -105,6 +108,12 @@ class InvoiceEletronic(models.Model):
         ('7', '7 - Contingência SVC-RS'),
         ('9', '9 - Contingência off-line da NFC-e')],
         string="Tipo de Emissão", readonly=True, states=STATE, default='1')
+    data_contingencia = fields.Datetime(
+        string='Data Contingência',
+        readonly=True,
+        states=STATE)
+    justificativa_contingencia = fields.Char(
+        string='Motivo da Contingência', states=STATE)
 
     # Transporte
     data_entrada_saida = fields.Datetime(
@@ -143,6 +152,25 @@ class InvoiceEletronic(models.Model):
         string='Local de Embarque', size=60, readonly=True, states=STATE)
     local_despacho = fields.Char(
         string='Local de Despacho', size=60, readonly=True, states=STATE)
+
+    # Grupo de exportação
+#     number_draw = fields.Char(
+#         string='Nº concessório de Drawback', size=11, compute='_get_export_group',
+#         help="O número do Ato Concessório de Suspensão deve ser preenchido com 11 dígitos (AAAANNNNNND)"
+#         "e o número do Ato Concessório de Drawback Isenção deve ser preenchido com 9 dígitos (AANNNNNND)."
+#         "(Observação incluída na NT 2013/005 v. 1.10)")
+#     number_reg = fields.Char(
+#         string='Nº Registro de Exportação', size=12)
+#     key_nfe = fields.Char(
+#         string='Chave de Acesso da NF-e rec. p/ exportação', size=44,
+#         help="NF-e recebida com fim específico de exportação. No caso de operação com CFOP 3.503,"
+#         "informar a chave de acesso da NF-e que efetivou a exportação")
+#     qty_export = fields.Float(
+#         string='Quant. do item realmente exportado', digits=dp.get_precision('Product Unit of Measure'))
+# 
+#     import_export_group_ids = fields.One2many(
+#         'account.export.group',
+#         'invoice_eletronic_line_id', 'Grupo de Exportação')
 
     # Cobrança
     numero_fatura = fields.Char(
@@ -289,6 +317,62 @@ class InvoiceEletronic(models.Model):
 
         return errors
 
+    def _prepare_eletronic_invoice_item_rastros(self, item, einvoice):
+        rastros = []
+        # Desabilitado essas verificações, pois estava gerando
+        # duplicação de lotes em pedidos agrupados
+        # pickings = []
+        # type_order = einvoice.invoice_id.type
+        # if 'picking_ids' in self.env['account.invoice']._fields:
+        #     pickings = einvoice.invoice_id.picking_ids
+        # else:
+        #     Essa condição do else em meus testes gerando vários tipos
+        #     de notas, nunca chegou a passar. Pois quando não há picking
+        #     o tratamento é feito antes de chegar neste método
+        #     model = 'sale.order' if type_order in \
+        #     ('out_invoice', 'in_invoice', 'in_refund', 'out_refund') \
+        #        else 'purchase.order'
+        #     orders = self.env[model].list_orders_by_invoice(
+        #        einvoice.invoice_id)
+        #     for order in orders:
+        #         pickings.append(order.picking_ids)
+        # for picking in pickings:
+        #     picking_type = picking.picking_type_id
+        # if picking_type.use_create_lots or picking_type.use_existing_lots:
+        move_ids = 'move_ids' in item.env['account.invoice.line']._fields
+
+        if not item.account_invoice_line_id or not move_ids:
+            return rastros
+
+        # Aqui é necessário ter a segunda opção,
+        # pois a primeira traz os pedidos agrupados
+        # e a segunda traz o move_ids de uma nota de crédito de compra.
+        moves = self.env['account.invoice'].get_stock_move(
+            item.account_invoice_line_id) or item.account_invoice_line_id.move_ids
+
+        if not moves:
+            return
+        for movs in moves:
+            mov = movs.move_line_ids.filtered(
+                lambda line: line.lot_id.id is not False)
+        for move in mov:
+            dt_fab_obj = datetime.strptime(move.create_date, DATETIME_FORMAT)
+            dt_val = move.lot_id.life_date if move.lot_id.life_date else \
+                str(dt_fab_obj.year) + '-' + str(dt_fab_obj.month) + '-' + \
+                str(monthrange(dt_fab_obj.year, dt_fab_obj.month)
+                    [1]) + ' 00:00:00'
+            dt_val_obj = datetime.strptime(dt_val, DATETIME_FORMAT)
+            num_lot = move.lot_id.name
+            qtd_lot = move.qty_done
+            rastros.append({
+                'nLote': num_lot,
+                'qLote': "%.03f" % qtd_lot,
+                'dFab': dt_fab_obj.date().strftime('%Y-%m-%d'),
+                'dVal': dt_val_obj.date().strftime('%Y-%m-%d'),
+            })
+
+        return rastros
+
     @api.multi
     def _prepare_eletronic_invoice_item(self, item, invoice):
         res = super(InvoiceEletronic, self)._prepare_eletronic_invoice_item(
@@ -368,6 +452,9 @@ class InvoiceEletronic(models.Model):
 
         prod["DI"] = di_vals
 
+        #prod["rastro"] = self._prepare_eletronic_invoice_item_rastros(item, invoice)
+
+
         imposto = {
             'vTotTrib': "%.02f" % item.tributos_estimados,
             'PIS': {
@@ -422,21 +509,27 @@ class InvoiceEletronic(models.Model):
                     'orig':  item.origem,
                     'CST': item.icms_cst,
                     'modBC': item.icms_tipo_base,
-                    'vBC': "%.02f" % item.icms_base_calculo,
                     'pRedBC': "%.04f" % item.icms_aliquota_reducao_base,
+                    'vBC': "%.02f" % item.icms_base_calculo,
                     'pICMS': "%.04f" % item.icms_aliquota,
-                    'vICMS': "%.02f" % item.icms_valor,
-                    'vICMSDif': "%.02f" % item.icms_valor_diferido_dif,
-                    'vICMSOp': "%.02f" % item.icms_valor_diferido,
+                    'vICMSOp': "%.02f" % item.icms_valor_operacao,
                     'pDif': "%.04f" % item.icms_aliquota_diferimento,
+                    'vICMSDif': "%.02f" % item.icms_valor_diferido,
+                    'vICMS': "%.02f" % item.icms_valor,
                     'modBCST': item.icms_st_tipo_base,
-                    'pMVAST': "%.04f" % item.icms_st_aliquota_mva,
+                    'pMVAST': "%.04f" % item.icms_st_aliquota_mva if item.icms_st_tipo_base == '4' else '',
                     'pRedBCST': "%.04f" % item.icms_st_aliquota_reducao_base,
                     'vBCST': "%.02f" % item.icms_st_base_calculo,
                     'pICMSST': "%.04f" % item.icms_st_aliquota,
                     'vICMSST': "%.02f" % item.icms_st_valor,
                     'pCredSN': "%.04f" % item.icms_aliquota_credito,
                     'vCredICMSSN': "%.02f" % item.icms_valor_credito,
+                    'vBCFCP': "%.02f" % item.icms_base_calculo_fcp if not item.tem_difal and item.icms_base_calculo_fcp > 0 else '',
+                    'pFCP': "%.02f" % item.icms_aliquota_fcp if not item.tem_difal and item.icms_aliquota_fcp > 0 else '',
+                    'vFCP': "%.02f" % item.icms_fcp if not item.tem_difal and item.icms_fcp > 0 else '',
+                    'vBCFCPST': "%.02f" % item.icms_base_calculo_fcp_st if item.icms_base_calculo_fcp_st > 0 else '',
+                    'pFCPST': "%.02f" % item.icms_aliquota_fcp_st if item.icms_aliquota_fcp_st > 0 else '',
+                    'vFCPST': "%.02f" % item.icms_fcp_st if item.icms_fcp_st > 0 else '',
                     'vICMSSubstituto': "%.02f" % item.icms_substituto,
                     'vBCSTRet': "%.02f" % item.icms_bc_st_retido,
                     'pST': "%.04f" % item.icms_aliquota_st_retido,
@@ -461,8 +554,12 @@ class InvoiceEletronic(models.Model):
                 'vFCPUFDest': "%.02f" % item.icms_fcp_uf_dest,
                 'vICMSUFDest': "%.02f" % item.icms_uf_dest,
                 'vICMSUFRemet': "%.02f" % item.icms_uf_remet, }
-        return {'prod': prod, 'imposto': imposto,
-                'infAdProd': item.informacao_adicional}
+            
+        return {
+            'prod': prod, 
+            'imposto': imposto, 
+            'infAdProd': item.informacao_adicional.replace('\n', '<br />') if bool(item.informacao_adicional) else '',
+        }
 
     @api.multi
     def _prepare_eletronic_invoice_values(self):
@@ -472,6 +569,13 @@ class InvoiceEletronic(models.Model):
 
         tz = pytz.timezone(self.env.user.tz)
         dt_emissao = datetime.now(tz).replace(microsecond=0).isoformat()
+        
+        if self.model == '65':
+            default_method = self.company_id.nfce_contingencia
+            ws_status = self.query_status_webservice(response_type='json')
+            if ws_status.cStat != 107 or default_method:
+                self.tipo_emissao = '9'
+        
         dt_saida = fields.Datetime.from_string(self.data_entrada_saida)
         if dt_saida:
             dt_saida = tz.localize(dt_saida).replace(microsecond=0).isoformat()
@@ -501,6 +605,18 @@ class InvoiceEletronic(models.Model):
             'procEmi': 0,
             'softEmi': paramObj.sudo().get_param('NFe.softEmi'),
         }
+
+        if self.tipo_emissao == '9':
+            self.data_contingencia = self.data_emissao
+            if self.justificativa_contingencia:
+                justificativa = self.justificativa_contingencia
+            else:
+                justificativa = 'FALHA NA COMUNICACAO COM WEBSERVICE'
+            ide.update({
+                'dhCont': dt_emissao.strftime('%Y-%m-%dT%H:%M:%S-00:00'),
+                'xJust': justificativa,
+            })
+
         # Documentos Relacionados
         documentos = []
         for doc in self.fiscal_document_related_ids:
@@ -608,11 +724,10 @@ class InvoiceEletronic(models.Model):
 
             if self.ambiente == 'homologacao':
                 dest['xNome'] = \
-                    'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO -\
- SEM VALOR FISCAL'
+                    'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
+                    
             if partner.country_id.id != self.company_id.country_id.id:
-                dest['idEstrangeiro'] = re.sub(
-                    '[^0-9]', '', partner.cnpj_cpf or '')
+                dest['idEstrangeiro'] = re.sub('[^0-9]', '', partner.cnpj_cpf or '')
                 dest['enderDest']['UF'] = 'EX'
                 dest['enderDest']['xMun'] = 'Exterior'
                 dest['enderDest']['cMun'] = '9999999'
@@ -639,10 +754,10 @@ class InvoiceEletronic(models.Model):
             'vBC': "%.02f" % self.valor_bc_icms,
             'vICMS': "%.02f" % self.valor_icms,
             'vICMSDeson': '0.00',
-            'vFCP': '0.00',  # TODO Implementar aqui
+            'vFCP': "%.02f" % self.total_fcp,
             'vBCST': "%.02f" % self.valor_bc_icmsst,
             'vST': "%.02f" % self.valor_icmsst,
-            'vFCPST': '0.00',
+            'vFCPST': "%.02f" % self.total_fcp_st,
             'vFCPSTRet': '0.00',
             'vProd': "%.02f" % self.valor_bruto,
             'vFrete': "%.02f" % self.valor_frete,
@@ -1331,3 +1446,42 @@ class InvoiceEletronic(models.Model):
             hashlib.sha1(hash_csrt.encode()).digest())
 
         return hash_csrt.decode("utf-8")
+
+    @api.multi
+    def query_status_webservice(self, context=None, response_type='notify'):
+        """
+        :param context: default
+        :param response_type: tipo de resposta, caso seja notify
+        será gerado um stick notificando o usuário
+        :return: notificação ou objeto com dados da consulta
+        """
+        cert = self.company_id.with_context({'bin_size': False}).nfe_a1_file
+        cert_pfx = base64.decodestring(cert)
+        certificado = Certificado(cert_pfx, self.company_id.nfe_a1_password)
+        query = dict(
+            estado=self.env.user.company_id.partner_id.state_id.ibge_code,
+            obj=dict(
+                ambiente=int(self.env.user.company_id.tipo_ambiente),
+                estado=int(self.env.user.company_id.state_id.ibge_code),
+            ),
+        )
+
+        if self.model:
+            query['modelo'] = self.model
+        if self.ambiente:
+            query['ambiente'] = 1 if self.ambiente == 'producao' else 2
+        else:
+            query['ambiente'] = int(self.env.user.company_id.tipo_ambiente)
+
+        status = nfe_status_servico(certificado, **query)
+        return_query = status['object'].getchildren()[0]
+        if response_type == 'notify':
+            user = self.env.user
+            message = u'Cód Status: %s <br/>' \
+                      u'Descrição: %s' % (
+                return_query.cStat, return_query.xMotivo)
+            title = _('Resposta da Consulta')
+
+            return user.notify_info(message=message, title=title, sticky=False)
+
+        return return_query

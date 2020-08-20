@@ -60,6 +60,9 @@
                                     <field name="icms_valor"/>
                                     <field name="icms_aliquota_credito" />
                                     <field name="icms_valor_credito" />
+                                    <field name="icms_base_calculo_fcp" />
+                                    <field name="icms_aliquota_fcp" />
+                                    <field name="icms_fcp" />
                                 </group>
                             </group>
                             <group name="substituicao_icms" string="Substituição Tributária ICMS">
@@ -76,6 +79,9 @@
                                     <field name="icms_bc_st_retido" />
                                     <field name="icms_aliquota_st_retido" />
                                     <field name="icms_st_retido" />
+                                    <field name="icms_base_calculo_fcp_st" />
+                                    <field name="icms_aliquota_fcp_st" />
+                                    <field name="icms_fcp_st" />
                                 </group>
                             </group>
                         </page>
@@ -330,6 +336,7 @@
                                     <group name="impostos" string="Impostos">
                                         <field name="valor_bc_icms" />
                                         <field name="valor_icms" />
+                                        <field name="valor_total_icms_credito"/>
                                         <field name="valor_icms_deson" />
                                         <field name="valor_bc_icmsst" />
                                         <field name="valor_icmsst" />
@@ -338,6 +345,8 @@
                                         <field name="valor_pis" />
                                         <field name="valor_cofins" />
                                         <field name="valor_estimado_tributos" />
+                                        <field name="total_fcp"/>
+                                        <field name="total_fcp_st"/>
                                     </group>
                                 </group>
                                 <group>

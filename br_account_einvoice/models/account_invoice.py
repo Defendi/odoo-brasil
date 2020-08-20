@@ -121,26 +121,32 @@ class AccountInvoice(models.Model):
             'desconto': line.valor_desconto,
             'valor_liquido': line.price_subtotal,
             'origem': line.icms_origem,
-            'icms_benef': line.icms_benef.id,
             'tributos_estimados': line.tributos_estimados,
             'ncm': line.fiscal_classification_id.code,
             'item_pedido_compra': line.item_pedido_compra, 
             'nr_pedido_compra': line.nr_pedido_compra, 
             # - ICMS -
             'icms_cst': line.icms_cst,
-            'incluir_ipi_base': line.incluir_ipi_base,
             'icms_aliquota': line.icms_aliquota,
             'icms_tipo_base': line.icms_tipo_base,
             'icms_aliquota_reducao_base': line.icms_aliquota_reducao_base,
             'icms_base_calculo': line.icms_base_calculo,
+            'icms_valor_operacao': line.icms_valor_operacao,
             'icms_valor': line.icms_valor,
+            'icms_benef': line.icms_benef.id,
+            'incluir_ipi_base': line.incluir_ipi_base,
             # - ICMS Diferido
             'icms_valor_diferido': line.icms_valor_diferido,
             'icms_aliquota_diferimento': line.icms_aliquota_diferimento,
             'icms_valor_diferido_dif': line.icms_valor_diferido - line.icms_valor,
+            'icms_fcp': line.icms_fcp,
+            'icms_aliquota_fcp': line.tax_icms_fcp_id.amount,
+            'icms_base_calculo_fcp': line.icms_base_calculo_fcp,
             # - ICMS ST -
             'icms_st_aliquota': line.icms_st_aliquota,
+            'icms_st_tipo_base': line.icms_st_tipo_base,
             'icms_st_aliquota_mva': line.icms_st_aliquota_mva,
+            'icms_st_preco_pauta': line.icms_st_preco_pauta,
             'icms_st_aliquota_reducao_base': line.icms_st_aliquota_reducao_base,
             'icms_st_base_calculo': line.icms_st_base_calculo,
             'icms_st_valor': line.icms_st_valor,
@@ -148,7 +154,9 @@ class AccountInvoice(models.Model):
             'icms_bc_st_retido': line.icms_bc_st_retido,
             'icms_aliquota_st_retido': line.icms_aliquota_st_retido,
             'icms_st_retido': line.icms_st_retido,
-            
+            'icms_fcp_st': line.icms_fcp_st,
+            'icms_aliquota_fcp_st': line.tax_icms_fcp_st_id.amount,
+            'icms_base_calculo_fcp_st': line.icms_base_calculo_fcp_st,
             # - Simples Nacional -
             'icms_aliquota_credito': line.icms_aliquota_credito,
             'icms_valor_credito': line.icms_valor_credito,
@@ -245,7 +253,10 @@ class AccountInvoice(models.Model):
             'valor_retencao_inss': invoice.inss_retention,
             'valor_bc_outras_ret': invoice.outros_base,
             'valor_retencao_outras': invoice.outros_retention,
-        }
+            'valor_total_icms_credito': invoice.total_icms_valor_credito,
+            'total_fcp': invoice.total_fcp,
+            'total_fcp_st': invoice.total_fcp_st,
+       }
 
         total_produtos = total_servicos = 0.0
         eletronic_items = []
