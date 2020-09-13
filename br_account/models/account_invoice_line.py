@@ -152,7 +152,8 @@ class AccountInvoiceLine(models.Model):
                 (self.icms_aliquota_credito / 100)
         else:
             icms_valor_credito = 0.0
- 
+            base_icms_credito = 0.0
+
         price_subtotal_signed = price_subtotal_signed * sign
 
         if icmsst:
@@ -662,6 +663,7 @@ class AccountInvoiceLine(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
+        self.issqn_tipo = 'N'
         domain = super(AccountInvoiceLine,self)._onchange_product_id()
         return domain
         

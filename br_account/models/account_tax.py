@@ -329,8 +329,8 @@ class AccountTax(models.Model):
             vals_intra['amount'] = 0.0
 
         taxes = [vals_inter, vals_intra]
-        if vals_fcp and tem_difal:
-            fcp = icms_fcp._compute_amount(base_icms, 1.0)
+        if vals_fcp:
+            fcp = icms_fcp._compute_amount(base_icms, 1.0) or 0.0
             vals_fcp['amount'] = fcp
             vals_fcp['base'] = base_icms
             taxes += [vals_fcp]
@@ -511,8 +511,9 @@ class AccountTax(models.Model):
 
         for tax in taxes:
             tax_id = self.filtered(lambda x: x.id == tax['id'])
+            amount = tax['amount'] if bool(tax.get('amount',None)) else 0.0
             if not tax_id.price_include:
-                total_included += round(tax['amount'], precision)
+                total_included += round(amount, precision)
 
         # retorna o valor dos impostos que permitem utilização de crédito
         total_allow_credit = 0

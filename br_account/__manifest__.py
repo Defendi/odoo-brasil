@@ -4,7 +4,7 @@
 {  # pylint: disable=C8101,C8103
     'name': 'Brazilian Localization Account',
     'description': """Brazilian Localization Account""",
-    'version': '11.0.1.1.0',
+    'version': '11.0.1.1.1',
     'category': 'account',
     'author': 'Trustcode',
     'license': 'AGPL-3',

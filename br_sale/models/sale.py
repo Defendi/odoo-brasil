@@ -58,6 +58,16 @@ class SaleOrder(models.Model):
         digits=dp.get_precision('Account'), store=True,
         help="The discount amount.")
 
+    @api.onchange('warehouse_id')
+    def _onchange_warehouse_id(self):
+        super(SaleOrder,self)._onchange_warehouse_id()
+        for order in self:
+            sp_type = self.env['stock.picking.type'].search([('warehouse_id','=',order.warehouse_id.id),('code','=','outgoing')])
+            if len(sp_type) > 0:
+                for pick in order.picking_ids:
+                    sql = 'UPDATE stock_picking SET picking_type_id = %s WHERE id = %s' % (sp_type.id,pick.id)
+                    self.env.cr.execute(sql)
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'

@@ -131,9 +131,9 @@ class ResPartner(models.Model):
             country_code = item.country_id.code or ''
             if item.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
                 if item.is_company:
-                    if not fiscal.validate_cnpj(item.cnpj_cpf):
+                    if re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000000" and not fiscal.validate_cnpj(item.cnpj_cpf):
                         raise ValidationError(_(u'Invalid CNPJ Number!'))
-                elif not fiscal.validate_cpf(item.cnpj_cpf):
+                elif re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000" and not fiscal.validate_cpf(item.cnpj_cpf):
                     raise ValidationError(_(u'Invalid CPF Number!'))
         return True
 
