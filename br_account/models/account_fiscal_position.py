@@ -227,6 +227,8 @@ class AccountFiscalPosition(models.Model):
                 'icms_st_aliquota_mva': rules[0].aliquota_mva,
                 'icms_st_aliquota_reducao_base': rules[0].reducao_icms_st,
                 'icms_st_aliquota_deducao': rules[0].icms_st_aliquota_deducao,
+                'tax_icms_fcp_st_id': rules[0].tax_icms_fcp_st_id,
+                'icms_st_preco_pauta': rules[0].preco_pauta,
                 # ICMS Difal
                 'tem_difal': rules[0].tem_difal,
                 'tax_icms_inter_id': rules[0].tax_icms_inter_id,

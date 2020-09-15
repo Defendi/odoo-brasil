@@ -194,7 +194,8 @@ class AccountInvoiceLine(models.Model):
             'icms_st_base_calculo': sum([x['base'] for x in icmsst]),
             'icms_st_valor': sum([x['amount'] for x in icmsst]),
             'icms_base_calculo_fcp_st': sum([x['base'] for x in icms_fcp_st]),
-
+            'icms_fcp_st': sum([x['amount'] for x in icms_fcp_st]),
+            
             'icms_bc_uf_dest': sum([x['base'] for x in icms_inter]),
             'icms_uf_remet': sum([x['amount'] for x in icms_inter]),
             'icms_uf_dest': sum([x['amount'] for x in icms_intra]),
