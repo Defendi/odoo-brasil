@@ -346,7 +346,7 @@ class AccountInvoiceLine(models.Model):
     icms_bc_uf_dest = fields.Float('Base ICMS', compute='_compute_price',digits=dp.get_precision('Account'))
     tax_icms_inter_id = fields.Many2one('account.tax', help="Alíquota utilizada na operação Interestadual",string="ICMS Inter", domain=[('domain', '=', 'icms_inter')])
     tax_icms_intra_id = fields.Many2one('account.tax', help="Alíquota interna do produto no estado destino",string="ICMS Intra", domain=[('domain', '=', 'icms_intra')])
-    icms_aliquota_inter_part = fields.Float('% Partilha', default=0.0, digits=(12,4))
+    icms_aliquota_inter_part = fields.Float('% Partilha', default=100.0, digits=(12,4))
     icms_fcp_uf_dest = fields.Float(string='Valor FCP', compute='_compute_price',digits=dp.get_precision('Account'))
     icms_uf_dest = fields.Float('ICMS Destino', compute='_compute_price',digits=dp.get_precision('Account'))
     icms_uf_remet = fields.Float('ICMS Remetente', compute='_compute_price',digits=dp.get_precision('Account'))
