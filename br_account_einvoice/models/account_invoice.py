@@ -30,7 +30,7 @@ class AccountInvoice(models.Model):
 
     invoice_eletronic_ids = fields.One2many(
         'invoice.eletronic', 'invoice_id',
-        u'Documentos Eletrônicos', readonly=True)
+        'Documentos Eletrônicos', readonly=True)
     invoice_model = fields.Char(
         string="Modelo de Fatura", related="product_document_id.code",
         readonly=True, store=True)

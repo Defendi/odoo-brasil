@@ -9,11 +9,9 @@
             <field name="valor_frete" position="after">
                 <field name="valor_aduana" string="Aduana" groups="sale.group_discount_per_so_line"/>
             </field>
-            <!-- 
             <field name="total_frete" position="after">
             	<field name="total_despesas_aduana" widget='monetary' options="{'currency_field': 'currency_id'}" />
             </field>
-             -->
         </field>
     </record>
 

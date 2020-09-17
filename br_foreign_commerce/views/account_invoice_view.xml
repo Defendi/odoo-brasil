@@ -45,32 +45,32 @@
 	                    <field name="import_declaration_ids" colspan="4" nolabel="1" widget="many2many"/> <!-- domain="[('invoice_id', '=', parent)]" context="{'search_default_invoice_id': parent.id}" /> --> 
 	                </group>
 	            </page>
+	            <page name="export_group" string="G.E." attrs="{'invisible': [('product_type','=', 'service')]}">
+	                <group string="Grupo de Exportação - Informações de exportação para o item">
+	                    <field name="import_export_group_ids" colspan="4" nolabel="1">
+	                        <tree>
+	                            <field name="number_draw"/>
+	                            <field name="number_reg"/>
+	                            <field name="key_nfe"/>
+	                            <field name="qty_export"/>
+	                        </tree>
+	                        <form string="Grupo sobre exportação indireta">
+	                            <group>
+	                                <group>
+	                                    <field name="number_draw"/>
+	                                </group>
+	                                <group>
+	                                    <field name="number_reg"/>
+	                                    <field name="key_nfe"/>
+	                                    <field name="qty_export"/>
+	                                </group>
+	                            </group>
+	
+	                        </form>
+	                    </field>
+	                </group>
+	            </page>
 	        </page>
-            <page name="Grupo de Exportação" string="Grupo de Exportação" attrs="{'invisible': [('product_type','=', 'service')]}">
-                <group string="Grupo de informações de exportação para o item">
-                    <field name="import_export_group_ids" colspan="4" nolabel="1">
-                        <tree>
-                            <field name="number_draw"/>
-                            <field name="number_reg"/>
-                            <field name="key_nfe"/>
-                            <field name="qty_export"/>
-                        </tree>
-                        <form string="Grupo sobre exportação indireta">
-                            <group>
-                                <group>
-                                    <field name="number_draw"/>
-                                </group>
-                                <group>
-                                    <field name="number_reg"/>
-                                    <field name="key_nfe"/>
-                                    <field name="qty_export"/>
-                                </group>
-                            </group>
-
-                        </form>
-                    </field>
-                </group>
-            </page>
         </field>
     </record>
 

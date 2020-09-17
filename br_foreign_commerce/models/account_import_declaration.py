@@ -197,7 +197,8 @@ class ImportDeclaration(models.Model):
     active = fields.Boolean(default=True)
 
     partner_id = fields.Many2one('res.partner', string='Exportador', readonly=True, states=DI_STATES)
-    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True, states=DI_STATES)
+    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True, 
+                                         domain=[('fiscal_type','in',('import','export'))], states=DI_STATES)
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     tax_cambial = fields.Float('Tx. Cambial', digits=(12,6), default=0.00)#, readonly=True, states=DI_STATES)
@@ -307,7 +308,11 @@ class ImportDeclaration(models.Model):
         result = action.read()[0]
  
         #override the context to get rid of the default filtering
-        result['context'] = {'type': 'in_invoice', 'default_import_id': self.id}
+        result['context'] = {'default_type': 'in_invoice', 
+                             'default_import_id': self.id,
+                             'default_fiscal_position_id': self.fiscal_position_id.id or self.partner_id.property_account_position_id.id,
+                             'default_partner_id': self.partner_id.id,
+                             }
  
         if not self.invoice_ids:
             # Choose a default account journal in the same currency in case a new invoice is created
@@ -543,7 +548,8 @@ class ImportDeclarationLine(models.Model):
             self.uom_id = self.product_id.uom_id
             fpos = self.import_declaration_id.fiscal_position_id or self.import_declaration_id.partner_id.property_account_position_id
             if fpos:
-                vals = fpos.map_tax_extra_values(self.company_id, self.product_id, self.import_declaration_id.partner_id, False)
+#                                                 product,          partner,                               fiscal_classification, service_type, issqn_tipo, analytic
+                vals = fpos.map_tax_extra_values(self.product_id, self.import_declaration_id.partner_id, False,                 False,         False,     False)
                 self.tax_ii_id = vals.get('tax_ii_id',False)
                 self.tax_ipi_id = vals.get('tax_ipi_id',False)
                 self.tax_pis_id = vals.get('tax_pis_id',False)

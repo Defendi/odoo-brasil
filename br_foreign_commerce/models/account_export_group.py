@@ -1,12 +1,14 @@
 # © 2020 Cristiano Rodrigues, Nexux
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import re
+
 from odoo import api, fields, models, exceptions
 from odoo.addons import decimal_precision as dp
-import re
 
 class AccountExportGroup(models.Model):
     _name = 'account.export.group'
+    _description = """Grupo de Exportação"""
 
     number_draw = fields.Char(
         string='Nº concessório de Drawback', size=11,
