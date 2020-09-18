@@ -40,6 +40,7 @@ class AccountInvoice(models.Model):
             'price_unit': line.price_unit_edoc,
             'quantity': line.quantity,
             'weight': line.amount_weight,
+            'weight_net': line.amount_weight,
             'discount': 0.0,
             'outras_despesas': line.pis_valor + line.cofins_valor + line.siscomex_value,
             'icms_base_calculo_manual': line.icms_base_calculo,
@@ -179,13 +180,9 @@ class AccountInvoice(models.Model):
 
     @api.onchange('import_id')
     def import_change(self):
-
         if not self.import_id:
             return {}
         self.env.context = dict(self.env.context, from_import_order_change=True)
-        self.type = 'out_invoice'
-        self.partner_id = self.import_id.partner_id.id
-        self.issuer = '1'
         fpos = self.import_id.fiscal_position_id or self.import_id.partner_id.property_account_position_id
         if fpos:
             self.product_document_id = fpos.product_document_id
