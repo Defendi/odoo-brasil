@@ -468,7 +468,7 @@ class AccountInvoice(models.Model):
                 _logger.info(str(tax.name))
                 tax_dict = next(x for x in taxes_dict['taxes'] if x['id'] == tax.id)
                 
-                if not tax.price_include and tax.account_id:
+                if not tax.price_include and not tax.account_id:
                     if tax_dict['amount'] > 0.0:
                         res[contador]['price'] += tax_dict['amount']
                     if tax_dict['amount'] < 0.0 and tax.deduced_account_id:

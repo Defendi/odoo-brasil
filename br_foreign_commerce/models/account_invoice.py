@@ -30,6 +30,31 @@ class AccountInvoice(models.Model):
         invoice_line = self.env['account.invoice.line']
         account = invoice_line.get_invoice_line_account('in_invoice', line.product_id, False, self.env.user.company_id)
         data['product_id'] = line.product_id.id
+
+        fpos = line.import_declaration_id.fiscal_position_id or line.import_declaration_id.partner_id.property_purchase_fiscal_position_id
+        if fpos: 
+            vals = fpos.map_tax_extra_values(line.product_id, line.import_declaration_id.partner_id, False, False, False, False)
+            data['cfop_id'] = vals.get('cfop_id',False)
+            data['icms_cst_normal'] = vals.get('icms_cst_normal',False)
+            data['icms_csosn_simples'] = vals.get('icms_csosn_simples',False)
+            data['icms_benef'] = vals.get('icms_benef',False)
+            data['ipi_cst'] = vals.get('ipi_cst',False)
+            data['ipi_codigo_enquadramento'] = vals.get('enq_ipi',False)
+            data['ipi_classe_enquadramento'] = vals.get('cla_ipi',False)
+            data['incluir_ipi_base'] = vals.get('incluir_ipi_base',False)
+            data['pis_cst'] = vals.get('pis_cst',False)
+            data['cofins_cst'] = vals.get('cofins_cst',False)
+#             data['icms_rule_id'] = vals.get('icms_rule_id',False)
+#             data['ipi_rule_id'] = vals.get('ipi_rule_id',False)
+#             data['pis_rule_id'] = vals.get('pis_rule_id',False)
+#             data['cofins_rule_id'] = vals.get('cofins_rule_id',False)
+#             data['ii_rule_id'] = vals.get('ii_rule_id',False)
+##             data['tax_icms_st_id'] = vals.get('tax_icms_st_id',False)
+
+#             for key, value in vals.items():
+#                 data[key] = value.id if isinstance(value, models.Model) else value
+
+        
         data.update({
             'name': line.product_id.name,
             'fiscal_classification_id': line.product_id.fiscal_classification_id.id,
@@ -159,22 +184,6 @@ class AccountInvoice(models.Model):
         if account:
             data['account_id'] = account.id
 
-        fpos = line.import_declaration_id.fiscal_position_id or line.import_declaration_id.partner_id.property_account_position_id
-        if fpos: 
-            vals = fpos.map_tax_extra_values(line.product_id, line.import_declaration_id.partner_id, False, False, False, False)
-            data['cfop_id'] = vals.get('cfop_id',False)
-            data['icms_cst_normal'] = vals.get('icms_cst_normal',False)
-            data['icms_csosn_simples'] = vals.get('icms_csosn_simples',False)
-            data['icms_benef'] = vals.get('icms_benef',False)
-#             data['icms_rule_id'] = vals.get('icms_rule_id',False)
-#             data['ipi_rule_id'] = vals.get('ipi_rule_id',False)
-#             data['pis_rule_id'] = vals.get('pis_rule_id',False)
-#             data['cofins_rule_id'] = vals.get('cofins_rule_id',False)
-#             data['ii_rule_id'] = vals.get('ii_rule_id',False)
-##             data['tax_icms_st_id'] = vals.get('tax_icms_st_id',False)
-
-#             for key, value in vals.items():
-#                 data[key] = value.id if isinstance(value, models.Model) else value
 
         return data
 
@@ -183,7 +192,8 @@ class AccountInvoice(models.Model):
         if not self.import_id:
             return {}
         self.env.context = dict(self.env.context, from_import_order_change=True)
-        fpos = self.import_id.fiscal_position_id or self.import_id.partner_id.property_account_position_id
+        self.issuer = '1'
+        fpos = self.import_id.fiscal_position_id or self.import_id.partner_id.property_purchase_fiscal_position_id
         if fpos:
             self.product_document_id = fpos.product_document_id
             self.product_serie_id = fpos.product_serie_id
