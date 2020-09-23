@@ -12,11 +12,13 @@
     'contributors': [
     ],
     'depends': [
+        'purchase',
         'br_purchase_stock',
         'br_foreign_commerce',
     ],
     'data': [
         'views/purchase_stock_view.xml',
+        'views/import_declaration_view.xml',
     ],
     'qweb': [],
     'installable': True,

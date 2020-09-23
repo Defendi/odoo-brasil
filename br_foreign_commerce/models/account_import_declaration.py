@@ -196,7 +196,7 @@ class ImportDeclaration(models.Model):
     state = fields.Selection(DI_STATE, string='Situação', default='draft')
     active = fields.Boolean(default=True)
 
-    partner_id = fields.Many2one('res.partner', string='Exportador', readonly=True, states=DI_STATES)
+    partner_id = fields.Many2one('res.partner', string='Exportador', domain="[('supplier', '=', True)]", readonly=True, states=DI_STATES)
     fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True, 
                                          domain=[('fiscal_type','in',('import','export'))], states=DI_STATES)
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
@@ -290,10 +290,11 @@ class ImportDeclaration(models.Model):
 
     @api.onchange('fiscal_position_id')
     def _onchange_fiscal_position_id(self):
-        fpos = self.fiscal_position_id or self.partner_id.property_account_position_id
+        fpos = self.fiscal_position_id or self.partner_id.property_purchase_fiscal_position_id
         if fpos:
             for line in self.line_ids:
-                vals = fpos.map_tax_extra_values(self.company_id, line.product_id, self.partner_id, False)
+                #                                 product,         partner,         fiscal_classification,                   service_type, issqn_tipo, analytic
+                vals = fpos.map_tax_extra_values(line.product_id, self.partner_id, line.product_id.fiscal_classification_id, False,        False,      False)
                 line.tax_ii_id = vals.get('tax_ii_id',False)
                 line.tax_ipi_id = vals.get('tax_ipi_id',False)
                 line.tax_pis_id = vals.get('tax_pis_id',False)
@@ -338,7 +339,7 @@ class ImportDeclaration(models.Model):
         return result
 
     def CreateInvoice(self):
-        fpos = self.import_id.fiscal_position_id or self.import_id.partner_id.property_account_position_id
+        fpos = self.import_id.fiscal_position_id or self.import_id.partner_id.property_purchase_fiscal_position_id
         var = {
             'type': 'in_invoice',
             'partner_id': self.partner_id.id,
@@ -347,7 +348,7 @@ class ImportDeclaration(models.Model):
             'product_serie_id': fpos.product_serie_id.id if bool(fpos.product_serie_id) else False,
             'fiscal_position_id': fpos.id if bool(fpos.id) else False, 
         }
-        
+        return var
 
     def _prepare_invoice_line_from_di_line(self, line):
         data = {}
@@ -482,9 +483,9 @@ class ImportDeclaration(models.Model):
         if account:
             data['account_id'] = account.id
 
-        fpos = line.import_declaration_id.fiscal_position_id or line.import_declaration_id.partner_id.property_account_position_id
+        fpos = line.import_declaration_id.fiscal_position_id or line.import_declaration_id.partner_id.property_purchase_fiscal_position_id
         if fpos: 
-            vals = fpos.map_tax_extra_values(line.product_id, line.import_declaration_id.partner_id, False, False, False, False)
+            vals = fpos.map_tax_extra_values(line.product_id, line.import_declaration_id.partner_id, line.product_id.fiscal_classification_id, False, False, False)
             data['cfop_id'] = vals.get('cfop_id',False)
             data['icms_cst_normal'] = vals.get('icms_cst_normal',False)
             data['icms_csosn_simples'] = vals.get('icms_csosn_simples',False)
@@ -501,12 +502,13 @@ class ImportDeclaration(models.Model):
 
         return data
 
-
+# 27795,
 class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
 
     def _calcule_line(self, txFreight, txValue, vlFreight, vlInsurance, vlAfrmm, vlSiscomex):
+        
         amount_value = (self.quantity * self.price_unit) - self.amount_discount
         amount_weight = self.weight_unit * self.quantity
         amount_value_cl = amount_value * self.tax_cambial
@@ -527,9 +529,12 @@ class ImportDeclarationLine(models.Model):
 
         cif_value = amount_value_cl + freight_value + insurance_value
         cif_afrmm_value = cif_value + afrmm_value
+        price_cost = cif_afrmm_value + siscomex_value
 
-        price_unit_edoc = cif_afrmm_value / self.quantity 
-
+        if self.quantity > 0.0:
+            price_unit_edoc = cif_afrmm_value / self.quantity
+        else: 
+            price_unit_edoc = 0.0
         ii_base_calculo = cif_afrmm_value
         ipi_base_calculo = cif_afrmm_value 
         pis_base_calculo = cif_afrmm_value
@@ -538,26 +543,40 @@ class ImportDeclarationLine(models.Model):
 
         ii_aliquota = self.tax_ii_id.amount if len(self.tax_ii_id) > 0 else 0.0
         ii_valor = ii_base_calculo * (ii_aliquota/100) if ii_aliquota != 0.0 else 0.0
+        if self.tax_ii_id.price_include:
+            price_cost += ii_valor
 
         if self.ipi_inclui_ii_base:
             ipi_base_calculo += ii_valor
         ipi_aliquota = self.tax_ipi_id.amount if len(self.tax_ipi_id) > 0 else 0.0
         ipi_valor = ipi_base_calculo * (ipi_aliquota/100) if ipi_aliquota != 0.0 else 0.0
+        if self.tax_ipi_id.price_include:
+            price_cost += ipi_valor
 
         pis_aliquota = self.tax_pis_id.amount if len(self.tax_pis_id) > 0 else 0.0
         pis_valor = pis_base_calculo * (pis_aliquota/100) if pis_aliquota != 0.0 else 0.0
+        if self.tax_pis_id.price_include:
+            price_cost += pis_valor
 
         cofins_aliquota = self.tax_cofins_id.amount if len(self.tax_cofins_id) > 0 else 0.0
         cofins_valor = cofins_base_calculo * (cofins_aliquota/100) if cofins_aliquota != 0.0 else 0.0
+        if self.tax_cofins_id.price_include:
+            price_cost += cofins_valor
 
         icms_base_calculo += (ii_valor + ipi_valor + pis_valor + cofins_valor)
         icms_aliquota = self.tax_icms_id.amount if len(self.tax_icms_id) > 0 else 0.0
         icms_base_calculo = icms_base_calculo / (1-(icms_aliquota/100)) if icms_aliquota != 0.0 else 0.0
         icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
+        if self.tax_icms_id.price_include:
+            price_cost += icms_valor
 
         icms_st_aliquota = self.tax_icms_st_id.amount if len(self.tax_icms_st_id) > 0 else 0.0
         icms_st_base_calculo = icms_base_calculo + (icms_base_calculo * (icms_st_aliquota/100)) if icms_st_aliquota != 0.0 else 0.0
         icms_st_valor = (icms_st_base_calculo * (icms_aliquota/100)) - icms_valor if icms_st_aliquota != 0.0 else 0.0
+        if self.tax_icms_st_id.price_include:
+            price_cost += icms_st_valor
+
+        price_cost = price_cost / self.quantity if self.quantity > 0.0 else 0.0
 
         vals = {
             'amount_value': amount_value, 
@@ -597,6 +616,7 @@ class ImportDeclarationLine(models.Model):
             'icms_st_base_calculo': icms_st_base_calculo,
             'icms_st_aliquota': icms_st_aliquota,
             'icms_st_valor': icms_st_valor,
+            'price_cost': price_cost,
         }
         return vals
 
@@ -626,7 +646,7 @@ class ImportDeclarationLine(models.Model):
     name = fields.Char('Adição', size=3, required=True)
     sequence_addition = fields.Char('Sequencia', size=3, required=True, default=_get_sequence)
     product_id = fields.Many2one('product.product', string='Produto', ondelete='restrict', index=True)
-    manufacturer_code = fields.Char('Código Fabricante', size=60, required=True)
+    manufacturer_code = fields.Char('Código Fabricante', size=60)
     manufacturer_description = fields.Char('Descrição Fabricante')
     uom_id = fields.Many2one('product.uom', string='UM', ondelete='set null', index=True)
     quantity = fields.Float(string='Qtde.', digits=dp.get_precision('Product Unit of Measure'), required=True, default=1)
@@ -664,6 +684,8 @@ class ImportDeclarationLine(models.Model):
 
     outras_depesas = fields.Float(string='Outras Despesas', compute='_compute_line', digits=(12,3), readonly=True, store=True)
     price_unit_edoc = fields.Float(string='Preço Un eDoc', compute='_compute_line', digits=(12,5), readonly=True, store=True)
+    
+    price_cost = fields.Float(string='Preço Custo Calc', compute='_compute_line', digits=(12,5), readonly=True, store=True)
 
     # impostos
     # II
@@ -708,13 +730,18 @@ class ImportDeclarationLine(models.Model):
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if bool(self.product_id):
-            self.manufacturer_description = self.product_id.name
+            partner = self.import_declaration_id.partner_id
+            self.ipi_inclui_ii_base = True
             self.weight_unit = self.product_id.weight
             self.uom_id = self.product_id.uom_id
-            fpos = self.import_declaration_id.fiscal_position_id or self.import_declaration_id.partner_id.property_account_position_id
+            suplierinfo = self.env['product.supplierinfo']
+            if bool(partner):
+                suplierinfo = suplierinfo.search([('name','=',partner.id),('product_tmpl_id','=',self.product_id.product_tmpl_id.id)],limit=1)
+            self.manufacturer_code = suplierinfo.product_code or self.product_id.code
+            self.manufacturer_description = suplierinfo.product_name or self.product_id.name
+            fpos = self.import_declaration_id.fiscal_position_id or self.import_declaration_id.partner_id.property_purchase_fiscal_position_id
             if fpos:
-#                                                 product,          partner,                               fiscal_classification, service_type, issqn_tipo, analytic
-                vals = fpos.map_tax_extra_values(self.product_id, self.import_declaration_id.partner_id, False,                 False,         False,     False)
+                vals = fpos.map_tax_extra_values(self.product_id, self.import_declaration_id.partner_id, self.product_id.fiscal_classification_id, False, False, False)
                 self.tax_ii_id = vals.get('tax_ii_id',False)
                 self.tax_ipi_id = vals.get('tax_ipi_id',False)
                 self.tax_pis_id = vals.get('tax_pis_id',False)

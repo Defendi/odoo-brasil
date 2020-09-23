@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_br_purchase_import_declaration_tree" model="ir.ui.view">
+        <field name="name">br_purchase.import.declaration.tree</field>
+        <field name="model">br_account.import.declaration</field>
+        <field name="inherit_id" ref="br_foreign_commerce.view_br_fc_import_declaration_tree" />
+        <field name="arch" type="xml">
+			<field name="state" position="before">
+				<field name="purchase_id"/>
+			</field>
+        </field>
+    </record>
+
+    <record id="view_br_purchase_import_declaration_form" model="ir.ui.view">
+        <field name="name">br_purcgase.import.declaration.form</field>
+        <field name="model">br_account.import.declaration</field>
+        <field name="inherit_id" ref="br_foreign_commerce.view_br_fc_import_declaration_form" />
+        <field name="arch" type="xml">
+        	<xpath expr="//button[@name='reopen']" position="after">
+        		<button string="Gerar O.C." name="create_purchase_order" type="object" attrs="{'invisible': [('state', 'not in', ('to_invoice'),('purchase_id','!=','False'))]}"/>
+        	</xpath>
+			<field name="partner_id" position="after">
+				<field name="purchase_id"/>
+			</field>
+			<xpath expr="//field[@name='line_ids']/tree" position="inside">
+				<field name="purchase_line_id"/>
+			</xpath>
+			<xpath expr="//field[@name='line_ids']/form/sheet/notebook/page[@name='item']/group/group" position="inside">
+				<field name="purchase_line_id"/>
+			</xpath>
+        </field>
+    </record>
+
+</odoo>

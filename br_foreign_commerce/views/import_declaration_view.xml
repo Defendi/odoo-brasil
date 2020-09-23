@@ -145,11 +145,12 @@
 					                		<field name="icms_st_aliquota" invisible="1"/>
 					                		<field name="icms_st_valor" invisible="1"/>
 					                		<field name="outras_depesas" invisible="1"/>
+					                		<field name="price_cost" invisible="1"/>
 							            </tree>
 							            <form>
 							            	<sheet>
 							                    <notebook>
-							                        <page string="Item">                  
+							                        <page name="item" string="Item">
 										                <group>
 										                	<group string="Produto">
 											                    <field name="product_id"/>
@@ -200,6 +201,7 @@
 											                    <field name="outras_depesas"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="cif_value"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="cif_afrmm_value"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="price_cost"/>
 											                </group>
 											            </group>
 										            </page>

@@ -475,7 +475,7 @@ class AccountInvoice(models.Model):
                         res[contador]['price'] += tax_dict['amount'] 
                         
                     
-                if tax.price_include and (not tax.account_id or not tax.deduced_account_id):
+                if tax.price_include and (tax.account_id or tax.deduced_account_id):
                     if tax_dict['amount'] > 0.0:  # Negativo é retido
                         res[contador]['price'] -= tax_dict['amount']
 
@@ -538,9 +538,30 @@ class AccountInvoice(models.Model):
 
     @api.model
     def tax_line_move_line_get(self):
-        res = super(AccountInvoice, self).tax_line_move_line_get()
+        res = []
+        # keep track of taxes already processed
         done_taxes = []
+        # loop the invoice.tax.line in reversal sequence
         for tax_line in sorted(self.tax_line_ids, key=lambda x: -x.sequence):
+            if tax_line.amount_total and tax_line.tax_id.account_id:
+                tax = tax_line.tax_id
+                if tax.amount_type == "group":
+                    for child_tax in tax.children_tax_ids:
+                        done_taxes.append(child_tax.id)
+                res.append({
+                    'invoice_tax_line_id': tax_line.id,
+                    'tax_line_id': tax_line.tax_id.id,
+                    'type': 'tax',
+                    'name': tax_line.name,
+                    'price_unit': tax_line.amount_total,
+                    'quantity': 1,
+                    'price': tax_line.amount_total,
+                    'account_id': tax_line.account_id.id,
+                    'account_analytic_id': tax_line.account_analytic_id.id,
+                    'invoice_id': self.id,
+                    'tax_ids': [(6, 0, list(done_taxes))] if tax_line.tax_id.include_base_amount else []
+                })
+                done_taxes.append(tax.id)
             if tax_line.amount and tax_line.tax_id.deduced_account_id:
                 tax = tax_line.tax_id
                 done_taxes.append(tax.id)
