@@ -299,7 +299,6 @@ class AccountInvoiceLine(models.Model):
     icms_aliquota = fields.Float('ICMS %', digits=(12,4), default=0.00)
     icms_aliquota_reducao_base = fields.Float('Red. Base ICMS %', digits=(12,4), default=0.00)
     icms_base_calculo_manual = fields.Float('Base ICMS Manual', digits=dp.get_precision('Account'), default=0.00)
-    icms_valor_operacao = fields.Float('Valor ICMS Operação', store=True, digits=dp.get_precision('Account'))
     tax_icms_fcp_id = fields.Many2one('account.tax', string="% FCP", domain=[('domain', '=', 'fcp')])
     icms_fcp = fields.Float(string='Valor FCP', compute='_compute_price', digits=dp.get_precision('Discount'))
     icms_aliquota_fcp = fields.Float(string='% FCP', digits=(12,4), states={'edit': [('readonly', False)]})
