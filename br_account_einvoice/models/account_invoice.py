@@ -96,11 +96,13 @@ class AccountInvoice(models.Model):
 
     def _action_preview_danfe(self, doc):
 
+        if not doc.data_autorizacao and doc.state != 'done':
+            raise UserError('Só é permitido imprimir Doc. Eletrônico com status autorizado.')
+
         report = self._return_pdf_invoice(doc)
         if not report:
             raise UserError(
-                _('Nenhum relatório implementado para este modelo \
-                  de documento'))
+                _('Nenhum relatório implementado para este modelo de documento'))
         if not isinstance(report, str):
             return report
         action = self.env.ref(report).report_action(doc)

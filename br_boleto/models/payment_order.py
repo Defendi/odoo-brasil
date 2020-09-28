@@ -19,7 +19,7 @@ class PaymentOrderLine(models.Model):
         if len(payment_mode.journal_id) == 0:
             raise UserError('Indique o diário no "Modo de Pagamento".')
         order_dict = {
-            'name': u'%s' % order_name,
+            'name': '%s' % order_name,
             'user_id': self.env.user.id,
             'payment_mode_id': move_line.payment_mode_id.id,
             'state': 'draft',

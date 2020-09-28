@@ -34,6 +34,15 @@ class Bradesco240(Cnab240):
 
     def _prepare_segmento(self, line):
         vals = super(Bradesco240, self)._prepare_segmento(line)
+
+        # força valor no segmento
+        self.arquivo.banco.registros.SegmentoR._campos_cls['servico_codigoMovimento'].default = 1
+
+        vals['multa_codigo'] = "2" # porcentual
+        vals['desconto2_percentual'] = Decimal('0.00')
+        vals['desconto3_percentual'] = Decimal('0.00')
+        vals['multa_percentual'] = vals['juros_multa']
+        
         if vals['prazo_protesto'] < 3:
             vals['prazo_protesto'] = 3
         vals['codigo_moeda'] = 9

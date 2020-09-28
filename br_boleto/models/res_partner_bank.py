@@ -9,4 +9,4 @@ class ResPartnerBank(models.Model):
 
     # Por motivos de falta de conhecimento este campo agora virou código
     # de beneficiario - Código Cnab virou código de Convênio
-    codigo_convenio = fields.Char(u'Código de Beneficiário')
+    codigo_convenio = fields.Char('Código de Beneficiário')

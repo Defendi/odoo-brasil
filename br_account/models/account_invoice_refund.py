@@ -3,7 +3,6 @@
 
 from odoo import models, fields, api
 
-
 class AccountInvoiceRefund(models.TransientModel):
     _inherit = 'account.invoice.refund'
 

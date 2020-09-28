@@ -34,6 +34,7 @@ class Sicoob240(Cnab240):
         vals['codigo_multa'] = int(vals['codigo_multa'])
         vals['controlecob_numero'] = self.order.id
         vals['controlecob_data_gravacao'] = self.data_hoje()
+        vals['especie_titulo'] = int(line.payment_mode_id.boleto_especie_sicoob)
         return vals
 
     def dv_nosso_numero(self, agencia, codigo_beneficiario, nosso_numero):

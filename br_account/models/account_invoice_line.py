@@ -69,8 +69,6 @@ class AccountInvoiceLine(models.Model):
                  'icms_st_tipo_base', 'tax_icms_fcp_st_id', 'l10n_br_issqn_deduction')
     def _compute_price(self):
         _logger.info('>>> Calculando linha %s' % str(self.ids))
-#         _logger.info('>>> aqui')
-#         return True
         currency = self.invoice_id and self.invoice_id.currency_id or None
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
         valor_bruto = self.price_unit * self.quantity
@@ -223,7 +221,7 @@ class AccountInvoiceLine(models.Model):
             'outros_base_calculo': sum([x['base'] for x in outros]),
             'outros_valor': sum([x['amount'] for x in outros]),
             'icms_valor_diferido_dif': dif_icms_dif*-1 if dif_icms_dif < 0 else dif_icms_dif,
-            #'tem_difal': self.tem_difal if self.invoice_id.partner_id and self.invoice_id.partner_id.indicador_ie_dest == '9' else False,
+            'tem_difal': self.tem_difal, #if self.invoice_id.partner_id and self.invoice_id.partner_id.indicador_ie_dest == '9' else False,
         })
 
     @api.multi
@@ -482,8 +480,8 @@ class AccountInvoiceLine(models.Model):
     # =========================================================================
     weight = fields.Float(string='Peso Bruto', help="O peso bruto em Kg.", digits=(12,3))
     weight_net = fields.Float('Peso Líquido', help="O peso líquido em Kg.", digits=(12,3))
-#     number_of_packages = fields.Integer('Nº Volumes')
-#     kind_of_packages = fields.Char('Espécie', size=60)
+    number_of_packages = fields.Integer('Nº Volumes')
+    kind_of_packages = fields.Char('Espécie', size=60)
 #     brand_of_packages = fields.Char('Marca', size=60)
 #     notation_of_packages = fields.Char('Numeração', size=60)
 

@@ -9,16 +9,14 @@ from datetime import datetime, timedelta
 class L10nBrPaymentStatement(models.Model):
     _name = 'l10n_br.payment.statement'
     _description = """Comprovante Pagamento"""
-
-    _description = "Payment Statement"
     _order = "date desc, id desc"
     _inherit = ['mail.thread']
 
+    @api.one
     @api.depends('journal_id')
     def _compute_currency(self):
-        for item in self:
-            item.currency_id = \
-                item.journal_id.currency_id or item.company_id.currency_id
+        self.currency_id = \
+            self.journal_id.currency_id or self.company_id.currency_id
 
     @api.depends('line_ids.amount')
     def _compute_amount_total(self):

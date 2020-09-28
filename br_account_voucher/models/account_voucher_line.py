@@ -17,4 +17,20 @@ class AccountVoucherLine(models.Model):
             res['value'].pop('account_id')
         return res
 
+    @api.model
+    def _get_account(self, product, fpos, type):
+        account = None
+        product_accounts = product.product_tmpl_id.get_product_accounts(fpos)
+        journal_id = self.voucher_id.journal_id
         
+        if type == 'sale':
+            account = journal_id.default_credit_account_id
+            if not account:
+                account = product_accounts['income']
+        else:
+            account = journal_id.default_debit_account_id
+            if not account:
+                account = product_accounts['expense']
+
+        return account
+       

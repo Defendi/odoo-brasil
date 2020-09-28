@@ -29,9 +29,8 @@ class AccountBankStatementImport(models.TransientModel):
         e se forem todos duplicados dizer que o arquivo já foi importado. \
         Se alguma dessas situações estiver ocorrendo ao importar o arquivo \
         talvez você precise marcar esta opção.")
-    force_journal_account = fields.Boolean(string=u"Forçar conta bancária?")
-    journal_id = fields.Many2one('account.journal', string=u"Conta Bancária",
-                                 domain=[('type', '=', 'bank')])
+    force_journal_account = fields.Boolean(string="Forçar conta bancária?")
+    journal_id = fields.Many2one('account.journal', string="Conta Bancária", domain=[('type', '=', 'bank')])
 
     @api.multi
     def import_file(self):

@@ -22,7 +22,8 @@
                             <field name="boleto_variacao"/>
                             <field name="boleto_cnab_code"/>
                             <field name="boleto_aceite"/>
-                            <field name="boleto_especie"/>
+                            <field name="boleto_especie" attrs="{'invisible': [('boleto_type', '=', '9')]}"/>
+                            <field name="boleto_especie_sicoob" attrs="{'invisible': [('boleto_type', '!=', '9')]}"/>
                             <field name="boleto_protesto"/>
                             <field name="boleto_protesto_prazo"/>
                             <field name="late_payment_fee"/>

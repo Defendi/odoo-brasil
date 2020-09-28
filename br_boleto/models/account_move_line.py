@@ -77,6 +77,6 @@ class AccountMoveLine(models.Model):
                 if not sacado.cnpj_cpf:
                     res.append("Indique o CPF da pessoa.")
         else:
-            res.append(u"Indique o sacado.")
+            res.append("Indique o sacado.")
         return res
 

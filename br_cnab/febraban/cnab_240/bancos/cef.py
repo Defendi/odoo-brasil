@@ -29,7 +29,7 @@ class Cef240(Cnab240):
         vals['cedente_beneficiario'] = vals['cedente_convenio']
 
         vals['cedente_codigo_codCedente'] = 6088
-        vals['nome_do_banco'] = u'CAIXA ECONOMICA FEDERAL'
+        vals['nome_do_banco'] = 'CAIXA ECONOMICA FEDERAL'
         if self.order.payment_mode_id.l10n_br_environment == 'test':
             vals['reservado_cedente_campo23'] = 'REMESSA TESTE'
         else:

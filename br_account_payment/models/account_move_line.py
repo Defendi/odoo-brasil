@@ -28,6 +28,11 @@ class AccountMoveLine(models.Model):
     l10n_br_order_line_id = fields.Many2one('payment.order.line', string='Linha de Pagamento')
     change_date_maturity_ids = fields.One2many("account.move.line.change.date.maturity", "move_id", string="Mudanças de Vencimento", readonly=True)
     acc_is_reconcile = fields.Boolean(related="account_id.reconcile")
+    number_doc = fields.Char(string="Número doc.", size=20, compute="_compute_set_number_doc")
+
+    @api.one
+    def _compute_set_number_doc(self):
+        self.number_doc = self.invoice_id.number_doc or None
 
     @api.multi
     def action_register_payment(self):
