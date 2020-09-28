@@ -585,7 +585,7 @@ class InvoiceEletronic(models.Model):
         ide = {
             'cUF': self.company_id.state_id.ibge_code,
             'cNF': "%08d" % self.numero_controle,
-            'natOp': self.fiscal_position_id.name,
+            'natOp': self.fiscal_position_id.natureza,
             'mod': self.model,
             'serie': self.serie.code,
             'nNF': self.numero,
