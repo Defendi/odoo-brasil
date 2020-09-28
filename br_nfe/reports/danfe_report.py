@@ -69,7 +69,8 @@ class IrActionsReport(models.Model):
 
         xml_element = etree.fromstring(nfe_xml)
         if nfe.model == '55':
-            oDanfe = danfe(list_xml=[xml_element], logo=tmpLogo,cce_xml=cce_xml_element, timezone=timezone)
+            rascunho = True if not nfe.data_autorizacao and nfe.state != 'done' else False
+            oDanfe = danfe(list_xml=[xml_element], logo=tmpLogo,cce_xml=cce_xml_element, timezone=timezone, rascunho=rascunho)
         if nfe.model == '65':
             oDanfe = danfce(list_xml=[xml_element], logo=tmpLogo)
 

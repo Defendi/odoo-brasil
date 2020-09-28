@@ -1021,7 +1021,9 @@ class InvoiceEletronic(models.Model):
         tmpLogo.seek(0)
 
         xml_element = etree.fromstring(nfe_xml)
-        oDanfe = danfe(list_xml=[xml_element], logo=tmpLogo)
+        rascunho = True if not self.data_autorizacao and self.state != 'done' else False
+            
+        oDanfe = danfe(list_xml=[xml_element], logo=tmpLogo, rascunho=rascunho)
 
         tmpDanfe = io.BytesIO()
         oDanfe.writeto_pdf(tmpDanfe)
