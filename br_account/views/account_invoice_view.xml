@@ -127,14 +127,6 @@
                 <field name="cofins_valor" invisible="1" />
                 <field name="cofins_aliquota" invisible="1" />
                 <field name="cofins_base_calculo_manual" invisible="1" />
-                <field name="ii_rule_id" invisible="1" />
-                <field name="tax_ii_id" invisible="1" />
-                <field name="ii_base_calculo" invisible="1" />
-                <field name="ii_aliquota" invisible="1" />
-                <field name="ii_valor" invisible="1" />
-                <field name="ii_valor_iof" invisible="1" />
-                <field name="ii_valor_despesas" invisible="1" />
-                <field name="import_declaration_ids" invisible="1" />
                 <field name="csll_rule_id" invisible="1" />
                 <field name="tax_csll_id" invisible="1" />
                 <field name="csll_base_calculo" invisible="1" />
@@ -383,14 +375,6 @@
                 <field name="cofins_valor" invisible="1" />
                 <field name="cofins_aliquota" invisible="1" />
                 <field name="cofins_base_calculo_manual" invisible="1" />
-                <field name="ii_rule_id" invisible="1" />
-                <field name="tax_ii_id" invisible="1" />
-                <field name="ii_base_calculo" invisible="1" />
-                <field name="ii_aliquota" invisible="1" />
-                <field name="ii_valor" invisible="1" />
-                <field name="ii_valor_iof" invisible="1" />
-                <field name="ii_valor_despesas" invisible="1" />
-                <field name="import_declaration_ids" invisible="1" />
                 <field name="csll_rule_id" invisible="1" />
                 <field name="tax_csll_id" invisible="1" />
                 <field name="csll_base_calculo" invisible="1" />

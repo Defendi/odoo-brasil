@@ -12,6 +12,7 @@
     'contributors': [
     ],
     'depends': [
+        'account',
         'br_account_einvoice',
     ],
     'external_dependencies': {

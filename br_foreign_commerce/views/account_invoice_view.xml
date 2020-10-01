@@ -4,12 +4,17 @@
     <record id="br_account_ii_product_invoice_form" model="ir.ui.view">
         <field name="name">br.account.ii.product.invoice.form</field>
         <field name="model">account.invoice</field>
-        <field name="inherit_id" ref="br_account.view_br_account_invoice_form"/>
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
 			<field name="amount_tax" position="after">
 	        	<field name="total_despesas_aduana" widget='monetary' options="{'currency_field': 'currency_id'}" invisible="1"/>
             </field>
+            <xpath expr="//field[@name='invoice_line_ids']" position="attributes">
+            	<attribute name="context">{'default_invoice_type': 'out_invoice'}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="after">
+            	<field name="invoice_type" invisible="1"/>
+            </xpath>
         </field>
     </record>
 
@@ -21,6 +26,12 @@
 			<field name="amount_tax" position="after">
 	        	<field name="total_despesas_aduana" widget='monetary' options="{'currency_field': 'currency_id'}" invisible="1"/>
             </field>
+            <xpath expr="//field[@name='invoice_line_ids']" position="attributes">
+            	<attribute name="context">{'default_invoice_type': 'in_invoice'}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="after">
+            	<field name="invoice_type" invisible="1"/>
+            </xpath>
         </field>
     </record> 
 
@@ -30,8 +41,11 @@
         <field name="inherit_id" ref="br_account.view_br_account_invoice_line_form" />
         <field name="priority">36</field>
         <field name="arch" type="xml">
+        	<field name="product_id" position="before">
+				<field name="invoice_type" invisible="1"/>
+        	</field>
         	<page name="cofins" position="after">
-	            <page name="ii" string="II" attrs="{'invisible': [('product_type','=', 'service')]}"> 
+	            <page name="ii" string="II" attrs="{'invisible': ['|',('product_type','=', 'service'),('invoice_type','in', ('out_invoice','out_refund'))]}"> 
 	                <group string="Detalhes do Imposto de Importação">
 	                    <field name="ii_rule_id" />
 	                    <field name="ii_valor_despesas"/>
@@ -45,7 +59,7 @@
 	                    <field name="import_declaration_ids" colspan="4" nolabel="1" widget="many2many"/> <!-- domain="[('invoice_id', '=', parent)]" context="{'search_default_invoice_id': parent.id}" /> --> 
 	                </group>
 	            </page>
-	            <page name="export_group" string="G.E." attrs="{'invisible': [('product_type','=', 'service')]}">
+	            <page name="export_group" string="G.E." attrs="{'invisible': ['|',('product_type','=', 'service'),('invoice_type','in', ('in_invoice','in_refund'))]}">
 	                <group string="Grupo de Exportação - Informações de exportação para o item">
 	                    <field name="import_export_group_ids" colspan="4" nolabel="1">
 	                        <tree>

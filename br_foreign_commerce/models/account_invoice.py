@@ -21,7 +21,7 @@ class AccountInvoice(models.Model):
         super(AccountInvoice, self)._compute_amount()
         self.total_despesas_aduana = sum(l.ii_valor_despesas for l in self.invoice_line_ids)
         self.amount_total = self.total_bruto - self.total_desconto + self.total_tax + self.total_despesas_aduana
-        
+    
     import_id = fields.Many2one(comodel_name='br_account.import.declaration',string='Declaração Importação', readonly=True, states={'draft': [('readonly', False)]})
     total_despesas_aduana = fields.Float(string='Desp.Aduana ( + )', digits=dp.get_precision('Account'), store=True, compute="_compute_amount")
 
@@ -220,6 +220,7 @@ class AccountInvoice(models.Model):
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 
+    invoice_type = fields.Selection(related='invoice_id.type', store=True)
     import_export_group_ids = fields.One2many('account.export.group', 'account_inv_line_id', 'Grupo de Exportação')
 
     @api.onchange("import_export_group_ids")
