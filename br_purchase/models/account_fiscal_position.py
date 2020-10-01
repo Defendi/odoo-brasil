@@ -4,7 +4,7 @@ class AccountFiscalPosition(models.Model):
     _inherit = 'account.fiscal.position'
 
     @api.model
-    def get_fiscal_position(self, partner_id, delivery_id=None, type_inv='out_invoice'):
+    def get_fiscal_position(self, partner_id, delivery_id=None, type_inv='in_invoice'):
         if not partner_id:
             return False
         # This can be easily overriden to apply more complex fiscal rules

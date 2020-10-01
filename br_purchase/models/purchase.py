@@ -30,10 +30,8 @@ class PurchaseOrder(models.Model):
             })
 
     def _get_deadline_order(self):
-        tm = self.env['res.config.settings'].search([],limit=1,order="id desc")
-        days = 0
-        if tm.days_lock_deadline:
-            days = tm.days_lock_deadline
+        params = self.env['ir.config_parameter'].sudo()
+        days = int(params.get_param('purchase.days_lock_deadline', default=7))
         return fields.date.today()+datetime.timedelta(days)
 
     deadline_order = fields.Date('Data Final Cotação', states=READONLY_STATES, index=True, copy=False, default=_get_deadline_order, required=True)
@@ -80,9 +78,11 @@ class PurchaseOrder(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner_fpos(self):
-        if not self.fiscal_position_id:
-            fpos = self.partner_id.property_purchase_fiscal_position_id
-            self.fiscal_position_id = fpos.id
+        if not self.fiscal_position_id and self.partner_id:
+            fpos = self.partner_id.property_purchase_fiscal_position_id.id
+            if not bool(fpos):
+                fpos = self.env['account.fiscal.position'].get_fiscal_position(self.partner_id.id, delivery_id=None, type_inv='in_invoice')
+            self.fiscal_position_id = fpos
 
     @api.onchange('account_analytic_id')
     def _onchange_account_analytic_id(self):
