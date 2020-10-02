@@ -288,6 +288,11 @@ class ImportDeclaration(models.Model):
     espelho_frete = fields.Float(string='Valor Frete', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_total_nfe = fields.Float(string='Total NFe', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
 
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        if bool(self.partner_id):
+            self.currency_purchase_id = self.partner_id.property_purchase_currency_id
+    
     @api.onchange('fiscal_position_id')
     def _onchange_fiscal_position_id(self):
         fpos = self.fiscal_position_id or self.partner_id.property_purchase_fiscal_position_id
@@ -301,6 +306,15 @@ class ImportDeclaration(models.Model):
                 line.tax_cofins_id = vals.get('tax_cofins_id',False)
                 line.tax_icms_id = vals.get('tax_icms_id',False)
                 line.tax_icms_st_id = vals.get('tax_icms_st_id',False)
+
+    @api.onchange('currency_purchase_id','company_id','date_registration')
+    def _onchange_currency_rate_date(self):
+        if bool(self.currency_purchase_id) and bool(self.company_id) and bool(self.date_registration):
+            rate = self.env['res.currency.rate'].search([('company_id','=',self.company_id.id),
+                                                  ('currency_id','=',self.currency_purchase_id.id),
+                                                  ('name','=',self.date_registration)])
+            if bool(rate):
+                self.tax_cambial = rate.rate
 
     @api.multi
     def action_view_invoice(self):
