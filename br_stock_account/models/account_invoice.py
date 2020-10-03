@@ -119,7 +119,12 @@ class AccountInvoice(models.Model):
         vals['outras_despesas'] = invoice_line.outras_despesas
         return vals
 
-
+    @api.onchange('partner_id', 'company_id')
+    def _onchange_partner_id(self):
+        super(AccountInvoice,self)._onchange_partner_id()
+        if len(self.partner_id) > 0:
+            self.freight_responsibility = self.partner_id.freight_responsibility
+        
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
 

@@ -84,7 +84,8 @@ class SaleOrder(models.Model):
 
     #transporte
     shipping_supplier_id = fields.Many2one('res.partner', 'Transportadora', readonly=True, states=EDITONLY_STATES, oldname='transp_id')
-    freight_responsibility = fields.Selection([('0', '0 - Contratação do Frete por conta do Remetente (CIF)'),
+    freight_responsibility = fields.Selection([
+         ('0', '0 - Contratação do Frete por conta do Remetente (CIF)'),
          ('1', '1 - Contratação do Frete por conta do Destinatário (FOB)'),
          ('2', '2 - Contratação do Frete por conta de Terceiros'),
          ('3', '3 - Transporte Próprio por conta do Remetente'),
@@ -284,7 +285,14 @@ class SaleOrder(models.Model):
 
         return super(SaleOrder, self).action_confirm()
 
-
+    @api.multi
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        super(SaleOrder,self).onchange_partner_id()
+        if len(self.partner_id) > 0:
+            self.freight_responsibility = self.partner_id.freight_responsibility
+        
+        
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 

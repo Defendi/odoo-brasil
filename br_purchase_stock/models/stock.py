@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, models
+from odoo.addons import decimal_precision as dp
 
 
 class StockMove(models.Model):
@@ -11,13 +12,14 @@ class StockMove(models.Model):
     @api.multi
     def _get_price_unit(self):
         self.ensure_one()
-        if self.purchase_line_id \
-                and self.product_id.id == self.purchase_line_id.product_id.id:
+        digits = dp.get_precision('Product Price')(self._cr)
+        if self.purchase_line_id and self.product_id.id == self.purchase_line_id.product_id.id:
             line = self.purchase_line_id
             order = line.order_id
             ctx = line._prepare_tax_context()
             tax_ids = line.taxes_id.with_context(**ctx)
-            price = line.price_unit
+            total_price = ((line.price_unit * line.product_qty) + line.outras_despesas + line.valor_seguro + line.valor_frete + line.valor_aduana)  - line.valor_desconto
+            price = round(total_price / line.product_qty, digits[1])
             if line.taxes_id:
                 taxes = tax_ids.compute_all(
                     price,
