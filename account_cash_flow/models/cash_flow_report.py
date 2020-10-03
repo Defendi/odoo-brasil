@@ -71,7 +71,7 @@ class CashFlowReport(models.TransientModel):
     def draw_chart(self):
         if self.print_graphic:
             import plotly.graph_objs as go
-            from plotly.offline.offline import _plot_html
+#             from plotly.offline.offline import _plot_html
             import pandas as pd
     
             diarios = []
@@ -177,8 +177,9 @@ class CashFlowReport(models.TransientModel):
             )
             fig = go.Figure(data=data, layout=layout)
     
-            plot_html, plotdivid, width, height = _plot_html(
-                fig, {}, True, '100%', 525, False)
+#             plot_html, plotdivid, width, height = _plot_html(
+#                 fig, {}, True, '100%', 525, False)
+            plot_html = fig.to_html()
         else:
             plot_html = '<div></div>'
         return plot_html
