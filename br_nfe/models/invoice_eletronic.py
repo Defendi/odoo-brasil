@@ -424,8 +424,8 @@ class InvoiceEletronic(models.Model):
             adicoes = []
             for adi in di.line_ids:
                 adicoes.append({
-                    'nAdicao': adi.name,
-                    'nSeqAdic': adi.sequence_addition,
+                    'nAdicao': str(int(adi.name)),
+                    'nSeqAdic': str(int(adi.sequence_addition)),
                     'cFabricante': adi.manufacturer_code,
                     'vDescDI': "%.02f" % adi.amount_discount
                     if adi.amount_discount else '',
@@ -727,7 +727,7 @@ class InvoiceEletronic(models.Model):
                     'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL'
                     
             if partner.country_id.id != self.company_id.country_id.id:
-                dest['idEstrangeiro'] = re.sub('[^0-9]', '', partner.cnpj_cpf or '')
+                dest['idEstrangeiro'] = re.sub('[^0-9]', '', partner.cnpj_cpf or '000000000000000000')
                 dest['enderDest']['UF'] = 'EX'
                 dest['enderDest']['xMun'] = 'Exterior'
                 dest['enderDest']['cMun'] = '9999999'
@@ -1182,7 +1182,8 @@ class InvoiceEletronic(models.Model):
                 'codigo_retorno': retorno.cStat,
                 'mensagem_retorno': retorno.xMotivo,
             })
-            self.notify_user()
+            return False
+#             self.notify_user()
         else:
             _logger.info('-> NF-e Nota Processada NF-e (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
             self.write({
@@ -1246,8 +1247,8 @@ class InvoiceEletronic(models.Model):
             })
             
             
-        _logger.info('NF-e (%s) was finished with status %s' % (
-            self.numero, self.codigo_retorno))
+#         _logger.info('NF-e (%s) was finished with status %s' % (
+#             self.numero, self.codigo_retorno))
 
     @api.multi
     def generate_nfe_proc(self):

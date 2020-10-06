@@ -88,7 +88,7 @@ class ImportDeclaration(models.Model):
             else:
                 weight_part = 100 - smPrWeight
                 value_part = 100 - smPrValue
-            val_line = line._calcule_line(weight_part, value_part, freight_converted_vl, insurance_converted_vl, self.afrmm_value, self.siscomex_value)
+            val_line = line._calcule_line(weight_part, value_part, freight_converted_vl, insurance_converted_vl, self.afrmm_value, self.siscomex_value, self.customs_value)
             inlines += [(1,line.id,val_line)]
             smPrWeight += weight_part
             smPrValue += value_part
@@ -176,7 +176,7 @@ class ImportDeclaration(models.Model):
 #                 smPercent += percentual
 #                 smFreight += freight_value
 
-    @api.depends('line_ids','freight_int_value','siscomex_value')
+    @api.depends('line_ids','freight_int_value','siscomex_value','freight_mode')
     def _compute_di(self):
         for DI in self:
             vals = DI._calcule_di()
@@ -240,6 +240,8 @@ class ImportDeclaration(models.Model):
 
     afrmm_value = fields.Float('Valor AFRMM', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     siscomex_value = fields.Float('Valor SISCOMEX', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    customs_value = fields.Float('Desp.Aduaneiras', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES,help="Despesas com THC,THC2 e outras despesas de armazenagem em terminal.")
+    freight_mode  = fields.Selection([('P', 'Peso'),('V', 'Valor')], 'Mod.Calculo Frete', default='P', required=True, readonly=True, states=DI_STATES)
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     freight_int_value = fields.Float('Valor Frete Interno', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
@@ -521,16 +523,18 @@ class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
 
-    def _calcule_line(self, txFreight, txValue, vlFreight, vlInsurance, vlAfrmm, vlSiscomex):
+    def _calcule_line(self, txFreight, txValue, vlFreight, vlInsurance, vlAfrmm, vlSiscomex, vlDespAdn):
         
         amount_value = (self.quantity * self.price_unit) - self.amount_discount
         amount_weight = self.weight_unit * self.quantity
         amount_value_cl = amount_value * self.tax_cambial
         price_unit_cl = amount_value_cl / self.quantity if self.quantity > 0.0 else 0.0
         
+        txFreightCal = txFreight if self.import_declaration_id.freight_mode == 'P' else txValue
+        
         freight_total = vlFreight
-        freight_part = txFreight
-        freight_value = vlFreight * (txFreight/100)
+        freight_part = txFreightCal
+        freight_value = vlFreight * (txFreightCal/100)
         insurance_total = vlInsurance
         insurance_part = txValue
         insurance_value = vlInsurance * (txValue/100)
@@ -540,6 +544,10 @@ class ImportDeclarationLine(models.Model):
         siscomex_total = vlSiscomex
         siscomex_part = txValue
         siscomex_value = vlSiscomex * (txValue/100)
+
+        desp_aduan_total = vlDespAdn
+        desp_aduan_part = txValue
+        desp_aduan_value = vlDespAdn * (txValue/100)
 
         cif_value = amount_value_cl + freight_value + insurance_value
         cif_afrmm_value = cif_value + afrmm_value
@@ -609,6 +617,9 @@ class ImportDeclarationLine(models.Model):
             'siscomex_total': siscomex_total,
             'siscomex_part': siscomex_part,
             'siscomex_value': siscomex_value,
+            'desp_aduan_total': desp_aduan_total,
+            'desp_aduan_part': desp_aduan_part,
+            'desp_aduan_value': desp_aduan_value,
             'cif_value': cif_value,
             'cif_afrmm_value': cif_afrmm_value,
             'price_unit_edoc': price_unit_edoc,
@@ -642,10 +653,14 @@ class ImportDeclarationLine(models.Model):
             vlInsurance = line.import_declaration_id.insurance_value * line.import_declaration_id.tax_cambial
             vlAfrmm = line.import_declaration_id.afrmm_value
             vlSiscomex = line.import_declaration_id.siscomex_value
+            vlDespAdn = line.import_declaration_id.siscomex_value
             res = line.import_declaration_id._calc_ratio_di()
-            pw = res[line.name][line.sequence_addition][1]
+            if line.import_declaration_id.freight_mode == 'P':
+                pw = res[line.name][line.sequence_addition][1]
+            else:
+                pw = res[line.name][line.sequence_addition][2]
             pv = res[line.name][line.sequence_addition][2]
-            vals = line._calcule_line(pw,pv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex)
+            vals = line._calcule_line(pw,pv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex,vlDespAdn)
             line.update(vals)
 
     def _get_sequence(self):
@@ -692,6 +707,10 @@ class ImportDeclarationLine(models.Model):
     siscomex_total = fields.Float(string='SISCOMEX Total', compute='_compute_line', digits=(12,4), readonly=True, store=True)
     siscomex_part = fields.Float(string='SISCOMEX %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
     siscomex_value = fields.Float(string='SISCOMEX Valor', compute='_compute_line', digits=(12,3), readonly=True, store=True)
+
+    desp_aduan_total = fields.Float(string='Desp.Aduana Total', compute='_compute_line', digits=(12,4), readonly=True, store=True)
+    desp_aduan_part = fields.Float(string='Desp.Aduana %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
+    desp_aduan_value = fields.Float(string='Desp.Aduana Valor', compute='_compute_line', digits=(12,3), readonly=True, store=True)
 
     cif_value = fields.Float(string='Valor CIF', compute='_compute_line', digits=(12,3), readonly=True, store=True)
     cif_afrmm_value = fields.Float(string='Valor CIF+AFRMM', compute='_compute_line', digits=(12,3), readonly=True, store=True)
