@@ -21,6 +21,7 @@
         'views/import_declaration_view.xml',
         'views/account_fiscal_position_view.xml',
         'views/account_invoice_view.xml',
+        'security/ir.model.access.csv',
     ],
     'qweb': [],
     'installable': True,
