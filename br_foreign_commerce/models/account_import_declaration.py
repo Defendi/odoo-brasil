@@ -60,7 +60,7 @@ class ImportDeclaration(models.Model):
     def _calcule_di(self):
         freight_converted_vl = self.freight_value * self.tax_cambial
         insurance_converted_vl = self.insurance_value * self.tax_cambial
-        total_desembaraco_vl = (freight_converted_vl + insurance_converted_vl + self.afrmm_value + self.siscomex_value)
+        total_desembaraco_vl = (freight_converted_vl + insurance_converted_vl + self.afrmm_value + self.siscomex_value + self.customs_value)
         total_fob_vl = sum(line.amount_value for line in self.line_ids)
         total_fob_lc = sum(line.amount_value_cl for line in self.line_ids)
         total_weight = sum((line.weight_unit * line.quantity) for line in self.line_ids)
@@ -79,6 +79,7 @@ class ImportDeclaration(models.Model):
         total_icms = 0.0
         total_bc_icms_st = 0.0
         total_icms_st = 0.0
+        total_produtos = 0.0
         tItens = len(self.line_ids)
         inlines = []
         for contador, line in enumerate(self.line_ids):
@@ -89,12 +90,13 @@ class ImportDeclaration(models.Model):
                 weight_part = 100 - smPrWeight
                 value_part = 100 - smPrValue
             val_line = line._calcule_line(weight_part, value_part, freight_converted_vl, insurance_converted_vl, self.afrmm_value, self.siscomex_value, self.customs_value)
-            inlines += [(1,line.id,val_line)]
+            #inlines += [(1,line.id,val_line)]
             smPrWeight += weight_part
             smPrValue += value_part
             total_cif += val_line['cif_value']
             total_bc_ii += val_line['ii_base_calculo'] 
             total_ii += val_line['ii_valor'] 
+            total_produtos += val_line['price_unit_edoc'] * line.quantity
             total_bc_ipi += val_line['ipi_base_calculo'] 
             total_ipi += val_line['ipi_valor'] 
             total_bc_pis += val_line['pis_base_calculo']
@@ -105,11 +107,12 @@ class ImportDeclaration(models.Model):
             total_icms += val_line['icms_valor']
             total_bc_icms_st += val_line['icms_st_base_calculo']
             total_icms_st += val_line['icms_st_valor']
+            line.write(val_line)
 
         total_cif_afrmm = total_cif + self.afrmm_value
-        total_imposto = total_ii + total_ipi + total_icms + total_icms_st
-        total_depesa = total_pis + total_cofins + self.siscomex_value
-        total_nota = total_cif_afrmm + total_imposto + total_depesa
+        total_imposto = total_ipi + total_icms + total_icms_st
+        total_despesa = total_pis + total_cofins + self.siscomex_value + self.afrmm_value
+        total_nota = total_produtos + total_imposto + total_despesa
 
         vals = {
             'total_desembaraco_vl': total_desembaraco_vl,
@@ -118,7 +121,7 @@ class ImportDeclaration(models.Model):
             'total_fob_lc': total_fob_lc,
             'total_cif': total_cif,
             'total_cif_afrmm': total_cif_afrmm,
-            'total_produtos': total_cif_afrmm,
+            'total_produtos': total_produtos,
             'total_bc_ii': total_bc_ii,
             'total_ii': total_ii,
             'total_bc_ipi': total_bc_ipi,
@@ -132,18 +135,18 @@ class ImportDeclaration(models.Model):
             'total_bc_icms_st': total_bc_icms_st,
             'total_icms_st': total_icms_st,
             'total_imposto': total_imposto,
-            'total_depesa': total_depesa,
+            'total_depesa': total_despesa,
             'total_nota': total_nota,
             'espelho_bc_icms': total_bc_icms,
             'espelho_vl_icms': total_icms,
             'espelho_vl_icms_st': total_icms_st,
             'espelho_vl_ii': total_ii,
             'espelho_vl_ipi': total_ipi,
-            'espelho_vl_other': total_depesa,
-            'espelho_produtos': total_cif_afrmm,
+            'espelho_vl_other': total_despesa,
+            'espelho_produtos': total_produtos,
             'espelho_frete': self.freight_int_value,
             'espelho_total_nfe': total_nota,
-            'line_ids': inlines,
+            #'line_ids': inlines,
         }
         return vals
 
@@ -176,7 +179,8 @@ class ImportDeclaration(models.Model):
 #                 smPercent += percentual
 #                 smFreight += freight_value
 
-    @api.depends('line_ids','freight_int_value','siscomex_value','freight_mode')
+    @api.depends('line_ids','freight_int_value','siscomex_value','freight_mode',
+                 'customs_value', 'afrmm_value', 'freight_value', 'insurance_value')
     def _compute_di(self):
         for DI in self:
             vals = DI._calcule_di()
@@ -382,7 +386,7 @@ class ImportDeclaration(models.Model):
             'quantity': line.quantity,
             'weight': line.amount_weight,
             'discount': 0.0,
-            'outras_despesas': line.pis_valor + line.cofins_valor + line.siscomex_value,
+            'outras_despesas': line.pis_valor + line.cofins_valor + line.siscomex_value + line.customs_value,
             'icms_base_calculo_manual': line.icms_base_calculo,
             'tax_icms_id': line.tax_icms_id.id,
             'icms_aliquota': line.tax_icms_id.amount,
@@ -519,6 +523,7 @@ class ImportDeclaration(models.Model):
         return data
 
 # 27795,
+
 class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
@@ -549,56 +554,89 @@ class ImportDeclarationLine(models.Model):
         desp_aduan_part = txValue
         desp_aduan_value = vlDespAdn * (txValue/100)
 
-        cif_value = amount_value_cl + freight_value + insurance_value
-        cif_afrmm_value = cif_value + afrmm_value
-        price_cost = cif_afrmm_value + siscomex_value
-
-        if self.quantity > 0.0:
-            price_unit_edoc = cif_afrmm_value / self.quantity
-        else: 
-            price_unit_edoc = 0.0
-        ii_base_calculo = cif_afrmm_value
-        ipi_base_calculo = cif_afrmm_value 
-        pis_base_calculo = cif_afrmm_value
-        cofins_base_calculo = cif_afrmm_value
-        icms_base_calculo = cif_afrmm_value + siscomex_value
+        cif_value = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+        price_cost = cif_value
 
         ii_aliquota = self.tax_ii_id.amount if len(self.tax_ii_id) > 0 else 0.0
-        ii_valor = ii_base_calculo * (ii_aliquota/100) if ii_aliquota != 0.0 else 0.0
-        if self.tax_ii_id.price_include:
-            price_cost += ii_valor
+        if ii_aliquota > 0.0:
+            ii_base_calculo = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+            ii_valor = ii_base_calculo * (ii_aliquota/100) if ii_aliquota != 0.0 else 0.0
+            if self.tax_ii_id.price_include:
+                price_cost += ii_valor
+        else:
+            ii_base_calculo = 0.0
+            ii_valor = 0.0
 
-        if self.ipi_inclui_ii_base:
-            ipi_base_calculo += ii_valor
         ipi_aliquota = self.tax_ipi_id.amount if len(self.tax_ipi_id) > 0 else 0.0
-        ipi_valor = ipi_base_calculo * (ipi_aliquota/100) if ipi_aliquota != 0.0 else 0.0
-        if self.tax_ipi_id.price_include:
-            price_cost += ipi_valor
+        if ipi_aliquota > 0.0:
+            ipi_base_calculo = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+            if self.ipi_inclui_ii_base:
+                ipi_base_calculo += ii_valor
+            ipi_valor = ipi_base_calculo * (ipi_aliquota/100) if ipi_aliquota != 0.0 else 0.0
+            if self.tax_ipi_id.price_include:
+                price_cost += ipi_valor
+        else:
+            ipi_base_calculo = 0.0
+            ipi_valor = 0.0
 
         pis_aliquota = self.tax_pis_id.amount if len(self.tax_pis_id) > 0 else 0.0
-        pis_valor = pis_base_calculo * (pis_aliquota/100) if pis_aliquota != 0.0 else 0.0
-        if self.tax_pis_id.price_include:
-            price_cost += pis_valor
+        if pis_aliquota > 0.0:
+            pis_base_calculo = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+            pis_valor = pis_base_calculo * (pis_aliquota/100) if pis_aliquota != 0.0 else 0.0
+            if self.tax_pis_id.price_include:
+                price_cost += pis_valor
+        else:
+            pis_base_calculo = 0.0
+            pis_valor = 0.0
 
         cofins_aliquota = self.tax_cofins_id.amount if len(self.tax_cofins_id) > 0 else 0.0
-        cofins_valor = cofins_base_calculo * (cofins_aliquota/100) if cofins_aliquota != 0.0 else 0.0
-        if self.tax_cofins_id.price_include:
-            price_cost += cofins_valor
+        if cofins_aliquota > 0.0:
+            cofins_base_calculo = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+            cofins_valor = cofins_base_calculo * (cofins_aliquota/100) if cofins_aliquota != 0.0 else 0.0
+            if self.tax_cofins_id.price_include:
+                price_cost += cofins_valor
+        else:
+            cofins_base_calculo = 0.0
+            cofins_valor = 0.0
 
-        icms_base_calculo += (ii_valor + ipi_valor + pis_valor + cofins_valor)
+        subtotal = (cif_value + ii_valor + ipi_valor + pis_valor + cofins_valor + afrmm_value + siscomex_value)
+        
         icms_aliquota = self.tax_icms_id.amount if len(self.tax_icms_id) > 0 else 0.0
-        icms_base_calculo = icms_base_calculo / (1-(icms_aliquota/100)) if icms_aliquota != 0.0 else 0.0
-        icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
-        if self.tax_icms_id.price_include:
-            price_cost += icms_valor
-
+        if icms_aliquota > 0.0:
+            if self.icms_fator_manual > 0.0:
+                icms_fator = self.icms_fator_manual
+            else:
+                icms_fator = 100.0 - icms_aliquota
+            icms_base_calculo = subtotal / (icms_fator/100) if (icms_fator/100) != 0.0 else 0.0
+            icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
+            if self.tax_icms_id.price_include:
+                price_cost += icms_valor
+        else:
+            icms_base_calculo = 0.0
+            icms_fator = 0.0
+            icms_valor = 0.0
+            
         icms_st_aliquota = self.tax_icms_st_id.amount if len(self.tax_icms_st_id) > 0 else 0.0
-        icms_st_base_calculo = icms_base_calculo + (icms_base_calculo * (icms_st_aliquota/100)) if icms_st_aliquota != 0.0 else 0.0
-        icms_st_valor = (icms_st_base_calculo * (icms_aliquota/100)) - icms_valor if icms_st_aliquota != 0.0 else 0.0
-        if self.tax_icms_st_id.price_include:
-            price_cost += icms_st_valor
+        if icms_st_aliquota > 0.0:
+            icms_st_base_calculo = icms_base_calculo + (icms_base_calculo * (icms_st_aliquota/100)) if icms_st_aliquota != 0.0 else 0.0
+            icms_st_valor = (icms_st_base_calculo * (icms_aliquota/100)) - icms_valor if icms_st_aliquota != 0.0 else 0.0
+            if self.tax_icms_st_id.price_include:
+                price_cost += icms_st_valor
+        else:
+            icms_st_base_calculo = 0.0
+            icms_st_valor = 0.0
 
-        price_cost = price_cost / self.quantity if self.quantity > 0.0 else 0.0
+#         price_cost = price_cost / self.quantity if self.quantity > 0.0 else 0.0
+
+        #price_cost = cif_afrmm_value + siscomex_value
+
+        if self.quantity > 0.0:
+            price_unit_edoc = (cif_value + ii_valor) / self.quantity if self.quantity > 0.0 else 0.0
+        else: 
+            price_unit_edoc = 0.0
+        
+#         icms_base_calculo = cif_value + cif_afrmm_value + siscomex_value
+
 
         vals = {
             'amount_value': amount_value, 
@@ -621,7 +659,7 @@ class ImportDeclarationLine(models.Model):
             'desp_aduan_part': desp_aduan_part,
             'desp_aduan_value': desp_aduan_value,
             'cif_value': cif_value,
-            'cif_afrmm_value': cif_afrmm_value,
+            'cif_afrmm_value': (cif_value + ii_valor),
             'price_unit_edoc': price_unit_edoc,
             'ii_base_calculo': ii_base_calculo,
             'ii_aliquota': ii_aliquota,
@@ -636,6 +674,7 @@ class ImportDeclarationLine(models.Model):
             'cofins_aliquota': cofins_aliquota,
             'cofins_valor': cofins_valor,
             'icms_base_calculo': icms_base_calculo,
+            'icms_fator': icms_fator,
             'icms_aliquota': icms_aliquota,
             'icms_valor': icms_valor,
             'icms_st_base_calculo': icms_st_base_calculo,
@@ -645,23 +684,23 @@ class ImportDeclarationLine(models.Model):
         }
         return vals
 
-    @api.depends('quantity','price_unit','amount_discount','weight_unit','tax_ii_id','tax_ipi_id',
-                 'ipi_inclui_ii_base','tax_pis_id','tax_cofins_id','tax_icms_id','tax_icms_st_id')
+    @api.one
+    @api.depends('product_id','quantity','price_unit','amount_discount','weight_unit','tax_ii_id','tax_ipi_id',
+                 'ipi_inclui_ii_base','tax_pis_id','tax_cofins_id','tax_icms_id','tax_icms_st_id', 'icms_fator_manual')
     def _compute_line(self):
-        for line in self:
-            vlfreight = line.import_declaration_id.freight_value * line.import_declaration_id.tax_cambial
-            vlInsurance = line.import_declaration_id.insurance_value * line.import_declaration_id.tax_cambial
-            vlAfrmm = line.import_declaration_id.afrmm_value
-            vlSiscomex = line.import_declaration_id.siscomex_value
-            vlDespAdn = line.import_declaration_id.siscomex_value
-            res = line.import_declaration_id._calc_ratio_di()
-            if line.import_declaration_id.freight_mode == 'P':
-                pw = res[line.name][line.sequence_addition][1]
-            else:
-                pw = res[line.name][line.sequence_addition][2]
-            pv = res[line.name][line.sequence_addition][2]
-            vals = line._calcule_line(pw,pv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex,vlDespAdn)
-            line.update(vals)
+        vlfreight = self.import_declaration_id.freight_value * self.import_declaration_id.tax_cambial
+        vlInsurance = self.import_declaration_id.insurance_value * self.import_declaration_id.tax_cambial
+        vlAfrmm = self.import_declaration_id.afrmm_value
+        vlSiscomex = self.import_declaration_id.siscomex_value
+        vlDespAdn = self.import_declaration_id.customs_value
+        res = self.import_declaration_id._calc_ratio_di()
+        if self.import_declaration_id.freight_mode == 'P':
+            pw = res[self.name][self.sequence_addition][1]
+        else:
+            pw = res[self.name][self.sequence_addition][2]
+        pv = res[self.name][self.sequence_addition][2]
+        vals = self._calcule_line(pw,pv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex,vlDespAdn)
+        self.update(vals)
 
     def _get_sequence(self):
         return '001'
@@ -723,40 +762,42 @@ class ImportDeclarationLine(models.Model):
     # impostos
     # II
     tax_ii_id = fields.Many2one('account.tax', string="Alíquota II", domain=[('domain', '=', 'ii'),('type_tax_use','=','purchase')])
-    ii_base_calculo = fields.Float('Base II', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00)
-    ii_aliquota = fields.Float('II %', compute='_compute_line', digits=(12,4), default=0.00)
-    ii_valor = fields.Float('Valor II', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line')
+    ii_base_calculo = fields.Float('Base II', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
+    ii_aliquota = fields.Float('II %', compute='_compute_line', digits=(12,4), default=0.00, store=True)
+    ii_valor = fields.Float('Valor II', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line', store=True)
     
     # IPI
     tax_ipi_id = fields.Many2one('account.tax', string="Alíquota IPI", domain=[('domain', '=', 'ipi'),('type_tax_use','=','purchase')])
     ipi_inclui_ii_base = fields.Boolean('Inclui II na base',default=True)
-    ipi_base_calculo = fields.Float('Base IPI', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00)
-    ipi_aliquota = fields.Float('IPI %', compute='_compute_line', digits=(12,4), default=0.00)
-    ipi_valor = fields.Float('Valor IPI', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line')
+    ipi_base_calculo = fields.Float('Base IPI', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
+    ipi_aliquota = fields.Float('IPI %', compute='_compute_line', digits=(12,4), default=0.00, store=True)
+    ipi_valor = fields.Float('Valor IPI', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line', store=True)
 
     # PIS
     tax_pis_id = fields.Many2one('account.tax', string="Alíquota PIS", domain=[('domain', '=', 'pis'),('type_tax_use','=','purchase')])
-    pis_base_calculo = fields.Float('Base PIS', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00)
-    pis_aliquota = fields.Float('PIS %', compute='_compute_line', digits=(12,4), default=0.00)
-    pis_valor = fields.Float('Valor PIS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line')
+    pis_base_calculo = fields.Float('Base PIS', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
+    pis_aliquota = fields.Float('PIS %', compute='_compute_line', digits=(12,4), default=0.00, store=True)
+    pis_valor = fields.Float('Valor PIS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line', store=True)
 
     # COFINS
     tax_cofins_id = fields.Many2one('account.tax', string="Alíquota COFINS", domain=[('domain', '=', 'cofins'),('type_tax_use','=','purchase')])
-    cofins_base_calculo = fields.Float('Base COFINS', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00)
-    cofins_aliquota = fields.Float('COFINS %', compute='_compute_line', digits=(12,4), default=0.00)
-    cofins_valor = fields.Float('Valor COFINS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line')
+    cofins_base_calculo = fields.Float('Base COFINS', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
+    cofins_aliquota = fields.Float('COFINS %', compute='_compute_line', digits=(12,4), default=0.00, store=True)
+    cofins_valor = fields.Float('Valor COFINS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line', store=True)
 
     # ICMS
     tax_icms_id = fields.Many2one('account.tax', string="Alíquota ICMS", domain=[('domain', '=', 'icms'),('type_tax_use','=','purchase')])
-    icms_base_calculo = fields.Float('Base ICMS', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00)
-    icms_aliquota = fields.Float('ICMS %', compute='_compute_line', digits=(12,4), default=0.00)
-    icms_valor = fields.Float('Valor ICMS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line')
+    icms_base_calculo = fields.Float('Base ICMS', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
+    icms_fator = fields.Float('ICMS Fator', compute='_compute_line', digits=(12,4), default=0.00, store=True)
+    icms_fator_manual = fields.Float('ICMS Fator Manual', digits=(12,4), default=0.00)
+    icms_aliquota = fields.Float('ICMS %', compute='_compute_line', digits=(12,4), default=0.00, store=True)
+    icms_valor = fields.Float('Valor ICMS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line', store=True)
 
     # ICMS ST
     tax_icms_st_id = fields.Many2one('account.tax', string="Alíquota ICMS ST", domain=[('domain', '=', 'icmsst'),('type_tax_use','=','purchase')])
-    icms_st_base_calculo = fields.Float('Base ICMS ST', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00)
-    icms_st_aliquota = fields.Float('ICMS ST %', compute='_compute_line', digits=(12,4), default=0.00)
-    icms_st_valor = fields.Float('Valor ICMS ST', compute='_compute_line', digits=dp.get_precision('Account'),default=0.00)
+    icms_st_base_calculo = fields.Float('Base ICMS ST', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
+    icms_st_aliquota = fields.Float('ICMS ST %', compute='_compute_line', digits=(12,4), default=0.00, store=True)
+    icms_st_valor = fields.Float('Valor ICMS ST', compute='_compute_line', digits=dp.get_precision('Account'),default=0.00, store=True)
 
     drawback_number = fields.Char('Número Drawback', size=11)
 

@@ -73,7 +73,7 @@
 				                <label for="tax_cambial"/>
 				                <div>
 					                <field name="tax_cambial" class="oe_inline"/>
-									<button name="recalculate" type="object" class="fa fa-refresh oe_edit_only" states="draft"/>	                
+									<button name="recalculate" type="object" class="fa fa-refresh" states="draft"/> <!--  oe_edit_only -->	                
 				                </div>
 		                        <field name="type_import" />
 		                        <field name="thirdparty_cnpj" />
@@ -99,7 +99,9 @@
 							                <field name="amount_discount" string="Desc." widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 							                <field name="tax_cambial" invisible="1"/>
 							                <field name="amount_value"/>
+							                <field name="price_unit_edoc"/>
 							                <field name="amount_value_cl"/>
+							                <!-- 
 							                <field name="amount_weight" invisible="1"/>
 							                <field name="price_unit_cl" invisible="1"/>
 							                <field name="drawback_number" invisible="1"/>
@@ -108,48 +110,58 @@
 							                <field name="weight_unit" invisible="1"/>
 						                    <field name="freight_total" invisible="1"/>
 						                    <field name="freight_part" invisible="1"/>
+						                    -->
 						                    <field name="freight_value"/>
+						                    <!-- 
 						                    <field name="insurance_total" invisible="1"/>
 						                    <field name="insurance_part" invisible="1"/>
+						                     -->
 						                    <field name="insurance_value"/>
+						                    <field name="desp_aduan_value"/>
+						                    <field name="cif_value"/>
+						                    <!-- 
 						                    <field name="afrmm_total" invisible="1"/>
 						                    <field name="afrmm_part" invisible="1"/>
+						                     -->
 						                    <field name="afrmm_value"/>
+						                    <!-- 
 						                    <field name="cif_value"/>
 						                    <field name="cif_afrmm_value" invisible="1"/>
 						                    <field name="siscomex_total" invisible="1"/>
 						                    <field name="siscomex_part" invisible="1"/>
+						                     -->
 						                    <field name="siscomex_value"/>
+						                    <!-- 
 						                    <field name="desp_aduan_total" invisible="1"/>
 						                    <field name="desp_aduan_part" invisible="1"/>
-						                    <field name="desp_aduan_value"/>
 					                		<field name="tax_ii_id" invisible="1"/>
-					                		<field name="ii_base_calculo" invisible="1"/>
+					                		<field name="ii_base_calculo"/>
 					                		<field name="ii_aliquota" invisible="1"/>
 					                		<field name="ii_valor" invisible="1"/>
 					                		<field name="tax_ipi_id" invisible="1"/>
 					                		<field name="ipi_inclui_ii_base" invisible="1"/>
-					                		<field name="ipi_base_calculo" invisible="1"/>
+					                		<field name="ipi_base_calculo"/>
 					                		<field name="ipi_aliquota" invisible="1"/>
 					                		<field name="ipi_valor" invisible="1"/>
 					                		<field name="tax_pis_id" invisible="1"/>
-					                		<field name="pis_base_calculo" invisible="1"/>
+					                		<field name="pis_base_calculo"/>
 					                		<field name="pis_aliquota" invisible="1"/>
 					                		<field name="pis_valor" invisible="1"/>
 					                		<field name="tax_cofins_id" invisible="1"/>
-					                		<field name="cofins_base_calculo" invisible="1"/>
+					                		<field name="cofins_base_calculo"/>
 					                		<field name="cofins_aliquota" invisible="1"/>
 					                		<field name="cofins_valor" invisible="1"/>
 					                		<field name="tax_icms_id" invisible="1"/>
-					                		<field name="icms_base_calculo" invisible="1"/>
+					                		<field name="icms_base_calculo"/>
 					                		<field name="icms_aliquota" invisible="1"/>
 					                		<field name="icms_valor" invisible="1"/>
 					                		<field name="tax_icms_st_id" invisible="1"/>
-					                		<field name="icms_st_base_calculo" invisible="1"/>
+					                		<field name="icms_st_base_calculo"/>
 					                		<field name="icms_st_aliquota" invisible="1"/>
 					                		<field name="icms_st_valor" invisible="1"/>
 					                		<field name="outras_depesas" invisible="1"/>
-					                		<field name="price_cost" invisible="1"/>
+					                		<field name="price_cost" invisible="1"/>  -->
+					                		<field name="cif_afrmm_value" string="SubTotal"/>
 							            </tree>
 							            <form>
 							            	<sheet>
@@ -183,11 +195,18 @@
 										            </page>
 							                        <page string="Cálculo BC" groups="base.group_no_one">                  
 										                <group>
-										                	<group string="Desp.Transporte">
-											                    <field name="amount_weight"/>
+										                	<group>
 											                    <field name="amount_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 											                    <field name="tax_cambial"/>
 											                    <field name="amount_value_cl" string="Valor FOB"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  --> 
+										                	</group>
+										                	<group>
+											                    <field name="amount_weight"/>
+											                    <field name="outras_depesas"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                </group>
+											            </group>
+										                <group string="Despesas">
+										                	<group>
 											                    <field name="freight_total" string="Frete Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="freight_part" string="Frete %"/>
 											                    <field name="freight_value" string="Frete Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
@@ -195,23 +214,22 @@
 											                    <field name="insurance_part" string="Seguro %"/>
 											                    <field name="insurance_value" string="Seguro Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 										                	</group>
-										                	<group string="Desp.Aduaneiras">
+										                	<group>
 											                    <field name="afrmm_total" string="AFRMM Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="afrmm_part" string="AFRMM %"/>
 											                    <field name="afrmm_value" string="AFRMM Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="siscomex_total" string="SISCOMEX Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="siscomex_part" string="SISCOMEX %"/>
 											                    <field name="siscomex_value" string="SISCOMEX Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="desp_aduan_total" string="SISCOMEX Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="desp_aduan_part" string="SISCOMEX %"/>
-											                    <field name="desp_aduan_value" string="SISCOMEX Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="desp_aduan_total" string="Des.Aduan.Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="desp_aduan_part" string="Des.Aduan. %"/>
+											                    <field name="desp_aduan_value" string="Des.Aduan.Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                </group>
 											            </group>
 										                <group>
 										                	<group string="Calculos">
-											                    <field name="outras_depesas"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="cif_value"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="cif_afrmm_value"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="cif_afrmm_value" string="SubTotal"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="price_cost"/>
 											                </group>
 											            </group>
@@ -249,6 +267,8 @@
 										                <group>
 										                	<group string="ICMS">
 										                		<field name="tax_icms_id"/>
+										                		<field name="icms_fator_manual" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
+										                		<field name="icms_fator" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
 										                		<field name="icms_base_calculo" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
 										                		<field name="icms_aliquota" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
 										                		<field name="icms_valor" attrs="{'invisible': [('tax_icms_id','=',False)]}" widget='monetary' options="{'currency_field': 'currency_id'}"/>
@@ -277,9 +297,9 @@
 										<field name="freight_int_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									</group>
 									<group colspan="4" class="oe_subtotal_footer oe_right">
-										<field name="total_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_fob_lc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="total_cif_afrmm" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="total_cif" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="total_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_imposto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_depesa" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_nota" widget='monetary' options="{'currency_field': 'currency_id'}"/>
