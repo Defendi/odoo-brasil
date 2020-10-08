@@ -311,6 +311,8 @@ class ImportDeclaration(models.Model):
                 line.tax_pis_id = vals.get('tax_pis_id',False)
                 line.tax_cofins_id = vals.get('tax_cofins_id',False)
                 line.tax_icms_id = vals.get('tax_icms_id',False)
+                line.icms_difer = True if vals.get('icms_aliquota_diferimento',0.0) > 0.0 else False
+                line.icms_aliq_difer = vals.get('icms_aliquota_diferimento',0.0)
                 line.tax_icms_st_id = vals.get('tax_icms_st_id',False)
 
     @api.onchange('currency_purchase_id','company_id','date_registration')
@@ -609,6 +611,9 @@ class ImportDeclarationLine(models.Model):
                 icms_fator = 100.0 - icms_aliquota
             icms_base_calculo = subtotal / (icms_fator/100) if (icms_fator/100) != 0.0 else 0.0
             icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
+            if self.icms_difer and self.icms_aliq_difer > 0.0:
+                icms_valor = icms_valor * (self.icms_aliq_difer/100)
+            
             if self.tax_icms_id.price_include:
                 price_cost += icms_valor
         else:
@@ -659,7 +664,8 @@ class ImportDeclarationLine(models.Model):
             'desp_aduan_part': desp_aduan_part,
             'desp_aduan_value': desp_aduan_value,
             'cif_value': cif_value,
-            'cif_afrmm_value': (cif_value + ii_valor),
+            'product_tot_value': (cif_value + ii_valor),
+            'subtotal': subtotal,
             'price_unit_edoc': price_unit_edoc,
             'ii_base_calculo': ii_base_calculo,
             'ii_aliquota': ii_aliquota,
@@ -686,7 +692,8 @@ class ImportDeclarationLine(models.Model):
 
     @api.one
     @api.depends('product_id','quantity','price_unit','amount_discount','weight_unit','tax_ii_id','tax_ipi_id',
-                 'ipi_inclui_ii_base','tax_pis_id','tax_cofins_id','tax_icms_id','tax_icms_st_id', 'icms_fator_manual')
+                 'ipi_inclui_ii_base','tax_pis_id','tax_cofins_id','tax_icms_id','tax_icms_st_id', 'icms_fator_manual',
+                 'icms_difer','icms_aliq_difer')
     def _compute_line(self):
         vlfreight = self.import_declaration_id.freight_value * self.import_declaration_id.tax_cambial
         vlInsurance = self.import_declaration_id.insurance_value * self.import_declaration_id.tax_cambial
@@ -752,7 +759,8 @@ class ImportDeclarationLine(models.Model):
     desp_aduan_value = fields.Float(string='Desp.Aduana Valor', compute='_compute_line', digits=(12,3), readonly=True, store=True)
 
     cif_value = fields.Float(string='Valor CIF', compute='_compute_line', digits=(12,3), readonly=True, store=True)
-    cif_afrmm_value = fields.Float(string='Valor CIF+AFRMM', compute='_compute_line', digits=(12,3), readonly=True, store=True)
+    product_tot_value = fields.Float(string='Valor CIF+AFRMM', compute='_compute_line', digits=(12,3), readonly=True, store=True, oldname='cif_afrmm_value')
+    subtotal = fields.Float(string='SubTotal', compute='_compute_line', digits=(12,3), readonly=True, store=True)
 
     outras_depesas = fields.Float(string='Outras Despesas', compute='_compute_line', digits=(12,3), readonly=True, store=True)
     price_unit_edoc = fields.Float(string='Preço Un eDoc', compute='_compute_line', digits=(12,5), readonly=True, store=True)
@@ -792,6 +800,8 @@ class ImportDeclarationLine(models.Model):
     icms_fator_manual = fields.Float('ICMS Fator Manual', digits=(12,4), default=0.00)
     icms_aliquota = fields.Float('ICMS %', compute='_compute_line', digits=(12,4), default=0.00, store=True)
     icms_valor = fields.Float('Valor ICMS', digits=dp.get_precision('Account'),default=0.00, compute='_compute_line', store=True)
+    icms_difer = fields.Boolean('Diferimento?')
+    icms_aliq_difer = fields.Float('Diferimento %', digits=(12,4), default=0.00)
 
     # ICMS ST
     tax_icms_st_id = fields.Many2one('account.tax', string="Alíquota ICMS ST", domain=[('domain', '=', 'icmsst'),('type_tax_use','=','purchase')])
