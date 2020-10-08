@@ -68,6 +68,15 @@ class SaleOrder(models.Model):
                     sql = 'UPDATE stock_picking SET picking_type_id = %s WHERE id = %s' % (sp_type.id,pick.id)
                     self.env.cr.execute(sql)
 
+    @api.multi
+    @api.onchange('partner_shipping_id', 'partner_id')
+    def onchange_partner_shipping_id(self):
+        """
+        Trigger the change of fiscal position when the shipping address is modified.
+        """
+        self.fiscal_position_id = self.env['account.fiscal.position'].get_fiscal_position(self.partner_id.id, self.partner_shipping_id.id,type_inv='out_invoice')
+        return {}
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
