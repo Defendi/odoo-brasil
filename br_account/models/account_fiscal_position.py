@@ -56,18 +56,18 @@ class AccountFiscalPositionTaxRule(models.Model):
     tax_id = fields.Many2one('account.tax', string="Imposto")
     tax_icms_st_id = fields.Many2one('account.tax', string="ICMS ST",
                                      domain=[('domain', '=', 'icmsst')])
-    icms_aliquota_credito = fields.Float(string="% Crédito de ICMS")
-    icms_aliquota_diferimento = fields.Float("% Diferimento")
+    icms_aliquota_credito = fields.Float(string="% Crédito de ICMS",digits=(12,4))
+    icms_aliquota_diferimento = fields.Float("% Diferimento",digits=(12,4))
     incluir_ipi_base = fields.Boolean(string="Incl. IPI na base ICMS")
     reducao_icms = fields.Float(string="Redução de base")
-    reducao_aliquota_icms = fields.Float(string="% Redução aliquota")
+    reducao_aliquota_icms = fields.Float(string="% Redução aliquota",digits=(12,4))
     reducao_icms_st = fields.Float(string="Redução de base ST")
     reducao_ipi = fields.Float(string="Redução de base IPI")
-    icms_aliquota_reducao_base = fields.Float(string="Aliquota Redução base")
+    icms_aliquota_reducao_base = fields.Float(string="Aliquota Redução base",digits=(12,4))
     l10n_br_issqn_deduction = fields.Float(string="% Dedução de base ISSQN")
-    aliquota_mva = fields.Float(string="Alíquota MVA")
+    aliquota_mva = fields.Float(string="Alíquota MVA",digits=(12,4))
     icms_st_aliquota_deducao = fields.Float(
-        string="% ICMS Próprio",
+        string="% ICMS Próprio", digits=(12,4),
         help="Alíquota interna ou interestadual aplicada \
          sobre o valor da operação para deduzir do ICMS ST - Para empresas \
          do Simples Nacional ou usado em casos onde existe apenas ST sem ICMS")
