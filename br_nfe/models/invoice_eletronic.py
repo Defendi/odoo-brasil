@@ -1159,14 +1159,15 @@ class InvoiceEletronic(models.Model):
             _logger.info('-> NF-e Serviço Paralisado Momentaneamente (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
             self.codigo_retorno = retorno.cStat
             self.mensagem_retorno = retorno.xMotivo
-            self.write({
-                'state': 'draft',
-                'tipo_emissao': '9',
-                'xml_to_send_name': False,
-                'xml_to_send': False,
-                'qrcode': False,
-            })
-            self.action_post_validate()
+            if self.model == '65': 
+                self.write({
+                    'state': 'draft',
+                    'tipo_emissao': '9',
+                    'xml_to_send_name': False,
+                    'xml_to_send': False,
+                    'qrcode': False,
+                })
+                self.action_post_validate()
 
         if retorno.cStat == 105:
             _logger.info('-> eDoc - Lote em processamento (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
