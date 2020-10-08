@@ -613,7 +613,7 @@ class InvoiceEletronic(models.Model):
             else:
                 justificativa = 'FALHA NA COMUNICACAO COM WEBSERVICE'
             ide.update({
-                'dhCont': dt_emissao.strftime('%Y-%m-%dT%H:%M:%S-00:00'),
+                'dhCont': dt_emissao,
                 'xJust': justificativa,
             })
 
