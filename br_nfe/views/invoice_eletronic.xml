@@ -18,6 +18,7 @@
                     string="Carta de Correção" attrs="{'invisible': ['|', ('state', '!=', 'done'), ('model', 'not in', ('55', '65'))]}">
                 </button>
                 <button name="action_get_status" attrs="{'invisible': [('state','!=','error')]}" string="Consultar" type="object" groups="br_account_einvoice.group_edit_edoc"/>
+                <button name="action_regenerate_xml" string="Regerar XML" type="object" groups="base.group_no_one"/>
             </button>
             <field name="tipo_operacao" position="after">
                 <field name="iest" attrs="{'invisible': [('model', 'not in', ('55', '65'))]}" />

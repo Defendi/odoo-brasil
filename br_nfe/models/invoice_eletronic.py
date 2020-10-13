@@ -1093,6 +1093,10 @@ class InvoiceEletronic(models.Model):
         self.state = 'draft'
 
     @api.multi
+    def action_regenerate_xml(self):
+        self.action_post_validate()
+
+    @api.multi
     def action_send_eletronic_invoice(self):
         super(InvoiceEletronic, self).action_send_eletronic_invoice()
 
