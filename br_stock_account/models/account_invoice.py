@@ -43,7 +43,7 @@ class AccountInvoice(models.Model):
 
     # Transporte
     goods_delivery_date = fields.Datetime(
-        string="Data Entrega", help="Data para saída/entrada das mercadorias")
+        string="Data Entrega", help="Data para saída/entrada das mercadorias",readonly=True, states={'draft': [('readonly', False)]})
     freight_responsibility = fields.Selection(
         [('0', '0 - Contratação do Frete por conta do Remetente (CIF)'),
          ('1', '1 - Contratação do Frete por conta do Destinatário (FOB)'),
@@ -51,30 +51,30 @@ class AccountInvoice(models.Model):
          ('3', '3 - Transporte Próprio por conta do Remetente'),
          ('4', '4 - Transporte Próprio por conta do Destinatário'),
          ('9', '9 - Sem Ocorrência de Transporte')],
-        'Modalidade do frete', default="9")
-    shipping_supplier_id = fields.Many2one('res.partner', 'Transportadora')
-    vehicle_plate = fields.Char('Placa do Veículo', size=7)
-    vehicle_state_id = fields.Many2one('res.country.state', 'UF da Placa')
-    vehicle_rntc = fields.Char('RNTC', size=20)
+        'Modalidade do frete', default="9",readonly=True, states={'draft': [('readonly', False)]})
+    shipping_supplier_id = fields.Many2one('res.partner', 'Transportadora',readonly=True, states={'draft': [('readonly', False)]})
+    vehicle_plate = fields.Char('Placa do Veículo', size=7,readonly=True, states={'draft': [('readonly', False)]})
+    vehicle_state_id = fields.Many2one('res.country.state', 'UF da Placa',readonly=True, states={'draft': [('readonly', False)]})
+    vehicle_rntc = fields.Char('RNTC', size=20,readonly=True, states={'draft': [('readonly', False)]})
 
-    tow_plate = fields.Char('Placa do Reboque', size=7)
+    tow_plate = fields.Char('Placa do Reboque', size=7, readonly=True, states={'draft': [('readonly', False)]})
     tow_state_id = fields.Many2one(
-        'res.country.state', 'UF da Placa do Reboque')
-    tow_rntc = fields.Char('RNTC Reboque', size=20)
+        'res.country.state', 'UF da Placa do Reboque',readonly=True, states={'draft': [('readonly', False)]})
+    tow_rntc = fields.Char('RNTC Reboque', size=20,readonly=True, states={'draft': [('readonly', False)]})
 
-    weight = fields.Float(string='Peso Bruto', help="O peso bruto em Kg.", digits=(12,3))
-    weight_net = fields.Float('Peso Líquido', help="O peso líquido em Kg.", digits=(12,3))
-    number_of_packages = fields.Integer('Nº Volumes')
-    kind_of_packages = fields.Char('Espécie', size=60)
-    brand_of_packages = fields.Char('Marca', size=60)
-    notation_of_packages = fields.Char('Numeração', size=60)
+    weight = fields.Float(string='Peso Bruto', help="O peso bruto em Kg.", digits=(12,3),readonly=True, states={'draft': [('readonly', False)]})
+    weight_net = fields.Float('Peso Líquido', help="O peso líquido em Kg.", digits=(12,3),readonly=True, states={'draft': [('readonly', False)]})
+    number_of_packages = fields.Integer('Nº Volumes',readonly=True, states={'draft': [('readonly', False)]})
+    kind_of_packages = fields.Char('Espécie', size=60,readonly=True, states={'draft': [('readonly', False)]})
+    brand_of_packages = fields.Char('Marca', size=60,readonly=True, states={'draft': [('readonly', False)]})
+    notation_of_packages = fields.Char('Numeração', size=60,readonly=True, states={'draft': [('readonly', False)]})
 
     # Exportação
     uf_saida_pais_id = fields.Many2one(
         'res.country.state', domain=[('country_id.code', '=', 'BR')],
-        string="UF Saída do País")
-    local_embarque = fields.Char('Local de Embarque', size=60)
-    local_despacho = fields.Char('Local de Despacho', size=60)
+        string="UF Saída do País",readonly=True, states={'draft': [('readonly', False)]})
+    local_embarque = fields.Char('Local de Embarque', size=60,readonly=True, states={'draft': [('readonly', False)]})
+    local_despacho = fields.Char('Local de Despacho', size=60,readonly=True, states={'draft': [('readonly', False)]})
 
     def _prepare_edoc_vals(self, inv, inv_lines, serie_id):
         res = super(AccountInvoice, self)._prepare_edoc_vals(
