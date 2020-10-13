@@ -360,172 +360,6 @@ class ImportDeclaration(models.Model):
             result['res_id'] = self.invoice_ids.id
         return result
 
-    def CreateInvoice(self):
-        fpos = self.import_id.fiscal_position_id or self.import_id.partner_id.property_purchase_fiscal_position_id
-        var = {
-            'type': 'in_invoice',
-            'partner_id': self.partner_id.id,
-            'issuer': '1',
-            'product_document_id': fpos.product_document_id.id if bool(fpos.product_document_id) else False,
-            'product_serie_id': fpos.product_serie_id.id if bool(fpos.product_serie_id) else False,
-            'fiscal_position_id': fpos.id if bool(fpos.id) else False, 
-        }
-        return var
-
-    def _prepare_invoice_line_from_di_line(self, line):
-        data = {}
-        invoice_line = self.env['account.invoice.line']
-        account = invoice_line.get_invoice_line_account('in_invoice', line.product_id, False, self.env.user.company_id)
-        data['product_id'] = line.product_id.id
-        data.update({
-            'name': line.product_id.name,
-            'fiscal_classification_id': line.product_id.fiscal_classification_id.id,
-            'icms_origem': '1',
-            'origin': line.import_declaration_id.name,
-            'uom_id': line.uom_id.id,
-            'product_id': line.product_id.id,
-            'price_unit': line.price_unit_edoc,
-            'quantity': line.quantity,
-            'weight': line.amount_weight,
-            'discount': 0.0,
-            'outras_despesas': line.pis_valor + line.cofins_valor + line.siscomex_value + line.customs_value,
-            'icms_base_calculo_manual': line.icms_base_calculo,
-            'tax_icms_id': line.tax_icms_id.id,
-            'icms_aliquota': line.tax_icms_id.amount,
-            'ipi_base_calculo_manual': line.ipi_base_calculo,
-            'ipi_tipo': 'percent',
-            'tax_ipi_id': line.tax_ipi_id.id,
-            'pis_base_calculo_manual': line.pis_base_calculo,
-            'pis_tipo': 'percent',
-            'tax_pis_id': line.tax_pis_id.id,
-            'cofins_base_calculo_manual': line.cofins_base_calculo,
-            'cofins_tipo': 'percent',
-            'tax_cofins_id': line.tax_cofins_id.id,
-            'ii_base_calculo': line.ii_base_calculo,
-            'tax_ii_id': line.tax_ii_id.id,
-            'ii_aliquota': line.tax_ii_id.amount,
-            'issqn_tipo': 'N',
-            'icms_tipo_base': '3',
-            'icms_st_tipo_base': '4',
-            'company_fiscal_type': line.import_declaration_id.company_id.fiscal_type,
-            'import_declaration_ids': [(6, 0, [line.import_declaration_id.id])],
-            'calculate_tax': True,
-#             'rule_id': False,
-#             'cfop_id': False,
-#             'fiscal_classification_id': False,
-#             'product_type': 'product',
-#             'fiscal_comment': False,
-#             'icms_rule_id': False,
-#             'icms_cst': '',
-#             'icms_cst_normal': '',
-#             'icms_benef': False,
-#             'incluir_ipi_base': False,
-#             'icms_base_calculo': 0.0,
-#             'icms_valor': 0.0,
-#             'icms_aliquota': 0.0,
-#             'icms_aliquota_reducao_base': 0.0,
-#             'icms_aliquota_diferimento': 0.0,
-#             'icms_valor_diferido': 0.0,
-#             'icms_valor_diferido_dif': 0.0,
-#             'tax_icms_st_id': False,
-#             'icms_st_valor': 0.0,
-#             'icms_st_base_calculo': 0.0,
-#             'icms_st_aliquota': 0.0,
-#             'icms_st_aliquota_reducao_base': 0.0,
-#             'icms_st_aliquota_mva': 0.0,
-#             'icms_st_base_calculo_manual': 0.0,
-#             'icms_substituto': 0.0,
-#             'icms_bc_st_retido': 0.0,
-#             'icms_aliquota_st_retido': 0.0,
-#             'icms_st_retido': 0.0,
-#             'tem_difal': False,
-#             'icms_bc_uf_dest': 0.0,
-#             'tax_icms_inter_id': False,
-#             'tax_icms_intra_id': False,
-#             'tax_icms_fcp_id': False,
-#             'icms_aliquota_inter_part': 0.0,
-#             'icms_fcp_uf_dest': 0.0,
-#             'icms_uf_dest': 0.0,
-#             'icms_uf_remet': 0.0,
-#             'icms_csosn_simples': False,
-#             'icms_aliquota_credito': 0.0,
-#             'icms_valor_credito': 0.0,
-#             'icms_st_aliquota_deducao': 0.0,
-#             'issqn_rule_id': False,
-#             'tax_issqn_id': False,
-#             'service_type_id': False,
-#             'issqn_base_calculo': 0.0,
-#             'issqn_aliquota': 0.0,
-#             'issqn_valor': 0.0,
-#             'l10n_br_issqn_deduction': 0.0,
-#             'ipi_rule_id': False,
-#             'ipi_base_calculo': 0.0,
-#             'ipi_reducao_bc': 0.0,
-#             'ipi_valor': 0.0,
-#             'ipi_aliquota': 0.0,
-#             'ipi_cst': False,
-#             'ipi_codigo_enquadramento': False,
-#             'ipi_classe_enquadramento': False,
-#             'pis_rule_id': False,
-#             'pis_cst': False,
-#             'pis_base_calculo': 0.0,
-#             'pis_valor': 0.0,
-#             'pis_aliquota': 0.0,
-#             'cofins_rule_id': False,
-#             'cofins_cst': False,
-#             'cofins_base_calculo': 0.0,
-#             'cofins_valor': 0.0,
-#             'cofins_aliquota': 0.0,
-#             'ii_rule_id': False,
-#             'ii_valor': 0.0,
-#             'ii_valor_iof': 0.0,
-#             'ii_valor_despesas': 0.0,
-#             'csll_rule_id': False,
-#             'tax_csll_id': False,
-#             'csll_base_calculo': 0.0,
-#             'csll_valor': 0.0,
-#             'csll_aliquota': 0.0,
-#             'irrf_rule_id': False,
-#             'tax_irrf_id': False,
-#             'irrf_base_calculo': 0.0,
-#             'irrf_valor': 0.0,
-#             'irrf_aliquota': 0.0,
-#             'inss_rule_id': False,
-#             'tax_inss_id': False,
-#             'inss_base_calculo': 0.0,
-#             'inss_valor': 0.0,
-#             'inss_aliquota': 0.0,
-#             'outros_rule_id': False,
-#             'tax_outros_id': False,
-#             'outros_base_calculo': 0.0,
-#             'outros_valor': 0.0,
-#             'outros_aliquota': 0.0,
-#             'informacao_adicional': False,
-        })
-        if account:
-            data['account_id'] = account.id
-
-        fpos = line.import_declaration_id.fiscal_position_id or line.import_declaration_id.partner_id.property_purchase_fiscal_position_id
-        if fpos: 
-            vals = fpos.map_tax_extra_values(line.product_id, line.import_declaration_id.partner_id, line.product_id.fiscal_classification_id, False, False, False)
-            data['cfop_id'] = vals.get('cfop_id',False)
-            data['icms_cst_normal'] = vals.get('icms_cst_normal',False)
-            data['icms_csosn_simples'] = vals.get('icms_csosn_simples',False)
-            data['icms_benef'] = vals.get('icms_benef',False)
-#             data['icms_rule_id'] = vals.get('icms_rule_id',False)
-#             data['ipi_rule_id'] = vals.get('ipi_rule_id',False)
-#             data['pis_rule_id'] = vals.get('pis_rule_id',False)
-#             data['cofins_rule_id'] = vals.get('cofins_rule_id',False)
-#             data['ii_rule_id'] = vals.get('ii_rule_id',False)
-##             data['tax_icms_st_id'] = vals.get('tax_icms_st_id',False)
-
-#             for key, value in vals.items():
-#                 data[key] = value.id if isinstance(value, models.Model) else value
-
-        return data
-
-# 27795,
-
 class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
@@ -612,7 +446,7 @@ class ImportDeclarationLine(models.Model):
             icms_base_calculo = subtotal / (icms_fator/100) if (icms_fator/100) != 0.0 else 0.0
             icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
             if self.icms_difer and self.icms_aliq_difer > 0.0:
-                icms_valor = icms_valor * (self.icms_aliq_difer/100)
+                icms_valor = icms_valor * ((100-self.icms_aliq_difer)/100)
             
             if self.tax_icms_id.price_include:
                 price_cost += icms_valor
@@ -636,7 +470,7 @@ class ImportDeclarationLine(models.Model):
         #price_cost = cif_afrmm_value + siscomex_value
 
         if self.quantity > 0.0:
-            price_unit_edoc = (cif_value + ii_valor) / self.quantity if self.quantity > 0.0 else 0.0
+            price_unit_edoc = round((cif_value + ii_valor), 2) / self.quantity if self.quantity > 0.0 else 0.0
         else: 
             price_unit_edoc = 0.0
         
@@ -664,7 +498,7 @@ class ImportDeclarationLine(models.Model):
             'desp_aduan_part': desp_aduan_part,
             'desp_aduan_value': desp_aduan_value,
             'cif_value': cif_value,
-            'product_tot_value': (cif_value + ii_valor),
+            'product_tot_value': round((cif_value + ii_valor), 2),
             'subtotal': subtotal,
             'price_unit_edoc': price_unit_edoc,
             'ii_base_calculo': ii_base_calculo,
@@ -725,7 +559,7 @@ class ImportDeclarationLine(models.Model):
     manufacturer_description = fields.Char('Descrição Fabricante')
     uom_id = fields.Many2one('product.uom', string='UM', ondelete='set null', index=True)
     quantity = fields.Float(string='Qtde.', digits=dp.get_precision('Product Unit of Measure'), required=True, default=1)
-    amount_discount = fields.Float(string='Desconto', digits=dp.get_precision('Account'), default=0.00)
+    amount_discount = fields.Float(string='Desconto', digits=dp.get_precision('Discount'), default=0.00)
     price_unit = fields.Float(string='Preço Un', required=True, digits=dp.get_precision('Product Price'), default=0.00)
     weight_unit = fields.Float(string='Peso Un Liq (kg)', required=True, digits=(12,4), default=0.00)
 
@@ -733,39 +567,39 @@ class ImportDeclarationLine(models.Model):
     value_part = fields.Float(string='% Valor FOB', digits=(12,4), readonly=True)
 
     # Fileds Calculados
-    amount_value = fields.Float(string='Valor FOB', compute='_compute_line', digits=(12,3), readonly=True, store=True)
-    amount_value_cl = fields.Float(string='Valor FOB', compute='_compute_line', digits=(12,3), readonly=True, store=True)
-    price_unit_cl = fields.Float(string='Preço Un', compute='_compute_line', digits=(12,5), readonly=True, store=True)
+    amount_value = fields.Float(string='Valor FOB', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    amount_value_cl = fields.Float(string='Valor FOB', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    price_unit_cl = fields.Float(string='Preço Un', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
     amount_weight = fields.Float(string='Peso Liq (kg)', compute='_compute_line', digits=(12,4), readonly=True, store=True)
 
-    freight_total = fields.Float(string='Frete Total', compute='_compute_line', digits=(12,4), readonly=True, store=True)
+    freight_total = fields.Float(string='Frete Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
     freight_part = fields.Float(string='Frete Total', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    freight_value = fields.Float(string='Frete Valor', compute='_compute_line', digits=(12,4), readonly=True, store=True)
+    freight_value = fields.Float(string='Frete Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
     
-    insurance_total = fields.Float(string='Seguro Total', compute='_compute_line', digits=(12,4), readonly=True, store=True)
+    insurance_total = fields.Float(string='Seguro Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
     insurance_part = fields.Float(string='Seguro %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    insurance_value = fields.Float(string='Seguro Valor', compute='_compute_line', digits=(12,3), readonly=True, store=True)
+    insurance_value = fields.Float(string='Seguro Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
-    afrmm_total = fields.Float(string='AFRMM Total', compute='_compute_line', digits=(12,4), readonly=True, store=True)
+    afrmm_total = fields.Float(string='AFRMM Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
     afrmm_part = fields.Float(string='AFRMM %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    afrmm_value = fields.Float(string='AFRMM Valor', compute='_compute_line', digits=(12,3), readonly=True, store=True)
+    afrmm_value = fields.Float(string='AFRMM Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
-    siscomex_total = fields.Float(string='SISCOMEX Total', compute='_compute_line', digits=(12,4), readonly=True, store=True)
+    siscomex_total = fields.Float(string='SISCOMEX Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
     siscomex_part = fields.Float(string='SISCOMEX %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    siscomex_value = fields.Float(string='SISCOMEX Valor', compute='_compute_line', digits=(12,3), readonly=True, store=True)
+    siscomex_value = fields.Float(string='SISCOMEX Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
-    desp_aduan_total = fields.Float(string='Desp.Aduana Total', compute='_compute_line', digits=(12,4), readonly=True, store=True)
+    desp_aduan_total = fields.Float(string='Desp.Aduana Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
     desp_aduan_part = fields.Float(string='Desp.Aduana %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    desp_aduan_value = fields.Float(string='Desp.Aduana Valor', compute='_compute_line', digits=(12,3), readonly=True, store=True)
+    desp_aduan_value = fields.Float(string='Desp.Aduana Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
-    cif_value = fields.Float(string='Valor CIF', compute='_compute_line', digits=(12,3), readonly=True, store=True)
-    product_tot_value = fields.Float(string='Valor CIF+AFRMM', compute='_compute_line', digits=(12,3), readonly=True, store=True, oldname='cif_afrmm_value')
-    subtotal = fields.Float(string='SubTotal', compute='_compute_line', digits=(12,3), readonly=True, store=True)
+    cif_value = fields.Float(string='Valor CIF', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    product_tot_value = fields.Float(string='Valor CIF+AFRMM', compute='_compute_line', digits=(12,2), readonly=True, store=True, oldname='cif_afrmm_value')
+    subtotal = fields.Float(string='SubTotal', compute='_compute_line', digits=(12,2), readonly=True, store=True)
 
-    outras_depesas = fields.Float(string='Outras Despesas', compute='_compute_line', digits=(12,3), readonly=True, store=True)
-    price_unit_edoc = fields.Float(string='Preço Un eDoc', compute='_compute_line', digits=(12,5), readonly=True, store=True)
+    outras_depesas = fields.Float(string='Outras Despesas', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
+    price_unit_edoc = fields.Float(string='Preço Un eDoc', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
     
-    price_cost = fields.Float(string='Preço Custo Calc', compute='_compute_line', digits=(12,5), readonly=True, store=True)
+    price_cost = fields.Float(string='Preço Custo Calc', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
     # impostos
     # II

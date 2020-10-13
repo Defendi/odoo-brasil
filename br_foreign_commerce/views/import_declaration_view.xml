@@ -100,6 +100,7 @@
 							                <field name="tax_cambial" invisible="1"/>
 							                <field name="amount_value"/>
 							                <field name="price_unit_edoc"/>
+							                <field name="product_tot_value"/>
 							                <field name="amount_value_cl"/>
 							                <!-- 
 							                <field name="amount_weight" invisible="1"/>
@@ -110,28 +111,22 @@
 							                <field name="weight_unit" invisible="1"/>
 						                    <field name="freight_total" invisible="1"/>
 						                    <field name="freight_part" invisible="1"/>
-						                    -->
 						                    <field name="freight_value"/>
-						                    <!-- 
 						                    <field name="insurance_total" invisible="1"/>
 						                    <field name="insurance_part" invisible="1"/>
-						                     -->
 						                    <field name="insurance_value"/>
 						                    <field name="desp_aduan_value"/>
+						                     -->
 						                    <field name="cif_value"/>
 						                    <!-- 
 						                    <field name="afrmm_total" invisible="1"/>
 						                    <field name="afrmm_part" invisible="1"/>
-						                     -->
 						                    <field name="afrmm_value"/>
-						                    <!-- 
 						                    <field name="cif_value"/>
 						                    <field name="product_tot_value" invisible="1"/>
 						                    <field name="siscomex_total" invisible="1"/>
 						                    <field name="siscomex_part" invisible="1"/>
-						                     -->
 						                    <field name="siscomex_value"/>
-						                    <!-- 
 						                    <field name="desp_aduan_total" invisible="1"/>
 						                    <field name="desp_aduan_part" invisible="1"/>
 					                		<field name="tax_ii_id" invisible="1"/>

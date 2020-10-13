@@ -67,7 +67,7 @@ class AccountInvoice(models.Model):
             'weight': line.amount_weight,
             'weight_net': line.amount_weight,
             'discount': 0.0,
-            'outras_despesas': line.pis_valor + line.cofins_valor + line.siscomex_value,
+            'outras_despesas': line.pis_valor + line.cofins_valor + line.siscomex_value + line.afrmm_value,
             'icms_base_calculo_manual': line.icms_base_calculo,
             'tax_icms_id': line.tax_icms_id.id,
             'icms_aliquota': line.tax_icms_id.amount,
@@ -89,6 +89,8 @@ class AccountInvoice(models.Model):
             'company_fiscal_type': line.import_declaration_id.company_id.fiscal_type,
             'import_declaration_ids': [(6, 0, [line.import_declaration_id.id])],
             'calculate_tax': True,
+            'icms_aliquota_diferimento': line.icms_aliq_difer if line.icms_difer else 0.0,
+            #'tem_difal': line.icms_difer,
 #             'rule_id': False,
 #             'cfop_id': False,
 #             'fiscal_classification_id': False,
@@ -117,7 +119,6 @@ class AccountInvoice(models.Model):
 #             'icms_bc_st_retido': 0.0,
 #             'icms_aliquota_st_retido': 0.0,
 #             'icms_st_retido': 0.0,
-#             'tem_difal': False,
 #             'icms_bc_uf_dest': 0.0,
 #             'tax_icms_inter_id': False,
 #             'tax_icms_intra_id': False,
@@ -204,6 +205,7 @@ class AccountInvoice(models.Model):
             data = self._prepare_invoice_line_from_di_line(line)
             new_line.append((0, 0, data))
         self.invoice_line_ids = new_line
+        
 #         self._onchange_br_account_fiscal_position_id()
 
     @api.onchange('fiscal_position_id')

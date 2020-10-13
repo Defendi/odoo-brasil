@@ -122,8 +122,10 @@ class AccountInvoice(models.Model):
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
         super(AccountInvoice,self)._onchange_partner_id()
-        if len(self.partner_id) > 0:
+        if bool(self.partner_id) and bool(self.partner_id.freight_responsibility):
             self.freight_responsibility = self.partner_id.freight_responsibility
+        else:
+            self.freight_responsibility = '9'
         
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
