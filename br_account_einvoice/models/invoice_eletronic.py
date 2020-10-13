@@ -431,6 +431,14 @@ class InvoiceEletronic(models.Model):
                 errors.append('Destinatário / Endereço - Nome do país')
             if not partner.country_id.bc_code:
                 errors.append('Destinatário / Endereço - Cód. do BC do país')
+
+        if not bool(self.fiscal_position_id.natureza):
+            errors.append('Posicao Fiscal - Descrição da Natureza está faltando')
+        if not bool(self.modalidade_frete):
+            errors.append('Frete - Modalidade do frete está faltando')
+        elif self.modalidade_frete not in ('0','1','2','3','4','9'):
+            errors.append('Frete - Modalidade do frete inválida')
+            
         return errors
 
     @api.multi
