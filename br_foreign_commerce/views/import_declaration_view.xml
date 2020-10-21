@@ -65,7 +65,6 @@
 		                        <field name="date_release"/>
 		                        <field name="type_transportation" />
 	                            <field name="company_id" groups="base.group_multi_company"/>
-	                            <field name="freight_mode"/>
 		                    </group>
 		                    <group>
 		                        <field name="currency_purchase_id" />
@@ -79,7 +78,6 @@
 		                        <field name="thirdparty_cnpj" />
 		                        <field name="thirdparty_state_id" options="{'no_create': True, 'no_create_edit': True}"/>
 		                        <field name="exporting_code"/>
-		                        <field name="fiscal_position_id" required="1"/>
 		                    </group>
 		                </group>
 	                    <notebook>
@@ -100,9 +98,9 @@
 							                <field name="tax_cambial" invisible="1"/>
 							                <field name="amount_value"/>
 							                <field name="price_unit_edoc"/>
-							                <field name="product_tot_value"/>
 							                <field name="amount_value_cl"/>
 							                <!-- 
+							                <field name="product_tot_value"/>
 							                <field name="amount_weight" invisible="1"/>
 							                <field name="price_unit_cl" invisible="1"/>
 							                <field name="drawback_number" invisible="1"/>
@@ -157,6 +155,7 @@
 					                		<field name="outras_depesas" invisible="1"/>
 					                		<field name="price_cost" invisible="1"/>  -->
 					                		<field name="subtotal" string="SubTotal"/>
+					                		<field name="price_cost" string="Vl.NFe"/>
 							            </tree>
 							            <form>
 							            	<sheet>
@@ -172,6 +171,7 @@
 											                    <field name="price_unit_edoc"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/> --> 
 											                    <field name="amount_discount" string="Vl Desconto"/> <!-- widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/> --> 
 											                    <field name="weight_unit"/>
+											                    <field name="volume_unit"/>
 										                	</group>
 										                	<group string="Adição">
 											                    <field name="name"/>
@@ -188,16 +188,20 @@
 										                	<field name="manufacturer_description" nolabel="1"/>
 										                </group>
 										            </page>
-							                        <page string="Cálculo BC" groups="base.group_no_one">                  
+							                        <page string="Cálculo BC">                  
 										                <group>
 										                	<group>
 											                    <field name="amount_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 											                    <field name="tax_cambial"/>
 											                    <field name="amount_value_cl" string="Valor FOB"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  --> 
-										                	</group>
-										                	<group>
 											                    <field name="amount_weight"/>
 											                    <field name="outras_depesas"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+										                	</group>
+										                	<group>
+										                		<field name="weight_part"/>
+										                		<field name="value_part"/>
+										                		<field name="item_part"/>
+										                		<field name="volume_part"/>
 											                </group>
 											            </group>
 										                <group string="Despesas">
@@ -312,7 +316,6 @@
 									<group colspan="4" class="oe_subtotal_footer oe_right">
 										<field name="total_fob_lc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_cif" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="total_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_imposto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_depesa" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_nota" widget='monetary' options="{'currency_field': 'currency_id'}"/>
@@ -320,6 +323,18 @@
 			                    </group>
 		                    </page>
 	                        <page string="Calculos">
+	                        	<group>
+	                        		<group string="Somatórios">
+	                        			<field name='total_produto_qty'/>
+	                        			<field name='total_weight'/>
+	                        			<field name='total_volume'/>
+										<field name="total_produtos"/>
+	                        		</group>
+	                        		<group>
+				                        <field name="fiscal_position_id" required="1"/>
+				                        <field name="freight_mode"/>
+	                        		</group>
+	                        	</group>
 	                        	<group>
 	                        		<group string="Base Cálculo">
 										<field name="total_bc_ii" widget='monetary' options="{'currency_field': 'currency_id'}"/>

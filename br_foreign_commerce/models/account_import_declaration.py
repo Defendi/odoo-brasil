@@ -28,7 +28,7 @@ class ImportDeclaration(models.Model):
     def _calc_ratio(self, qty, total):
         if float_compare(qty,total,precision_rounding=4) == 0:
             return 1.0
-        elif total > 0.0:
+        elif total > 0.0 and qty > 0.0:
             return qty / total
         else:
             return 0
@@ -36,25 +36,37 @@ class ImportDeclaration(models.Model):
     def _calc_ratio_di(self):
         self.ensure_one()
         total_weight = sum((line.weight_unit * line.quantity) for line in self.line_ids)
-        total_fob_lc = sum(((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial for line in self.line_ids)
+        total_volume = sum((line.volume_unit * line.quantity) for line in self.line_ids)
+        total_qty = sum(line.quantity for line in self.line_ids)
+        total_prod = sum(((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial for line in self.line_ids)
+
         tItens = len(self.line_ids)
         smPrWeight = 0.0
         smPrValue = 0.0
+        smQuantity = 0.0
+        smVolume = 0.0
         inlines = {}
         for contador, line in enumerate(self.line_ids):
             if contador+1 < tItens:
-                amount_value_cl = ((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial
-                weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100
-                value_part = self._calc_ratio(amount_value_cl, total_fob_lc) * 100
+                value_prod = ((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial
+                weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100 if line.weight_unit > 0.0 else 0.0
+                volume_part = self._calc_ratio((line.quantity * line.volume_unit), total_volume) * 100 if line.weight_unit > 0.0 else 0.0
+                value_part = self._calc_ratio(value_prod, total_prod) * 100 if value_prod > 0.0 else 0.0
+                quant_part = self._calc_ratio(line.quantity, total_qty) * 100 if line.quantity > 0.0 else 0.0
             else:
-                weight_part = 100 - smPrWeight
-                value_part = 100 - smPrValue
+                weight_part = 100.0 - smPrWeight
+                volume_part = 100.0 - smVolume 
+                value_part = 100.0 - smPrValue
+                quant_part = 100.0 - smQuantity 
+                
             if bool(inlines.get(line.name,False)):
-                inlines[line.name][line.sequence_addition] = (line.id,weight_part,value_part)
+                inlines[line.name][line.sequence_addition] = (line.id,weight_part,value_part,volume_part,quant_part)
             else:
-                inlines[line.name] = {line.sequence_addition: (line.id,weight_part,value_part)}
+                inlines[line.name] = {line.sequence_addition: (line.id,weight_part,value_part,volume_part,quant_part)}
             smPrWeight += weight_part
             smPrValue += value_part
+            smQuantity += quant_part
+            smVolume += volume_part
         return inlines
 
     def _calcule_di(self):
@@ -64,8 +76,12 @@ class ImportDeclaration(models.Model):
         total_fob_vl = sum(line.amount_value for line in self.line_ids)
         total_fob_lc = sum(line.amount_value_cl for line in self.line_ids)
         total_weight = sum((line.weight_unit * line.quantity) for line in self.line_ids)
+        total_volume = sum((line.volume_unit * line.quantity) for line in self.line_ids)
+        total_produto_qty = sum(line.quantity for line in self.line_ids)
         smPrWeight = 0.0
         smPrValue = 0.0
+        smQuantity = 0.0
+        smVolume = 0.0
         total_cif = 0.0
         total_bc_ii = 0.0
         total_ii = 0.0
@@ -81,16 +97,19 @@ class ImportDeclaration(models.Model):
         total_icms_st = 0.0
         total_produtos = 0.0
         tItens = len(self.line_ids)
-        inlines = []
         for contador, line in enumerate(self.line_ids):
             if contador+1 < tItens:
-                weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100
-                value_part = self._calc_ratio(line.amount_value_cl, total_fob_lc) * 100
+                #value_prod = ((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial
+                weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100 if line.weight_unit > 0.0 else 0.0
+                value_part = self._calc_ratio(line.amount_value_cl, total_fob_lc) * 100 if line.amount_value_cl > 0.0 else 0.0
+                volume_part = self._calc_ratio((line.quantity * line.volume_unit), total_volume) * 100 if line.volume_unit > 0.0 else 0.0
+                quant_part = self._calc_ratio(line.quantity, total_produto_qty) * 100 if line.quantity > 0.0 else 0.0
             else:
                 weight_part = 100 - smPrWeight
                 value_part = 100 - smPrValue
-            val_line = line._calcule_line(weight_part, value_part, freight_converted_vl, insurance_converted_vl, self.afrmm_value, self.siscomex_value, self.customs_value)
-            #inlines += [(1,line.id,val_line)]
+                volume_part = 100 - smVolume
+                quant_part = 100 - smQuantity
+            val_line = line._calcule_line(weight_part, value_part, quant_part, volume_part, freight_converted_vl, insurance_converted_vl, self.afrmm_value, self.siscomex_value, self.customs_value)
             smPrWeight += weight_part
             smPrValue += value_part
             total_cif += val_line['cif_value']
@@ -111,17 +130,19 @@ class ImportDeclaration(models.Model):
 
         total_cif_afrmm = total_cif + self.afrmm_value
         total_imposto = total_ipi + total_icms + total_icms_st
-        total_despesa = total_pis + total_cofins + self.siscomex_value + self.afrmm_value
+        total_despesa = total_pis + total_cofins #+ self.siscomex_value + self.afrmm_value
         total_nota = total_produtos + total_imposto + total_despesa
 
         vals = {
-            'total_desembaraco_vl': total_desembaraco_vl,
+            'total_produtos': total_produtos,
+            'total_produto_qty': total_produto_qty,
             'total_weight': total_weight,
+            'total_volume': total_volume,
+            'total_desembaraco_vl': total_desembaraco_vl,
             'total_fob_vl': total_fob_vl,
             'total_fob_lc': total_fob_lc,
             'total_cif': total_cif,
             'total_cif_afrmm': total_cif_afrmm,
-            'total_produtos': total_produtos,
             'total_bc_ii': total_bc_ii,
             'total_ii': total_ii,
             'total_bc_ipi': total_bc_ipi,
@@ -245,7 +266,7 @@ class ImportDeclaration(models.Model):
     afrmm_value = fields.Float('Valor AFRMM', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     siscomex_value = fields.Float('Valor SISCOMEX', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     customs_value = fields.Float('Desp.Aduaneiras', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES,help="Despesas com THC,THC2 e outras despesas de armazenagem em terminal.")
-    freight_mode  = fields.Selection([('P', 'Peso'),('V', 'Valor')], 'Mod.Calculo Frete', default='P', required=True, readonly=True, states=DI_STATES)
+    freight_mode  = fields.Selection([('P', 'Peso'),('V', 'Volume'),('Q', 'Quantidade')], 'Mod.Calculo Frete', default='Q', required=True, readonly=True, states=DI_STATES) 
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     freight_int_value = fields.Float('Valor Frete Interno', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
@@ -254,7 +275,12 @@ class ImportDeclaration(models.Model):
     line_ids = fields.One2many('br_account.import.declaration.line','import_declaration_id', 'Linhas da DI', copy=True, readonly=True, states=DI_STATES)
 
     # Campos Calculados
+    total_produtos = fields.Float(string='Total Produtos', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    total_produto_qty = fields.Float(string='Total Qtde. Produto', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     total_weight = fields.Float('Peso Liq.', compute='_compute_di', digits=(12,4), readonly=True, store=True)
+    total_volume = fields.Float('Volume', compute='_compute_di', digits=(18,6), readonly=True, store=True)
+    
+    
     freight_converted_vl = fields.Float('Frete', compute='_compute_di', digits=(12,4), readonly=True, store=True)
     insurance_converted_vl = fields.Float('Seguro', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
     afrmm_converted_vl = fields.Float('AFRMM', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
@@ -264,7 +290,6 @@ class ImportDeclaration(models.Model):
     total_fob_lc = fields.Float('Total FOB', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
     total_cif = fields.Float(string='Total CIF', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
     total_cif_afrmm = fields.Float(string='Total CIF+AFRMM', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
-    total_produtos = fields.Float(string='Total Produtos', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
 
     total_imposto = fields.Float(string='Total Imposto', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
     total_depesa = fields.Float(string='Total Despesa', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
@@ -364,78 +389,76 @@ class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
 
-    def _calcule_line(self, txFreight, txValue, vlFreight, vlInsurance, vlAfrmm, vlSiscomex, vlDespAdn):
+    def _calcule_line(self, txFreight, txValue, txQtde, txVolume, vlFreight, vlInsurance, vlAfrmm, vlSiscomex, vlDespAdn):
         
         amount_value = (self.quantity * self.price_unit) - self.amount_discount
         amount_weight = self.weight_unit * self.quantity
-        amount_value_cl = amount_value * self.tax_cambial
-        price_unit_cl = amount_value_cl / self.quantity if self.quantity > 0.0 else 0.0
-        
-        txFreightCal = txFreight if self.import_declaration_id.freight_mode == 'P' else txValue
+        amount_value_fob = amount_value * self.tax_cambial
+        price_unit_fob = amount_value_fob / self.quantity if self.quantity > 0.0 else 0.0
         
         freight_total = vlFreight
-        freight_part = txFreightCal
-        freight_value = vlFreight * (txFreightCal/100)
+        freight_part = txFreight
+        freight_value = vlFreight * (txFreight/100)
         insurance_total = vlInsurance
         insurance_part = txValue
         insurance_value = vlInsurance * (txValue/100)
         afrmm_total = vlAfrmm
-        afrmm_part = txValue
+        afrmm_part = txQtde
         afrmm_value = vlAfrmm * (txValue/100)
         siscomex_total = vlSiscomex
-        siscomex_part = txValue
+        siscomex_part = txQtde
         siscomex_value = vlSiscomex * (txValue/100)
-
         desp_aduan_total = vlDespAdn
-        desp_aduan_part = txValue
+        desp_aduan_part = txFreight
         desp_aduan_value = vlDespAdn * (txValue/100)
 
-        cif_value = amount_value_cl + freight_value + insurance_value + desp_aduan_value
-        price_cost = cif_value
+        cif_value = amount_value_fob + freight_value + desp_aduan_value + insurance_value
+        subtotal = (cif_value + siscomex_value + afrmm_value)
 
         ii_aliquota = self.tax_ii_id.amount if len(self.tax_ii_id) > 0 else 0.0
         if ii_aliquota > 0.0:
-            ii_base_calculo = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+            ii_base_calculo = amount_value_fob + freight_value + insurance_value + desp_aduan_value
             ii_valor = ii_base_calculo * (ii_aliquota/100) if ii_aliquota != 0.0 else 0.0
-            if self.tax_ii_id.price_include:
-                price_cost += ii_valor
+#             if self.tax_ii_id.price_include:
+            subtotal += ii_valor
         else:
             ii_base_calculo = 0.0
             ii_valor = 0.0
 
+        price_cost = subtotal
+
         ipi_aliquota = self.tax_ipi_id.amount if len(self.tax_ipi_id) > 0 else 0.0
         if ipi_aliquota > 0.0:
-            ipi_base_calculo = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+            ipi_base_calculo = amount_value_fob + freight_value + insurance_value + desp_aduan_value
             if self.ipi_inclui_ii_base:
                 ipi_base_calculo += ii_valor
             ipi_valor = ipi_base_calculo * (ipi_aliquota/100) if ipi_aliquota != 0.0 else 0.0
-            if self.tax_ipi_id.price_include:
-                price_cost += ipi_valor
+#             if self.tax_ipi_id.price_include:
+            price_cost += ipi_valor
         else:
             ipi_base_calculo = 0.0
             ipi_valor = 0.0
 
         pis_aliquota = self.tax_pis_id.amount if len(self.tax_pis_id) > 0 else 0.0
         if pis_aliquota > 0.0:
-            pis_base_calculo = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+            pis_base_calculo = amount_value_fob + freight_value + insurance_value + desp_aduan_value
             pis_valor = pis_base_calculo * (pis_aliquota/100) if pis_aliquota != 0.0 else 0.0
-            if self.tax_pis_id.price_include:
-                price_cost += pis_valor
+#             if self.tax_pis_id.price_include:
+            price_cost += pis_valor
         else:
             pis_base_calculo = 0.0
             pis_valor = 0.0
 
         cofins_aliquota = self.tax_cofins_id.amount if len(self.tax_cofins_id) > 0 else 0.0
         if cofins_aliquota > 0.0:
-            cofins_base_calculo = amount_value_cl + freight_value + insurance_value + desp_aduan_value
+            cofins_base_calculo = amount_value_fob + freight_value + insurance_value + desp_aduan_value
             cofins_valor = cofins_base_calculo * (cofins_aliquota/100) if cofins_aliquota != 0.0 else 0.0
-            if self.tax_cofins_id.price_include:
-                price_cost += cofins_valor
+#             if self.tax_cofins_id.price_include:
+            price_cost += cofins_valor
         else:
             cofins_base_calculo = 0.0
             cofins_valor = 0.0
 
-        subtotal = (cif_value + ii_valor + ipi_valor + pis_valor + cofins_valor + afrmm_value + siscomex_value)
         
         icms_aliquota = self.tax_icms_id.amount if len(self.tax_icms_id) > 0 else 0.0
         if icms_aliquota > 0.0:
@@ -443,13 +466,13 @@ class ImportDeclarationLine(models.Model):
                 icms_fator = self.icms_fator_manual
             else:
                 icms_fator = 100.0 - icms_aliquota
-            icms_base_calculo = subtotal / (icms_fator/100) if (icms_fator/100) != 0.0 else 0.0
+            icms_base_calculo = (subtotal + pis_valor + cofins_valor) / (icms_fator/100) if (icms_fator/100) != 0.0 else 0.0
             icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
             if self.icms_difer and self.icms_aliq_difer > 0.0:
                 icms_valor = icms_valor * ((100-self.icms_aliq_difer)/100)
             
-            if self.tax_icms_id.price_include:
-                price_cost += icms_valor
+#             if self.tax_icms_id.price_include:
+            price_cost += icms_valor
         else:
             icms_base_calculo = 0.0
             icms_fator = 0.0
@@ -470,7 +493,7 @@ class ImportDeclarationLine(models.Model):
         #price_cost = cif_afrmm_value + siscomex_value
 
         if self.quantity > 0.0:
-            price_unit_edoc = round((cif_value + ii_valor), 2) / self.quantity if self.quantity > 0.0 else 0.0
+            price_unit_edoc = round(subtotal, 2) / self.quantity if self.quantity > 0.0 else 0.0
         else: 
             price_unit_edoc = 0.0
         
@@ -478,10 +501,15 @@ class ImportDeclarationLine(models.Model):
 
 
         vals = {
+            'weight_part': txFreight,
+            'value_part': txValue,
+            'item_part': txQtde,
+            'volume_part': txVolume,
+
             'amount_value': amount_value, 
             'amount_weight': amount_weight,
-            'amount_value_cl': amount_value_cl,
-            'price_unit_cl': price_unit_cl,
+            'amount_value_cl': amount_value_fob,
+            'price_unit_cl': price_unit_fob,
             'freight_total': freight_total,
             'freight_part': freight_part,
             'freight_value': freight_value,
@@ -525,7 +553,7 @@ class ImportDeclarationLine(models.Model):
         return vals
 
     @api.one
-    @api.depends('product_id','quantity','price_unit','amount_discount','weight_unit','tax_ii_id','tax_ipi_id',
+    @api.depends('product_id','quantity','price_unit','amount_discount','weight_unit', 'volume_unit', 'tax_ii_id','tax_ipi_id',
                  'ipi_inclui_ii_base','tax_pis_id','tax_cofins_id','tax_icms_id','tax_icms_st_id', 'icms_fator_manual',
                  'icms_difer','icms_aliq_difer')
     def _compute_line(self):
@@ -535,12 +563,17 @@ class ImportDeclarationLine(models.Model):
         vlSiscomex = self.import_declaration_id.siscomex_value
         vlDespAdn = self.import_declaration_id.customs_value
         res = self.import_declaration_id._calc_ratio_di()
+        # line.id, weight_part, value_part, volume_part, quant_part
         if self.import_declaration_id.freight_mode == 'P':
             pw = res[self.name][self.sequence_addition][1]
+        elif self.import_declaration_id.freight_mode == 'V':
+            pw = res[self.name][self.sequence_addition][3]
         else:
-            pw = res[self.name][self.sequence_addition][2]
+            pw = res[self.name][self.sequence_addition][4]
         pv = res[self.name][self.sequence_addition][2]
-        vals = self._calcule_line(pw,pv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex,vlDespAdn)
+        vv = res[self.name][self.sequence_addition][3]
+        pq = res[self.name][self.sequence_addition][4]
+        vals = self._calcule_line(pw,pv,pq,vv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex,vlDespAdn)
         self.update(vals)
 
     def _get_sequence(self):
@@ -560,11 +593,14 @@ class ImportDeclarationLine(models.Model):
     uom_id = fields.Many2one('product.uom', string='UM', ondelete='set null', index=True)
     quantity = fields.Float(string='Qtde.', digits=dp.get_precision('Product Unit of Measure'), required=True, default=1)
     amount_discount = fields.Float(string='Desconto', digits=dp.get_precision('Discount'), default=0.00)
-    price_unit = fields.Float(string='Preço Un', required=True, digits=dp.get_precision('Product Price'), default=0.00)
+    price_unit = fields.Float(string='Preço Un', required=True, digits=(18,6), default=0.00)
     weight_unit = fields.Float(string='Peso Un Liq (kg)', required=True, digits=(12,4), default=0.00)
+    volume_unit = fields.Float(string='Volume (m³)', required=True, digits=(18,6), default=0.00)
 
-    weight_part = fields.Float(string='% Peso Liq', digits=(12,4), readonly=True)
-    value_part = fields.Float(string='% Valor FOB', digits=(12,4), readonly=True)
+    weight_part = fields.Float(string='% Peso Liq', digits=(12,4), compute='_compute_line', readonly=True, store=True)
+    value_part = fields.Float(string='% Valor FOB', digits=(12,4), compute='_compute_line', readonly=True, store=True)
+    item_part = fields.Float(string='% Qtde', digits=(12,4), compute='_compute_line', readonly=True, store=True)
+    volume_part = fields.Float(string='% Volume', digits=(12,4), compute='_compute_line', readonly=True, store=True)
 
     # Fileds Calculados
     amount_value = fields.Float(string='Valor FOB', compute='_compute_line', digits=(12,2), readonly=True, store=True)
@@ -651,6 +687,7 @@ class ImportDeclarationLine(models.Model):
             partner = self.import_declaration_id.partner_id
             self.ipi_inclui_ii_base = True
             self.weight_unit = self.product_id.weight
+            self.volume_unit = self.product_id.volume
             self.uom_id = self.product_id.uom_id
             suplierinfo = self.env['product.supplierinfo']
             if bool(partner):
