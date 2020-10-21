@@ -112,6 +112,8 @@ class ImportDeclaration(models.Model):
             val_line = line._calcule_line(weight_part, value_part, quant_part, volume_part, freight_converted_vl, insurance_converted_vl, self.afrmm_value, self.siscomex_value, self.customs_value)
             smPrWeight += weight_part
             smPrValue += value_part
+            smQuantity += quant_part
+            smVolume += volume_part
             total_cif += val_line['cif_value']
             total_bc_ii += val_line['ii_base_calculo'] 
             total_ii += val_line['ii_valor'] 
@@ -389,13 +391,20 @@ class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
 
-    def _calcule_line(self, txFreight, txValue, txQtde, txVolume, vlFreight, vlInsurance, vlAfrmm, vlSiscomex, vlDespAdn):
+    def _calcule_line(self, txWheight, txValue, txQtde, txVolume, vlFreight, vlInsurance, vlAfrmm, vlSiscomex, vlDespAdn):
         
         amount_value = (self.quantity * self.price_unit) - self.amount_discount
         amount_weight = self.weight_unit * self.quantity
         amount_value_fob = amount_value * self.tax_cambial
         price_unit_fob = amount_value_fob / self.quantity if self.quantity > 0.0 else 0.0
-        
+
+        if self.import_declaration_id.freight_mode == 'P':
+            txFreight = txWheight
+        elif self.import_declaration_id.freight_mode == 'V':
+            txFreight = txVolume
+        else:
+            txFreight = txQtde
+
         freight_total = vlFreight
         freight_part = txFreight
         freight_value = vlFreight * (txFreight/100)
@@ -564,12 +573,7 @@ class ImportDeclarationLine(models.Model):
         vlDespAdn = self.import_declaration_id.customs_value
         res = self.import_declaration_id._calc_ratio_di()
         # line.id, weight_part, value_part, volume_part, quant_part
-        if self.import_declaration_id.freight_mode == 'P':
-            pw = res[self.name][self.sequence_addition][1]
-        elif self.import_declaration_id.freight_mode == 'V':
-            pw = res[self.name][self.sequence_addition][3]
-        else:
-            pw = res[self.name][self.sequence_addition][4]
+        pw = res[self.name][self.sequence_addition][1]
         pv = res[self.name][self.sequence_addition][2]
         vv = res[self.name][self.sequence_addition][3]
         pq = res[self.name][self.sequence_addition][4]
