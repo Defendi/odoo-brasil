@@ -67,7 +67,7 @@ class AccountInvoice(models.Model):
             'weight': line.amount_weight,
             'weight_net': line.amount_weight,
             'discount': 0.0,
-            'outras_despesas': line.pis_valor + line.cofins_valor + line.siscomex_value + line.afrmm_value,
+            'outras_despesas': line.pis_valor + line.cofins_valor, # + line.siscomex_value + line.afrmm_value,
             'icms_base_calculo_manual': line.icms_base_calculo,
             'tax_icms_id': line.tax_icms_id.id,
             'icms_aliquota': line.tax_icms_id.amount,

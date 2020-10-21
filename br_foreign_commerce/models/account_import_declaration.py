@@ -267,7 +267,7 @@ class ImportDeclaration(models.Model):
 
     afrmm_value = fields.Float('Valor AFRMM', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     siscomex_value = fields.Float('Valor SISCOMEX', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
-    customs_value = fields.Float('Desp.Aduaneiras', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES,help="Despesas com THC,THC2 e outras despesas de armazenagem em terminal.")
+    customs_value = fields.Float('THC + THC2', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES,help="Despesas com THC,THC2 e outras despesas de armazenagem em terminal.")
     freight_mode  = fields.Selection([('P', 'Peso'),('V', 'Volume'),('Q', 'Quantidade')], 'Mod.Calculo Frete', default='Q', required=True, readonly=True, states=DI_STATES) 
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     freight_int_value = fields.Float('Valor Frete Interno', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
