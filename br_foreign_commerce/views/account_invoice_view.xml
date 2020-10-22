@@ -14,6 +14,7 @@
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="after">
             	<field name="invoice_type" invisible="1"/>
+            	<field name="import_declaration_ids" invisible="1"/>
             </xpath>
         </field>
     </record>
@@ -31,6 +32,7 @@
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="after">
             	<field name="invoice_type" invisible="1"/>
+            	<field name="import_declaration_ids" invisible="1"/>
             </xpath>
         </field>
     </record> 
@@ -94,7 +96,7 @@
         <field name="inherit_id" ref="account.invoice_supplier_form"/>
         <field name="arch" type="xml">
             <field name="reference" position="after" >
-                 <field name="import_id" attrs="{'readonly': [('state','not in',['draft'])], 'invisible': ['|', ('state', '=', 'purchase'), ('type', '=', 'in_refund')]}" class="oe_edit_only" options="{'no_create': True}"/>
+                 <field name="import_id" attrs="{'readonly': [('state','not in',['draft'])], 'invisible': ['|', ('state', '=', 'purchase'), ('type', '=', 'in_refund')]}" options="{'no_create': True}"/>
             </field>
         </field>
     </record>

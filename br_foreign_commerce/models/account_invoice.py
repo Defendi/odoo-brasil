@@ -87,7 +87,7 @@ class AccountInvoice(models.Model):
             'icms_tipo_base': '3',
             'icms_st_tipo_base': '4',
             'company_fiscal_type': line.import_declaration_id.company_id.fiscal_type,
-            'import_declaration_ids': [(6, 0, [line.import_declaration_id.id])],
+            'import_declaration_ids': [(4, line.import_declaration_id.id)],
             'calculate_tax': True,
             'icms_aliquota_diferimento': line.icms_aliq_difer if line.icms_difer else 0.0,
             #'tem_difal': line.icms_difer,
@@ -218,6 +218,12 @@ class AccountInvoice(models.Model):
     def _onchange_partner_id(self):
         if not self.env.context.get('from_import_order_change', False):
             super(AccountInvoice,self)._onchange_partner_id()
+
+    @api.model
+    def create(self, vals):
+        res = super(AccountInvoice, self).create(vals)
+        return res
+
             
 class AccountInvoiceLine(models.Model):
     _inherit = 'account.invoice.line'
