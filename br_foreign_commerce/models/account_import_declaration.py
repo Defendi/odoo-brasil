@@ -202,7 +202,7 @@ class ImportDeclaration(models.Model):
 #                 smPercent += percentual
 #                 smFreight += freight_value
 
-    @api.depends('line_ids','freight_int_value','siscomex_value','freight_mode',
+    @api.depends('line_ids','freight_int_value','siscomex_value','freight_mode', 'tax_cambial',
                  'customs_value', 'afrmm_value', 'freight_value', 'insurance_value')
     def _compute_di(self):
         for DI in self:
@@ -235,10 +235,10 @@ class ImportDeclaration(models.Model):
     invoice_count = fields.Integer(compute="_compute_invoice", string='# Faturas', copy=False, default=0, store=False)
 
     name = fields.Char('Número da DI', size=10, required=True, readonly=True, states=DI_STATES)
-    date_registration = fields.Date('Data de Registro', required=True, readonly=True, states=DI_STATES)
-    state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", required=True, readonly=True, states=DI_STATES)
-    location = fields.Char('Local', required=True, size=60, readonly=True, states=DI_STATES)
-    date_release = fields.Date('Data de Liberação', required=True, readonly=True, states=DI_STATES)
+    date_registration = fields.Date('Data de Registro', readonly=True, states=DI_STATES)
+    state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", readonly=True, states=DI_STATES)
+    location = fields.Char('Local', size=60, readonly=True, states=DI_STATES)
+    date_release = fields.Date('Data de Liberação', readonly=True, states=DI_STATES)
     type_transportation = fields.Selection([
         ('1', '1 - Marítima'),
         ('2', '2 - Fluvial'),
@@ -250,15 +250,15 @@ class ImportDeclaration(models.Model):
         ('8', '8 - Conduto / Rede Transmissão'),
         ('9', '9 - Meios Próprios'),
         ('10', '10 - Entrada / Saída ficta'),
-    ], 'Transporte Internacional', required=True, default="1", readonly=True, states=DI_STATES)
+    ], 'Transporte Internacional', default="1", readonly=True, states=DI_STATES)
     type_import = fields.Selection([
         ('1', '1 - Importação por conta própria'),
         ('2', '2 - Importação por conta e ordem'),
         ('3', '3 - Importação por encomenda'),
-    ], 'Tipo de Importação', default='1', required=True, readonly=True, states=DI_STATES)
+    ], 'Tipo de Importação', default='1', readonly=True, states=DI_STATES)
     thirdparty_cnpj = fields.Char('CNPJ', size=18, readonly=True, states=DI_STATES)
     thirdparty_state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", readonly=True, states=DI_STATES)
-    exporting_code = fields.Char('Código do Exportador', required=True, size=60, readonly=True, states=DI_STATES)
+    exporting_code = fields.Char('Código do Exportador', size=60, readonly=True, states=DI_STATES)
     additional_information = fields.Text('Informações Adicionais', readonly=True, states=DI_STATES)
 
     company_id = fields.Many2one('res.company', 'Empresa', default=lambda self: self.env.user.company_id.id)#, readonly=True, states=DI_STATES)
@@ -272,7 +272,6 @@ class ImportDeclaration(models.Model):
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     freight_int_value = fields.Float('Valor Frete Interno', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
-    tax_cambial = fields.Float('Taxa Cambial', digits=(12,6), default=0.00, readonly=True, states=DI_STATES)
     
     line_ids = fields.One2many('br_account.import.declaration.line','import_declaration_id', 'Linhas da DI', copy=True, readonly=True, states=DI_STATES)
 

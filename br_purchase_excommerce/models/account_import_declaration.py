@@ -12,13 +12,13 @@ class ImportDeclaration(models.Model):
                                   domain="[('partner_id','=',partner_id),('state','=','purchase')]", 
                                   readonly=True, states={'draft': [('readonly', False)]})
 
-    def _prepare_import_line_from_po_line(self, line):
+    def _prepare_import_line_from_po_line(self, line, idx):
         if bool(line.order_id.partner_id):
             suplierinfo = self.env['product.supplierinfo'].search([('name','=',line.order_id.partner_id.id),
                                                                    ('product_tmpl_id','=',line.product_id.product_tmpl_id.id)],limit=1)
         data = {
             'name': '001',
-            'sequence_addition': str(line.sequence).zfill(3),
+            'sequence_addition': str(idx+1).zfill(3),
             'origin': line.order_id.origin,
             'product_id': line.product_id.id,
             'uom_id': line.product_uom.id,
@@ -27,7 +27,7 @@ class ImportDeclaration(models.Model):
             'discount': 0.0,
             'weight_unit': line.product_id.weight,
             'manufacturer_description': suplierinfo.product_name or line.product_id.name,
-            'manufacturer_code': suplierinfo.product_code,
+            'manufacturer_code': suplierinfo.product_code or line.product_id.default_code,
             'ipi_inclui_ii_base': True,
             'purchase_line_id': line,
         }
@@ -40,15 +40,28 @@ class ImportDeclaration(models.Model):
             return {}
         if not self.partner_id:
             self.partner_id = self.purchase_id.partner_id.id
+        fpos = self.purchase_id.fiscal_position_id or self.partner_id.property_purchase_fiscal_position_id
         
-        self.fiscal_position_id = self.purchase_id.fiscal_position_id
+        self.fiscal_position_id = fpos
         self.currency_purchase_id = self.purchase_id.currency_id
         self.freight_value = self.purchase_id.total_frete
         self.insurance_value = self.purchase_id.total_seguro
 
         new_lines = self.env['br_account.import.declaration.line']
-        for line in self.purchase_id.order_line:
-            data = self._prepare_import_line_from_po_line(line)
+        for idx, line in enumerate(self.purchase_id.order_line):
+            data = self._prepare_import_line_from_po_line(line,idx)
+            if fpos:
+                product_id = self.env['product.product'].browse([data['product_id']])
+                vals = fpos.map_tax_extra_values(product_id, self.partner_id, product_id.fiscal_classification_id, False, False, False)
+                data['tax_ii_id'] = vals.get('tax_ii_id',False)
+                data['tax_ipi_id'] = vals.get('tax_ipi_id',False)
+                data['tax_pis_id'] = vals.get('tax_pis_id',False)
+                data['tax_cofins_id'] = vals.get('tax_cofins_id',False)
+                data['tax_icms_id'] = vals.get('tax_icms_id',False)
+                data['icms_difer'] = True if vals.get('icms_aliquota_diferimento',0.0) > 0.0 else False
+                data['icms_aliq_difer'] = vals.get('icms_aliquota_diferimento',0.0)
+                data['tax_icms_st_id'] = vals.get('tax_icms_st_id',False)
+                    
             new_line = new_lines.new(data)
             new_lines += new_line
 
