@@ -551,6 +551,7 @@ class InvoiceEletronic(models.Model):
                 'pICMSUFDest': "%.02f" % item.icms_aliquota_uf_dest,
                 'pICMSInter': "%.02f" % item.icms_aliquota_interestadual,
                 'pICMSInterPart': "%.02f" % item.icms_aliquota_inter_part,
+                'vBCFCPUFDest': "%.02f" % item.icms_bc_uf_dest,
                 'vFCPUFDest': "%.02f" % item.icms_fcp_uf_dest,
                 'vICMSUFDest': "%.02f" % item.icms_uf_dest,
                 'vICMSUFRemet': "%.02f" % item.icms_uf_remet, }
