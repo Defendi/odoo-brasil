@@ -46,7 +46,7 @@ class AccountInvoice(models.Model):
         self.outros_base = sum(l.outros_base_calculo for l in lines)
         self.outros_value = sum(abs(l.outros_valor) for l in lines)
         # FCP
-        self.total_fcp = sum(l.icms_fcp for l in lines)
+        self.total_fcp = sum(l.icms_fcp for l in lines.filtered(lambda x: not x.tem_difal))
         self.total_fcp_st = sum(l.icms_fcp_st for l in lines)
 
         # Retenções

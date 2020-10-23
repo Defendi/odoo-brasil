@@ -140,7 +140,7 @@ class AccountInvoice(models.Model):
             'icms_valor_operacao': line.icms_valor_diferido,
             'icms_valor_diferido': line.icms_valor_diferido - line.icms_valor,
             'icms_aliquota_diferimento': line.icms_aliquota_diferimento,
-            'icms_fcp': line.icms_fcp,
+            'icms_fcp': line.icms_fcp if not line.tem_difal else 0.0,
             'icms_aliquota_fcp': line.tax_icms_fcp_id.amount,
             'icms_base_calculo_fcp': line.icms_base_calculo_fcp,
             # - ICMS ST -
