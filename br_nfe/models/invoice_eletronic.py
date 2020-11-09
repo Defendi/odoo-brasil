@@ -290,6 +290,8 @@ class InvoiceEletronic(models.Model):
                         errors.append('{} - CST do ICMS'.format(prod))
                     if not eletr.ipi_cst:
                         errors.append('{} - CST do IPI'.format(prod))
+                    if not bool(eletr.uom_id):
+                        errors.append('{} - Unidade de Medida'.format(prod))
                 if eletr.tipo_produto == 'service':
                     if not eletr.issqn_codigo:
                         errors.append('{} - Código de Serviço'.format(prod))
