@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="br_account_fleet_chart_template" model="account.chart.template">
+        <field name="property_account_receivable_id" ref="xtiger_cc_1_1_2_01_001" />
+        <field name="property_account_payable_id" ref="xtiger_cc_2_1_2_01_001" />
+        <field name="property_account_income_categ_id" ref="xtiger_cc_3_1_1_01_001" />
+        <field name="property_account_expense_categ_id" ref="xtiger_cc_3_2_1_01_001" />
+        <field name="income_currency_exchange_account_id" ref="xtiger_cc_3_2_4_01_004" />
+        <field name="expense_currency_exchange_account_id" ref="xtiger_cc_3_2_4_01_004" />
+    </record>
+
+</odoo>
