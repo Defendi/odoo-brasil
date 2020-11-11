@@ -8,6 +8,7 @@ class AccountAccountTemplate(models.Model):
 
     type = fields.Char(string="Type")
     parent_id = fields.Many2one('account.account.template', string="Parent")
+    shortcut = fields.Integer(string="Cod.Curto", index=True)
 
 class AccountAccount(models.Model):
     _inherit = 'account.account'
