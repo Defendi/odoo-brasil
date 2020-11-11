@@ -24,7 +24,7 @@
 				<field name="purchase_id"/>
 			</field>
 			<xpath expr="//field[@name='line_ids']/tree" position="inside">
-				<field name="purchase_line_id"/>
+				<field name="purchase_line_id" invisible="1"/>
 			</xpath>
 			<xpath expr="//field[@name='line_ids']/form/sheet/notebook/page[@name='item']/group/group" position="inside">
 				<field name="purchase_line_id"/>

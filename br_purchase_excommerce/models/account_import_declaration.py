@@ -16,6 +16,9 @@ class ImportDeclaration(models.Model):
         if bool(line.order_id.partner_id):
             suplierinfo = self.env['product.supplierinfo'].search([('name','=',line.order_id.partner_id.id),
                                                                    ('product_tmpl_id','=',line.product_id.product_tmpl_id.id)],limit=1)
+        
+        price_vucv = ((line.product_qty * line.price_unit) - line.valor_desconto) / line.product_qty
+        
         data = {
             'name': '001',
             'sequence_addition': str(idx+1).zfill(3),
@@ -23,7 +26,7 @@ class ImportDeclaration(models.Model):
             'product_id': line.product_id.id,
             'uom_id': line.product_uom.id,
             'quantity': line.product_qty,
-            'price_unit': line.price_unit,
+            'price_vucv': price_vucv,
             'discount': 0.0,
             'weight_unit': line.product_id.weight,
             'manufacturer_description': suplierinfo.product_name or line.product_id.name,

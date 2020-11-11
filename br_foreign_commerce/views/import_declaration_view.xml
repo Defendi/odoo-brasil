@@ -93,12 +93,12 @@
 							                <field name="manufacturer_description"/>
 							                <field name="quantity"/>
 							                <field name="uom_id" groups="product.group_uom"/>
-							                <field name="price_unit" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
+							                <field name="price_vucv" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 							                <field name="amount_discount" string="Desc." widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
+							                <field name="amount_vucv" string="VUCV FOB" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
+							                <field name="amount_value_cl" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 							                <field name="tax_cambial" invisible="1"/>
-							                <field name="amount_value"/>
 							                <field name="price_unit_edoc"/>
-							                <field name="amount_value_cl"/>
 							                <!-- 
 							                <field name="product_tot_value"/>
 							                <field name="amount_weight" invisible="1"/>
@@ -164,7 +164,6 @@
 					                		<field name="icms_st_base_calculo"/>
 					                		<field name="icms_st_aliquota" invisible="1"/>
 					                		<field name="icms_st_valor" invisible="1"/>
-					                		<field name="outras_depesas" invisible="1"/>
 					                		<field name="price_cost" invisible="1"/>  -->
 					                		<field name="subtotal" string="SubTotal"/>
 					                		<field name="price_cost" string="Vl.NFe"/>
@@ -178,10 +177,14 @@
 											                    <field name="product_id"/>
 											                    <field name="quantity"/>
 											                    <field name="uom_id"/>
-											                    <field name="price_unit"/> <!-- widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>  --> 
+											                    <field name="price_vucv"/> <!-- widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>  --> 
 											                    <field name="price_unit_cl"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/> --> 
 											                    <field name="price_unit_edoc"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/> --> 
-											                    <field name="amount_discount" string="Vl Desconto"/> <!-- widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/> --> 
+																<label for="amount_discount" string="Vl Desconto"/>
+												                <div class="o_row">
+												                    $<field name="amount_discount"/>
+												                    /<field name="discount"/>%
+												                </div>
 											                    <field name="weight_unit"/>
 											                    <field name="volume_unit"/>
 										                	</group>
@@ -203,11 +206,10 @@
 							                        <page string="Cálculo BC">                  
 										                <group>
 										                	<group>
-											                    <field name="amount_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
+											                    <field name="amount_vucv" string="VUCV FOB" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
 											                    <field name="tax_cambial"/>
-											                    <field name="amount_value_cl" string="Valor FOB"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  --> 
 											                    <field name="amount_weight"/>
-											                    <field name="outras_depesas"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="price_cost"/>
 										                	</group>
 										                	<group>
 										                		<field name="weight_part"/>
@@ -216,32 +218,40 @@
 										                		<field name="volume_part"/>
 											                </group>
 											            </group>
-										                <group string="Despesas">
-										                	<group>
-											                    <field name="freight_total" string="Frete Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="freight_part" string="Frete %"/>
-											                    <field name="freight_value" string="Frete Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="insurance_total" string="Seguro Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="insurance_part" string="Seguro %"/>
-											                    <field name="insurance_value" string="Seguro Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+										                <group>
+										                	<group string="Aduaneiras">
+											                    <field name="amount_value_cl" string="[+] FOB" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="freight_total" string="Frete Vl." groups="base.group_no_one"/> 
+											                    <field name="freight_part" string="Frete %" groups="base.group_no_one"/>
+											                    <field name="freight_value" string="[+] Frete" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="insurance_total" string="Seguro Vl." groups="base.group_no_one"/>
+											                    <field name="insurance_part" string="Seguro %" groups="base.group_no_one"/>
+											                    <field name="insurance_value" string="[+] Seguro" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="desp_aduan_total" string="THC+THC2 Vl." groups="base.group_no_one"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="desp_aduan_part" string="THC+THC2 %" groups="base.group_no_one"/>
+											                    <field name="desp_aduan_value" string="[+] THC+THC2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="cif_value" string="[=] Aduaneiro" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										                	</group>
-										                	<group>
-											                    <field name="afrmm_total" string="AFRMM Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="afrmm_part" string="AFRMM %"/>
-											                    <field name="afrmm_value" string="AFRMM Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="siscomex_total" string="SISCOMEX Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="siscomex_part" string="SISCOMEX %"/>
-											                    <field name="siscomex_value" string="SISCOMEX Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="desp_aduan_total" string="Des.Aduan.Total"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="desp_aduan_part" string="Des.Aduan. %"/>
-											                    <field name="desp_aduan_value" string="Des.Aduan.Valor"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+										                	<group string="CMV">
+											                    <field name="cif_value" string="[+] Aduaneiro" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="afrmm_total" string="AFRMM Vl." groups="base.group_no_one"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="afrmm_part" string="AFRMM %" groups="base.group_no_one"/>
+											                    <field name="afrmm_value" string="[+] AFRMM" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="siscomex_total" string="SISCOMEX Vl." groups="base.group_no_one"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="siscomex_part" string="SISCOMEX %" groups="base.group_no_one"/>
+											                    <field name="siscomex_value" string="[+] SISCOMEX" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="other_taxs_total" string="Outras Taxas Vl." groups="base.group_no_one"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
+											                    <field name="other_taxs_part" string="Outras Taxas %" groups="base.group_no_one"/>
+											                    <field name="other_taxs_value" string="[+] Outras Taxas" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										                		<field name="ii_valor" string="[+] II" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="subtotal" string="[=] CMV" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 											                </group>
 											            </group>
 										                <group>
-										                	<group string="Calculos">
-											                    <field name="cif_value"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="subtotal" string="SubTotal"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
-											                    <field name="price_cost"/>
+										                	<group>
+											                </group>
+										                	<group>
+											                    
 											                </group>
 											            </group>
 										            </page>
@@ -317,13 +327,6 @@
 			                    </group>
 								<group>
 									<group>
-										<field name="afrmm_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="siscomex_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="customs_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="freight_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
-										<field name="insurance_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
-	                        			<field name="total_desembaraco_vl" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="freight_int_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 									</group>
 									<group colspan="4" class="oe_subtotal_footer oe_right">
 										<field name="total_fob_lc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
@@ -333,6 +336,19 @@
 										<field name="total_nota" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 				                    </group>
 			                    </group>
+		                    </page>
+		                    <page string="Despesas">
+								<group>
+									<group>
+										<field name="afrmm_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="siscomex_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="customs_value" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="freight_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
+										<field name="insurance_value" widget='monetary' options="{'currency_field': 'currency_purchase_id'}"/>
+	                        			<field name="total_desembaraco_vl" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="other_value" string="Outras Taxas" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+									</group>
+								</group>
 		                    </page>
 	                        <page string="Calculos">
 	                        	<group>

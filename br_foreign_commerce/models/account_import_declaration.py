@@ -38,7 +38,9 @@ class ImportDeclaration(models.Model):
         total_weight = sum((line.weight_unit * line.quantity) for line in self.line_ids)
         total_volume = sum((line.volume_unit * line.quantity) for line in self.line_ids)
         total_qty = sum(line.quantity for line in self.line_ids)
-        total_prod = sum(((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial for line in self.line_ids)
+        total_prod = sum(((line.quantity * line.price_vucv) - line.amount_discount) * self.tax_cambial for line in self.line_ids)
+        total_aduaneiro = (((self.freight_value + self.insurance_value) * self.tax_cambial) +  self.customs_value)
+        ratio = total_aduaneiro / total_qty
 
         tItens = len(self.line_ids)
         smPrWeight = 0.0
@@ -46,18 +48,19 @@ class ImportDeclaration(models.Model):
         smQuantity = 0.0
         smVolume = 0.0
         inlines = {}
+
         for contador, line in enumerate(self.line_ids):
             if contador+1 < tItens:
-                value_prod = ((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial
+                value_prod = ((line.quantity * line.price_vucv) - line.amount_discount) * self.tax_cambial
                 weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100 if line.weight_unit > 0.0 else 0.0
                 volume_part = self._calc_ratio((line.quantity * line.volume_unit), total_volume) * 100 if line.weight_unit > 0.0 else 0.0
                 value_part = self._calc_ratio(value_prod, total_prod) * 100 if value_prod > 0.0 else 0.0
-                quant_part = self._calc_ratio(line.quantity, total_qty) * 100 if line.quantity > 0.0 else 0.0
+                quant_part = ((ratio * line.quantity) / total_aduaneiro) * 100 #self._calc_ratio(line.quantity, total_qty) * 100 if line.quantity > 0.0 else 0.0
             else:
                 weight_part = 100.0 - smPrWeight
                 volume_part = 100.0 - smVolume 
                 value_part = 100.0 - smPrValue
-                quant_part = 100.0 - smQuantity 
+                quant_part = ratio #100.0 - smQuantity 
                 
             if bool(inlines.get(line.name,False)):
                 inlines[line.name][line.sequence_addition] = (line.id,weight_part,value_part,volume_part,quant_part)
@@ -73,7 +76,7 @@ class ImportDeclaration(models.Model):
         freight_converted_vl = self.freight_value * self.tax_cambial
         insurance_converted_vl = self.insurance_value * self.tax_cambial
         total_desembaraco_vl = (freight_converted_vl + insurance_converted_vl + self.afrmm_value + self.siscomex_value + self.customs_value)
-        total_fob_vl = sum(line.amount_value for line in self.line_ids)
+        total_fob_vl = sum(line.amount_vucv for line in self.line_ids)
         total_fob_lc = sum(line.amount_value_cl for line in self.line_ids)
         total_weight = sum((line.weight_unit * line.quantity) for line in self.line_ids)
         total_volume = sum((line.volume_unit * line.quantity) for line in self.line_ids)
@@ -96,20 +99,22 @@ class ImportDeclaration(models.Model):
         total_bc_icms_st = 0.0
         total_icms_st = 0.0
         total_produtos = 0.0
+        total_aduaneiro = (((self.freight_value + self.insurance_value) * self.tax_cambial) +  self.customs_value)
         tItens = len(self.line_ids)
+        ratio = total_aduaneiro / total_produto_qty
         for contador, line in enumerate(self.line_ids):
             if contador+1 < tItens:
-                #value_prod = ((line.quantity * line.price_unit) - line.amount_discount) * self.tax_cambial
+                #value_prod = ((line.quantity * line.price_vucv) - line.amount_discount) * self.tax_cambial
                 weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100 if line.weight_unit > 0.0 else 0.0
                 value_part = self._calc_ratio(line.amount_value_cl, total_fob_lc) * 100 if line.amount_value_cl > 0.0 else 0.0
                 volume_part = self._calc_ratio((line.quantity * line.volume_unit), total_volume) * 100 if line.volume_unit > 0.0 else 0.0
-                quant_part = self._calc_ratio(line.quantity, total_produto_qty) * 100 if line.quantity > 0.0 else 0.0
+                quant_part = ((ratio * line.quantity) / total_aduaneiro) * 100 #self._calc_ratio(line.quantity, total_produto_qty) * 100 if line.quantity > 0.0 else 0.0
             else:
                 weight_part = 100 - smPrWeight
                 value_part = 100 - smPrValue
                 volume_part = 100 - smVolume
                 quant_part = 100 - smQuantity
-            val_line = line._calcule_line(weight_part, value_part, quant_part, volume_part, freight_converted_vl, insurance_converted_vl, self.afrmm_value, self.siscomex_value, self.customs_value)
+            val_line = line._calcule_line(weight_part, value_part, quant_part, volume_part, freight_converted_vl, insurance_converted_vl, self.afrmm_value, self.siscomex_value, self.customs_value, self.other_value)
             smPrWeight += weight_part
             smPrValue += value_part
             smQuantity += quant_part
@@ -167,7 +172,6 @@ class ImportDeclaration(models.Model):
             'espelho_vl_ipi': total_ipi,
             'espelho_vl_other': total_despesa,
             'espelho_produtos': total_produtos,
-            'espelho_frete': self.freight_int_value,
             'espelho_total_nfe': total_nota,
             #'line_ids': inlines,
         }
@@ -202,7 +206,7 @@ class ImportDeclaration(models.Model):
 #                 smPercent += percentual
 #                 smFreight += freight_value
 
-    @api.depends('line_ids','freight_int_value','siscomex_value','freight_mode', 'tax_cambial',
+    @api.depends('line_ids','other_value','siscomex_value','freight_mode', 'tax_cambial',
                  'customs_value', 'afrmm_value', 'freight_value', 'insurance_value')
     def _compute_di(self):
         for DI in self:
@@ -270,8 +274,9 @@ class ImportDeclaration(models.Model):
     customs_value = fields.Float('THC + THC2', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES,help="Despesas com THC,THC2 e outras despesas de armazenagem em terminal.")
     freight_mode  = fields.Selection([('P', 'Peso'),('V', 'Volume'),('Q', 'Quantidade')], 'Mod.Calculo Frete', default='Q', required=True, readonly=True, states=DI_STATES) 
     freight_value = fields.Float('Valor Frete', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
-    freight_int_value = fields.Float('Valor Frete Interno', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+    other_value = fields.Float('Outras Taxas', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES, oldname="freight_int_value")
     insurance_value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
+#     _value = fields.Float('Valor Seguro', digits=dp.get_precision('Account'), default=0.00, readonly=True, states=DI_STATES)
     
     line_ids = fields.One2many('br_account.import.declaration.line','import_declaration_id', 'Linhas da DI', copy=True, readonly=True, states=DI_STATES)
 
@@ -390,11 +395,11 @@ class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
 
-    def _calcule_line(self, txWheight, txValue, txQtde, txVolume, vlFreight, vlInsurance, vlAfrmm, vlSiscomex, vlDespAdn):
+    def _calcule_line(self, txWheight, txValue, txQtde, txVolume, vlFreight, vlInsurance, vlAfrmm, vlSiscomex, vlDespAdn, vlOther):
         
-        amount_value = (self.quantity * self.price_unit) - self.amount_discount
+        amount_vucv = (self.quantity * self.price_vucv) - self.amount_discount
         amount_weight = self.weight_unit * self.quantity
-        amount_value_fob = amount_value * self.tax_cambial
+        amount_value_fob = amount_vucv * self.tax_cambial
         price_unit_fob = amount_value_fob / self.quantity if self.quantity > 0.0 else 0.0
 
         if self.import_declaration_id.freight_mode == 'P':
@@ -412,16 +417,19 @@ class ImportDeclarationLine(models.Model):
         insurance_value = vlInsurance * (txValue/100)
         afrmm_total = vlAfrmm
         afrmm_part = txQtde
-        afrmm_value = vlAfrmm * (txValue/100)
+        afrmm_value = vlAfrmm * (txQtde/100)
         siscomex_total = vlSiscomex
         siscomex_part = txQtde
-        siscomex_value = vlSiscomex * (txValue/100)
+        siscomex_value = vlSiscomex * (txQtde/100)
         desp_aduan_total = vlDespAdn
         desp_aduan_part = txFreight
-        desp_aduan_value = vlDespAdn * (txValue/100)
+        desp_aduan_value = vlDespAdn * (txFreight/100)
+        other_taxs_total = vlOther
+        other_taxs_part = txQtde
+        other_taxs_value = vlOther * (txQtde/100)
 
         cif_value = amount_value_fob + freight_value + desp_aduan_value + insurance_value
-        subtotal = (cif_value + siscomex_value + afrmm_value)
+        subtotal = (cif_value + siscomex_value + afrmm_value + other_taxs_value)
 
         ii_aliquota = self.tax_ii_id.amount if len(self.tax_ii_id) > 0 else 0.0
         if ii_aliquota > 0.0:
@@ -474,7 +482,7 @@ class ImportDeclarationLine(models.Model):
                 icms_fator = self.icms_fator_manual
             else:
                 icms_fator = 100.0 - icms_aliquota
-            icms_base_calculo = (subtotal + pis_valor + cofins_valor) / (icms_fator/100) if (icms_fator/100) != 0.0 else 0.0
+            icms_base_calculo = (cif_value + siscomex_value + afrmm_value + ii_valor + ipi_valor + pis_valor + cofins_valor) / (icms_fator/100) if (icms_fator/100) != 0.0 else 0.0
             icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
             if self.icms_difer and self.icms_aliq_difer > 0.0:
                 icms_valor = icms_valor * ((100-self.icms_aliq_difer)/100)
@@ -513,8 +521,7 @@ class ImportDeclarationLine(models.Model):
             'value_part': txValue,
             'item_part': txQtde,
             'volume_part': txVolume,
-
-            'amount_value': amount_value, 
+            'amount_vucv': amount_vucv, 
             'amount_weight': amount_weight,
             'amount_value_cl': amount_value_fob,
             'price_unit_cl': price_unit_fob,
@@ -533,6 +540,9 @@ class ImportDeclarationLine(models.Model):
             'desp_aduan_total': desp_aduan_total,
             'desp_aduan_part': desp_aduan_part,
             'desp_aduan_value': desp_aduan_value,
+            'other_taxs_total': other_taxs_total,
+            'other_taxs_part': other_taxs_part,
+            'other_taxs_value': other_taxs_value,
             'cif_value': cif_value,
             'product_tot_value': round((cif_value + ii_valor), 2),
             'subtotal': subtotal,
@@ -561,7 +571,7 @@ class ImportDeclarationLine(models.Model):
         return vals
 
     @api.one
-    @api.depends('product_id','quantity','price_unit','amount_discount','weight_unit', 'volume_unit', 'tax_ii_id','tax_ipi_id',
+    @api.depends('product_id','quantity','price_vucv','amount_discount','weight_unit', 'volume_unit', 'tax_ii_id','tax_ipi_id',
                  'ipi_inclui_ii_base','tax_pis_id','tax_cofins_id','tax_icms_id','tax_icms_st_id', 'icms_fator_manual',
                  'icms_difer','icms_aliq_difer')
     def _compute_line(self):
@@ -570,13 +580,14 @@ class ImportDeclarationLine(models.Model):
         vlAfrmm = self.import_declaration_id.afrmm_value
         vlSiscomex = self.import_declaration_id.siscomex_value
         vlDespAdn = self.import_declaration_id.customs_value
+        vlOther = self.import_declaration_id.other_value
         res = self.import_declaration_id._calc_ratio_di()
         # line.id, weight_part, value_part, volume_part, quant_part
         pw = res[self.name][self.sequence_addition][1]
         pv = res[self.name][self.sequence_addition][2]
         vv = res[self.name][self.sequence_addition][3]
         pq = res[self.name][self.sequence_addition][4]
-        vals = self._calcule_line(pw,pv,pq,vv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex,vlDespAdn)
+        vals = self._calcule_line(pw,pv,pq,vv,vlfreight,vlInsurance,vlAfrmm,vlSiscomex,vlDespAdn,vlOther)
         self.update(vals)
 
     def _get_sequence(self):
@@ -595,8 +606,9 @@ class ImportDeclarationLine(models.Model):
     manufacturer_description = fields.Char('Descrição Fabricante')
     uom_id = fields.Many2one('product.uom', string='UM', ondelete='set null', index=True)
     quantity = fields.Float(string='Qtde.', digits=dp.get_precision('Product Unit of Measure'), required=True, default=1)
-    amount_discount = fields.Float(string='Desconto', digits=dp.get_precision('Discount'), default=0.00)
-    price_unit = fields.Float(string='Preço Un', required=True, digits=(18,6), default=0.00)
+    discount = fields.Float(string='% Desconto', digits=dp.get_precision('Discount'), default=0.00)
+    amount_discount = fields.Float(string='Desconto', digits=(12,4), default=0.00)
+    price_vucv = fields.Float(string='VUCV', required=True, digits=(18,7), default=0.00, oldname='price_unit')
     weight_unit = fields.Float(string='Peso Un Liq (kg)', required=True, digits=(12,4), default=0.00)
     volume_unit = fields.Float(string='Volume (m³)', required=True, digits=(18,6), default=0.00)
 
@@ -606,36 +618,39 @@ class ImportDeclarationLine(models.Model):
     volume_part = fields.Float(string='% Volume', digits=(12,4), compute='_compute_line', readonly=True, store=True)
 
     # Fileds Calculados
-    amount_value = fields.Float(string='Valor FOB', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    amount_vucv = fields.Float(string='VUCV FOB', compute='_compute_line', digits=(12,2), readonly=True, store=True, oldname='amount_value')
     amount_value_cl = fields.Float(string='Valor FOB', compute='_compute_line', digits=(12,2), readonly=True, store=True)
     price_unit_cl = fields.Float(string='Preço Un', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
     amount_weight = fields.Float(string='Peso Liq (kg)', compute='_compute_line', digits=(12,4), readonly=True, store=True)
 
-    freight_total = fields.Float(string='Frete Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
-    freight_part = fields.Float(string='Frete Total', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    freight_value = fields.Float(string='Frete Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
+    freight_total = fields.Float(string='Frete Vl.', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    freight_part = fields.Float(string='Frete %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
+    freight_value = fields.Float(string='Frete', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
     
-    insurance_total = fields.Float(string='Seguro Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
-    insurance_part = fields.Float(string='Seguro %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    insurance_value = fields.Float(string='Seguro Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
+    insurance_total = fields.Float(string='Seguro Vl.', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    insurance_part = fields.Float(string='Seguro %', compute='_compute_line', digits=(12,7), readonly=True, store=True)
+    insurance_value = fields.Float(string='Seguro', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
-    afrmm_total = fields.Float(string='AFRMM Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
-    afrmm_part = fields.Float(string='AFRMM %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    afrmm_value = fields.Float(string='AFRMM Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
+    afrmm_total = fields.Float(string='AFRMM Vl.', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    afrmm_part = fields.Float(string='AFRMM %', compute='_compute_line', digits=(12,7), readonly=True, store=True)
+    afrmm_value = fields.Float(string='AFRMM', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
-    siscomex_total = fields.Float(string='SISCOMEX Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
-    siscomex_part = fields.Float(string='SISCOMEX %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    siscomex_value = fields.Float(string='SISCOMEX Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
+    siscomex_total = fields.Float(string='SISCOMEX Vl.', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    siscomex_part = fields.Float(string='SISCOMEX %', compute='_compute_line', digits=(12,7), readonly=True, store=True)
+    siscomex_value = fields.Float(string='SISCOMEX', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
-    desp_aduan_total = fields.Float(string='Desp.Aduana Total', compute='_compute_line', digits=(12,2), readonly=True, store=True)
-    desp_aduan_part = fields.Float(string='Desp.Aduana %', compute='_compute_line', digits=(12,6), readonly=True, store=True)
-    desp_aduan_value = fields.Float(string='Desp.Aduana Valor', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
+    desp_aduan_total = fields.Float(string='Desp. Aduana Vl.', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    desp_aduan_part = fields.Float(string='Desp. Aduana %', compute='_compute_line', digits=(12,7), readonly=True, store=True)
+    desp_aduan_value = fields.Float(string='Desp. Aduana', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
+
+    other_taxs_total = fields.Float(string='Outras Taxas Vl.', compute='_compute_line', digits=(12,2), readonly=True, store=True)
+    other_taxs_part = fields.Float(string='Outras Taxas %', compute='_compute_line', digits=(12,7), readonly=True, store=True)
+    other_taxs_value = fields.Float(string='Outras Taxas', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
     cif_value = fields.Float(string='Valor CIF', compute='_compute_line', digits=(12,2), readonly=True, store=True)
     product_tot_value = fields.Float(string='Valor CIF+AFRMM', compute='_compute_line', digits=(12,2), readonly=True, store=True, oldname='cif_afrmm_value')
     subtotal = fields.Float(string='SubTotal', compute='_compute_line', digits=(12,2), readonly=True, store=True)
 
-    outras_depesas = fields.Float(string='Outras Despesas', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
     price_unit_edoc = fields.Float(string='Preço Un eDoc', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
     
     price_cost = fields.Float(string='Preço Custo Calc', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
@@ -684,6 +699,13 @@ class ImportDeclarationLine(models.Model):
 
     drawback_number = fields.Char('Número Drawback', size=11)
 
+    @api.onchange('discount')
+    def _onchange_discount(self):
+        amount_vucv = self.quantity * self.price_vucv
+        disc_vl = amount_vucv * (self.discount/100) if self.discount > 0.0 else 0.0
+        if disc_vl != self.amount_discount:
+            self.amount_discount = disc_vl
+    
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if bool(self.product_id):
