@@ -148,6 +148,9 @@
                 <field name="outros_valor" invisible="1" />
                 <field name="outros_aliquota" invisible="1" />
                 <field name="informacao_adicional" invisible="1" />
+                <field name="icms_base_calculo_fcp_st" invisible="1" />
+                <field name="tax_icms_fcp_st_id" invisible="1" />
+                <field name="icms_fcp_st" invisible="1" />
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='invoice_line_tax_ids']" position="attributes">
                 <attribute name="invisible">1</attribute>
@@ -340,6 +343,9 @@
                 <field name="icms_aliquota_credito" invisible="1" />
                 <field name="icms_valor_credito" invisible="1" />
                 <field name="icms_st_aliquota_deducao" invisible="1" />
+				<field name="icms_base_calculo_fcp" invisible="1" />
+				<field name="tax_icms_fcp_id" invisible="1" />
+				<field name="icms_fcp" />
                 <field name="issqn_rule_id" invisible="1" />
                 <field name="tax_issqn_id" invisible="1" />
                 <field name="issqn_tipo" invisible="1" />
@@ -396,6 +402,9 @@
                 <field name="outros_valor" invisible="1" />
                 <field name="outros_aliquota" invisible="1" />
                 <field name="informacao_adicional" invisible="1" />
+                <field name="icms_base_calculo_fcp_st" invisible="1" />
+                <field name="tax_icms_fcp_st_id" invisible="1" />
+                <field name="icms_fcp_st" invisible="1" />
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='invoice_line_tax_ids']" position="attributes">
                 <attribute name="invisible">1</attribute>
