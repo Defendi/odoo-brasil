@@ -38,6 +38,7 @@
         'sequence/numero_documento_sequence.xml',
         'wizard/br_boleto_wizard.xml',
         'wizard/send_boleto_email.xml',
+        'views/portal_bank_slips_templates.xml',
     ],
     'installable': True,
     'application': True,
