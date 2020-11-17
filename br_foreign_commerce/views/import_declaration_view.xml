@@ -115,7 +115,7 @@
 						                    <field name="insurance_value"/>
 						                    <field name="desp_aduan_value"/>
 						                     -->
-						                    <field name="cif_value"/>
+						                    <field name="cif_value" string="Aduaneiro"/>
 						                    <!-- 
 						                    <field name="afrmm_total" invisible="1"/>
 						                    <field name="afrmm_part" invisible="1"/>
@@ -230,6 +230,9 @@
 											                    <field name="desp_aduan_total" string="THC+THC2 Vl." groups="base.group_no_one"/> <!-- widget='monetary' options="{'currency_field': 'currency_id'}"/>  -->
 											                    <field name="desp_aduan_part" string="THC+THC2 %" groups="base.group_no_one"/>
 											                    <field name="desp_aduan_value" string="[+] THC+THC2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+											                    <field name="ajuste_total" string="Ajuste Vl." groups="base.group_no_one"/> 
+											                    <field name="ajuste_part" string="Ajuste %" groups="base.group_no_one"/>
+											                    <field name="ajuste_value" string="[±] Ajuste" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 											                    <field name="cif_value" string="[=] Aduaneiro" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										                	</group>
 										                	<group string="CMV">
@@ -330,7 +333,7 @@
 									</group>
 									<group colspan="4" class="oe_subtotal_footer oe_right">
 										<field name="total_fob_lc" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="total_cif" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="total_cif" string="Vl Aduaneiro" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_imposto" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_depesa" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="total_nota" widget='monetary' options="{'currency_field': 'currency_id'}"/>
@@ -356,11 +359,12 @@
 	                        			<field name='total_produto_qty'/>
 	                        			<field name='total_weight'/>
 	                        			<field name='total_volume'/>
-										<field name="total_produtos"/>
+	                        			<field name="total_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 	                        		</group>
 	                        		<group>
 				                        <field name="fiscal_position_id" required="1"/>
 				                        <field name="freight_mode"/>
+				                        <field name="adjust_cb"/>
 	                        		</group>
 	                        	</group>
 	                        	<group>
