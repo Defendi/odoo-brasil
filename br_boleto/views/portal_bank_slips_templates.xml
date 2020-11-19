@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data> <!-- noupdate="0"> --> 
+    <template id="portal_my_home_menu_bank_slips" name="Layout do Portal: entradas para o menu de Boletos" inherit_id="portal.portal_layout" priority="50">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <!-- <li t-if="page_name == 'bank_slips' or bank_slips"> -->
+                <t t-if="bank_slips">Boletos</t>
+             <!-- <t t-else="">Boletos</t>
+            </li>
+            <li t-if="bank_slips">
+                #<span t-field="bank_slips.id"/>
+            </li> -->
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_bank_slips" name="Portal Boletos: bank_slips" inherit_id="portal.portal_my_home" priority="50">
+        <xpath expr="//ul[hasclass('o_portal_docs')]" position="inside">
+            <li t-if="bank_slips_count" class="list-group-item">
+                <span class="badge" t-esc="bank_slips_count"/>
+                <a href="bank_slips">Boletos</a>
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_bank_slips" name="My Bank Slips">
+        <t t-call="portal.portal_layout">
+            <h3>Boletos
+                <!-- <t t-call="portal.portal_searchbar"/> -->
+            </h3>
+            <t t-if="not bank_slips">
+                <p>No momento, não há documentos disponíveis para você.</p>
+            </t>
+            <div t-if="bank_slips" class="panel panel-default">
+                <div class="table-responsive">
+                <table class="table table-hover o_portal_my_doc_table">
+                    <thead>
+                        <tr class="active">
+                            <th>Ref.</th>
+                            <th>Emissão</th>
+                            <th>Vencimento</th>
+                            <th>Valor</th>
+                            <th>Imprimir</th>
+                        </tr>
+                    </thead>
+                    <t t-foreach="bank_slips" t-as="bankslips">
+                        <tr>
+                            <td><span t-field="bankslips.name"/></td>
+                            <td><span t-field="bankslips.emission_date"/></td>
+                            <td><span t-field="bankslips.date_maturity"/></td>
+                            <td><span t-field="bankslips.value_final"/></td>
+                            <td>
+				                <a target="_blank" t-att-href="'/my/bank_slips/pdf/%s' % (bankslips.id)" alt="Imprimir" class="btn btn-xs btn-primary">
+				                    <i class="fa fa-download fa-2x"/><span class='hidden-xs'> Boleto</span>
+				                </a>
+                            </td>
+                        </tr>
+                    </t>
+                </table></div>
+                <div t-if="pager" class="o_portal_pager text-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</data>
+</odoo>

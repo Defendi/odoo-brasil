@@ -1028,13 +1028,15 @@ class InvoiceEletronic(models.Model):
             }
             self.recibo_nfe = obj['obj']['numero_recibo']
             import time
-            while True:
+            tentativas = 0
+            while tentativas < 15:
                 _logger.info('-> NF-e Verificando Lote (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
                 time.sleep(3)
                 resposta_recibo = retorno_autorizar_nfe(certificado, **obj)
                 retorno = resposta_recibo['object'].getchildren()[0]
                 if retorno.cStat != 105:
                     break
+                tentativas += 1
 
         if retorno.cStat == 108:
             _logger.info('-> NF-e Serviço Paralisado Momentaneamente (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
@@ -1048,8 +1050,16 @@ class InvoiceEletronic(models.Model):
                 'qrcode': False,
             })
             self.action_post_validate()
-            
-        if retorno.cStat != 104:
+
+        if retorno.cStat == 105:
+            _logger.info('-> eDoc - Lote em processamento (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
+            self.write({
+                'codigo_retorno': retorno.cStat,
+                'mensagem_retorno': 'Verifica o processamento mais tarde, %s' % retorno.xMotivo,
+            })
+            #self.notify_user()
+            return False
+        elif retorno.cStat != 104:
             _logger.info('-> NF-e Lote processado (%s) (%.2f) - %s' % (self.numero, self.valor_final, self.partner_id.name))
             self.write({
                 'codigo_retorno': retorno.cStat,
@@ -1068,8 +1078,8 @@ class InvoiceEletronic(models.Model):
                     'protocolo_nfe': retorno.protNFe.infProt.nProt,
                     'data_autorizacao': retorno.protNFe.infProt.dhRecbto
                 })
-            else:
-                self.notify_user()
+#             else:
+#                 self.notify_user()
             # Duplicidade de NF-e significa que a nota já está emitida
             # TODO Buscar o protocolo de autorização, por hora só finalizar
             if self.codigo_retorno == '204':

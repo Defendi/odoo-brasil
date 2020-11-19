@@ -1,0 +1,98 @@
+id,shortcut,code,name,reconcile,type,user_type_id/id,account_type,group_id/id,chart_template_id:id
+xtiger_cc_1_1_1_01_001,1,1.1.1.01.001,Dinheiro,0,liquidity,account.data_account_type_liquidity,,xtiger_gp_1_1_1,br_account_fleet_chart_template
+xtiger_cc_1_1_1_02_001,4,1.1.1.02.001,Bancos,0,liquidity,account.data_account_type_liquidity,,xtiger_gp_1_1_1,br_account_fleet_chart_template
+xtiger_cc_1_1_2_01_001,7,1.1.2.01.001,Clientes (A Receber),1,receivable,account.data_account_type_receivable,,xtiger_gp_1_1_2,br_account_fleet_chart_template
+xtiger_cc_1_1_2_03_001,10,1.1.2.03.001,Adiantamentos,1,receivable,account.data_account_type_current_assets,,xtiger_gp_1_1_2,br_account_fleet_chart_template
+xtiger_cc_1_1_3_01_001,13,1.1.3.01.001,Matéria Prima,0,view,account.data_account_type_current_assets,,xtiger_gp_1_1_3,br_account_fleet_chart_template
+xtiger_cc_1_1_3_02_001,16,1.1.3.02.001,Peças de Reposição,0,view,account.data_account_type_current_assets,,xtiger_gp_1_1_3,br_account_fleet_chart_template
+xtiger_cc_1_1_3_05_999,19,1.1.3.05.999,Estoque em Trânsito,0,view,account.data_account_type_current_assets,,xtiger_gp_1_1_3,br_account_fleet_chart_template
+xtiger_cc_1_1_4_01_001,22,1.1.4.01.001,Impostos a Recuperar,0,other,account.data_account_type_current_assets,,xtiger_gp_1_1_4,br_account_fleet_chart_template
+xtiger_cc_1_1_4_03_001,25,1.1.4.03.001,"Títulos a Receber, Cartão Crédito/Débito",1,receivable,account.data_account_type_current_assets,,xtiger_gp_1_1_4,br_account_fleet_chart_template
+xtiger_cc_1_1_4_03_002,28,1.1.4.03.002,Outros Valores a Receber,1,receivable,account.data_account_type_current_assets,,xtiger_gp_1_1_4,br_account_fleet_chart_template
+xtiger_cc_1_2_2_01_001,31,1.2.2.01.001,Investimentos,0,other,account.data_account_type_current_assets,,xtiger_gp_1_2_2,br_account_fleet_chart_template
+xtiger_cc_1_2_3_01_001,34,1.2.3.01.001,Imóveis,0,other,account.data_account_type_current_assets,,xtiger_gp_1_2_3,br_account_fleet_chart_template
+xtiger_cc_1_2_3_01_002,37,1.2.3.01.002,"Veículos, Máquinas e Equipamentos",0,other,account.data_account_type_current_assets,,xtiger_gp_1_2_3,br_account_fleet_chart_template
+xtiger_cc_1_2_3_01_003,40,1.2.3.01.003,"Móveis, Aparelhos e Utens�lios",0,other,account.data_account_type_current_assets,,xtiger_gp_1_2_3,br_account_fleet_chart_template
+xtiger_cc_1_2_3_01_004,43,1.2.3.01.004,Ferramentas,0,other,account.data_account_type_current_assets,,xtiger_gp_1_2_3,br_account_fleet_chart_template
+xtiger_cc_1_2_3_02_001,46,1.2.3.02.001,Adiantamentos a Consórcio de Bens,0,other,account.data_account_type_current_assets,,xtiger_gp_1_2_3,br_account_fleet_chart_template
+xtiger_cc_1_2_3_03_001,49,1.2.3.03.001,(-) Depreciação Acumulada,0,other,account.data_account_type_depreciation,,xtiger_gp_1_2_3,br_account_fleet_chart_template
+xtiger_cc_2_1_1_01_001,52,2.1.1.01.001,Empréstimos e Financiamentos,1,payable,account.data_account_type_payable,,xtiger_gp_2_1_1,br_account_fleet_chart_template
+xtiger_cc_2_1_2_01_001,55,2.1.2.01.001,Fornecedores (a Pagar),1,payable,account.data_account_type_payable,,xtiger_gp_2_1_2,br_account_fleet_chart_template
+xtiger_cc_2_1_3_01_001,58,2.1.3.01.001,"Salários, Obrigações trabalhistas a Pagar",1,payable,account.data_account_type_payable,,xtiger_gp_2_1_3,br_account_fleet_chart_template
+xtiger_cc_2_1_4_01_001,61,2.1.4.01.001,Impostos a Recolher,1,payable,account.data_account_type_current_liabilities,,xtiger_gp_2_1_4,br_account_fleet_chart_template
+xtiger_cc_3_1_1_01_001,64,3.1.1.01.001,Venda de Mercadorias,0,other,account.data_account_type_revenue,Receita,xtiger_gp_3_1_1,br_account_fleet_chart_template
+xtiger_cc_3_1_1_01_002,67,3.1.1.01.002,Venda de Serviços,0,other,account.data_account_type_revenue,Receita,xtiger_gp_3_1_1,br_account_fleet_chart_template
+xtiger_cc_3_1_1_01_003,70,3.1.1.01.003,Venda de Sucatas,0,other,account.data_account_type_revenue,Receita,xtiger_gp_3_1_1,br_account_fleet_chart_template
+xtiger_cc_3_1_1_02_001,73,3.1.1.02.001,Rendimentos Aplicações Financeiras,0,other,account.data_account_type_revenue,Receita,xtiger_gp_3_1_1,br_account_fleet_chart_template
+xtiger_cc_3_1_1_02_002,76,3.1.1.02.002,Juros Multas Recebidas,0,other,account.data_account_type_revenue,Receita,xtiger_gp_3_1_1,br_account_fleet_chart_template
+xtiger_cc_3_1_1_02_003,79,3.1.1.02.003,Descontos Recebidos,0,other,account.data_account_type_revenue,Receita,xtiger_gp_3_1_1,br_account_fleet_chart_template
+xtiger_cc_3_1_1_03_001,82,3.1.1.03.001,Receitas de Venda de Imobilizado,0,other,account.data_account_type_revenue,Receita,xtiger_gp_3_1_1,br_account_fleet_chart_template
+xtiger_cc_3_1_1_03_004,85,3.1.1.03.004,Variação Monetária Ativa,0,other,account.data_account_type_revenue,Receita,xtiger_gp_3_1_1,br_account_fleet_chart_template
+xtiger_cc_3_1_2_01_001,88,3.1.2.01.001,Vendas Canceladas,0,other,account.data_account_type_direct_costs,Despesa,xtiger_gp_3_1_2,br_account_fleet_chart_template
+xtiger_cc_3_1_2_01_003,91,3.1.2.01.003,"Impostos Sobre Venda (ICMS,PIS,COFINS,DAS)",0,other,account.data_account_type_direct_costs,Imposto,xtiger_gp_3_1_2,br_account_fleet_chart_template
+xtiger_cc_3_2_1_01_001,94,3.2.1.01.001,Custo Mercadoria Vendida CMV,0,other,account.data_account_type_direct_costs,Despesa,xtiger_gp_3_2_1,br_account_fleet_chart_template
+xtiger_cc_3_2_1_01_003,97,3.2.1.01.003,Custo Sobre Serviços Vendidos CSV,0,other,account.data_account_type_direct_costs,Despesa,xtiger_gp_3_2_1,br_account_fleet_chart_template
+xtiger_cc_3_2_1_01_004,100,3.2.1.01.004,Fretes Sobre Compras Insumos,0,other,account.data_account_type_direct_costs,Receita,xtiger_gp_3_2_1,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_001,103,3.2.2.01.001,Salários,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_002,106,3.2.2.01.002,Pro-labore,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_003,109,3.2.2.01.003,INSS Pro-labore,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_004,112,3.2.2.01.004,13. Salário,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_005,115,3.2.2.01.005,Férias,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_006,118,3.2.2.01.006,INSS,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_008,124,3.2.2.01.008,FGTS,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_009,127,3.2.2.01.009,Alimentação,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_010,130,3.2.2.01.010,Vale Transporte,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_011,133,3.2.2.01.011,Treinamentos,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_2_01_012,136,3.2.2.01.012,Exames e Medicamentos,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_2,br_account_fleet_chart_template
+xtiger_cc_3_2_3_01_001,139,3.2.3.01.001,Comissões Sobre Vendas,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_01_002,142,3.2.3.01.002,Propaganda e Maketing,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_01_003,145,3.2.3.01.003,Sites e Redes Sociais,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_001,148,3.2.3.02.001,Água e Esgoto,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_002,151,3.2.3.02.002,Energia Elétrica,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_003,154,3.2.3.02.003,Telefone e Comunicação,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_004,157,3.2.3.02.004,Internet,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_006,160,3.2.3.02.006,Material de Limpeza,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_007,163,3.2.3.02.007,Gás,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_008,166,3.2.3.02.008,Aluguel,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_009,169,3.2.3.02.009,Combustíveis,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_010,172,3.2.3.02.010,Refeições,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_011,175,3.2.3.02.011,Seguros,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_012,178,3.2.3.02.012,Viagens e Estadias,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_013,181,3.2.3.02.013,Material de Escritório,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_015,184,3.2.3.02.015,Bens de Pequeno Valor,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_016,187,3.2.3.02.016,Donativos,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_017,190,3.2.3.02.017,Indenizações,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_018,193,3.2.3.02.018,Manutenção e Reparo,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_02_999,196,3.2.3.02.999,Depreciações e Amortizações,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_03_001,199,3.2.3.03.001,Assistência Contábil,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_03_002,202,3.2.3.03.002,Assistência Jurídica,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_03_003,205,3.2.3.03.003,Assistência Consultoria,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_03_004,208,3.2.3.03.004,Ferramenta de Gestão - Mensalidade,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_03_005,211,3.2.3.03.005,Despesas com Baixa de Imobilizado,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_03_006,214,3.2.3.03.006,Despesas com Baixa de Investimentos,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_3_03_007,217,3.2.3.03.007,Perda de Estoques,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_3,br_account_fleet_chart_template
+xtiger_cc_3_2_4_01_001,220,3.2.4.01.001,Juros Multas Pagas,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_4,br_account_fleet_chart_template
+xtiger_cc_3_2_4_01_002,223,3.2.4.01.002,Despesas Bancárias,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_4,br_account_fleet_chart_template
+xtiger_cc_3_2_4_01_003,226,3.2.4.01.003,Descontos Concedidos,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_4,br_account_fleet_chart_template
+xtiger_cc_3_2_4_01_004,229,3.2.4.01.004,Variação Monetária Passiva,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_4,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_001,232,3.2.5.01.001,Frota - Peças Acessórios,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_002,235,3.2.5.01.002,Frota - Mão de Obra - Manutenção,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_003,238,3.2.5.01.003,Frota - Custo de Revisão,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_004,241,3.2.5.01.004,Frota - Limpeza e Conservação,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_005,244,3.2.5.01.005,Frota - Graxa,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_006,247,3.2.5.01.006,Frota - Óleo Motor,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_007,250,3.2.5.01.007,Frota - Óleo Caixa,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_008,253,3.2.5.01.008,Frota - Óleo Hidráulico,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_009,256,3.2.5.01.009,Frota - IPVA,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_010,259,3.2.5.01.010,Frota - Licenciamento,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_011,262,3.2.5.01.011,Frota - DPVAT,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_012,265,3.2.5.01.012,Frota - Multa de Trânsito,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_013,268,3.2.5.01.013,Frota - Pneus e Esteiras,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_01_014,271,3.2.5.01.014,Frota - Borracharia,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_02_001,274,3.2.5.02.001,Frota - Seguro,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_02_002,277,3.2.5.02.002,Frota - Sinistros,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_02_003,280,3.2.5.02.003,"Frota - Compra Rastreador e Instalação",0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_02_004,283,3.2.5.02.004,"Frota - Mensalidade, Anuidade de Rastreamento",0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_5_02_005,286,3.2.5.02.005,Frota - Recarga de Chip Rastreador,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_5,br_account_fleet_chart_template
+xtiger_cc_3_2_6_01_001,289,3.2.6.01.001,IOF / IPTU / ITR,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_6,br_account_fleet_chart_template
+xtiger_cc_3_2_6_02_002,292,3.2.6.02.002,IRPJ,0,other,account.data_account_type_expenses,Despesa,xtiger_gp_3_2_6,br_account_fleet_chart_template

@@ -129,7 +129,7 @@ class AccountInvoiceLine(models.Model):
                 + valor_seguro + outras_despesas
         else:
             base_icms_credito = 0.0
- 
+
         price_subtotal_signed = price_subtotal_signed * sign
         dif_icms_dif = (self.icms_valor - self.icms_valor_diferido)
         self.update({
@@ -602,6 +602,7 @@ class AccountInvoiceLine(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
+        self.issqn_tipo = 'N'
         domain = super(AccountInvoiceLine,self)._onchange_product_id()
         return domain
         

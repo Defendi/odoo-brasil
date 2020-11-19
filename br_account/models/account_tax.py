@@ -282,7 +282,7 @@ class AccountTax(models.Model):
 
         taxes = [vals_inter, vals_intra]
         if vals_fcp:
-            fcp = icms_fcp._compute_amount(base_icms, 1.0)
+            fcp = icms_fcp._compute_amount(base_icms, 1.0) or 0.0
             vals_fcp['amount'] = fcp
             vals_fcp['base'] = base_icms
             taxes += [vals_fcp]
@@ -411,8 +411,9 @@ class AccountTax(models.Model):
 
         for tax in taxes:
             tax_id = self.filtered(lambda x: x.id == tax['id'])
+            amount = tax['amount'] if bool(tax.get('amount',None)) else 0.0
             if not tax_id.price_include:
-                total_included += round(tax['amount'], precision)
+                total_included += round(amount, precision)
 
         return {
             'taxes': sorted(taxes, key=lambda k: k['sequence']),

@@ -34,12 +34,10 @@ class ResPartner(models.Model):
     rg_fisica = fields.Char('RG', size=16, copy=False)
     inscr_mun = fields.Char('Municipal Inscription', size=18)
     suframa = fields.Char('Suframa', size=18)
-    legal_name = fields.Char(
-        u'Legal Name', size=60, help="Name used in fiscal documents")
+    legal_name = fields.Char('Legal Name', size=60, help="Name used in fiscal documents")
     country_id = fields.Many2one('res.country', string='Country', ondelete='restrict', default=_default_country)
-    city_id = fields.Many2one(
-        'res.state.city', u'City',
-        domain="[('state_id','=',state_id)]")
+    ibge_code = fields.Char(related='country_id.ibge_code')
+    city_id = fields.Many2one('res.state.city', 'City', domain="[('state_id','=',state_id)]")
     district = fields.Char('District', size=32)
     number = fields.Char(u'Number', size=10)
 
@@ -131,9 +129,9 @@ class ResPartner(models.Model):
             country_code = item.country_id.code or ''
             if item.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
                 if item.is_company:
-                    if not fiscal.validate_cnpj(item.cnpj_cpf):
+                    if re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000000" and not fiscal.validate_cnpj(item.cnpj_cpf):
                         raise ValidationError(_(u'Invalid CNPJ Number!'))
-                elif not fiscal.validate_cpf(item.cnpj_cpf):
+                elif re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000" and not fiscal.validate_cpf(item.cnpj_cpf):
                     raise ValidationError(_(u'Invalid CPF Number!'))
         return True
 
