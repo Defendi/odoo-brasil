@@ -42,7 +42,7 @@ class PaymentAccountMoveLine(models.TransientModel):
     )
     journal_id = fields.Many2one(
         'account.journal', string="Diário", required=True,
-        domain=[('type', 'in', ('bank', 'cash'))]
+        domain=[('type', 'in', ('bank', 'cash', 'general'))]
     )
     communication = fields.Char(string='Anotações')
     payment_date = fields.Date(

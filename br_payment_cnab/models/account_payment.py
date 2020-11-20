@@ -23,58 +23,52 @@ class account_payment(models.Model):
         """ Create a journal entry corresponding to a payment, if the payment references invoice(s) they are reconciled.
             Return the journal entry.
         """
-        aml_fee = self.fee + self.interest
+        fee_interest_vl = self.fee + self.interest
         aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
+        company = self.company_id or self.env.user.company_id
         debit, credit, amount_currency, currency_id = aml_obj.with_context(date=self.payment_date)._compute_amount_fields(amount, self.currency_id, self.company_id.currency_id)
 
         if amount < 0.0:
             pdebit = 0.0
-            pcredit = (amount + (self.discount * (-1)) + aml_fee) * (-1)
+            pcredit = (amount + (self.discount * (-1)) + fee_interest_vl) * (-1)
+            discount_account_id = company.l10n_br_payment_discount_account_id
+            fee_account_id = company.l10n_br_interest_account_id
         else:
-            pdebit = ((amount + self.discount) - aml_fee)
+            pdebit = ((amount + self.discount) - fee_interest_vl)
             pcredit = 0.0
-        
+            discount_account_id = company.l10n_br_discount_account_id
+            fee_account_id = company.l10n_br_payment_interest_account_id
+            
         move = self.env['account.move'].create(self._get_move_vals())
-        
-        company = self.company_id or self.env.user.company_id
 
-        if self.discount > 0.0:
+        if self.discount > 0.0 and bool(discount_account_id):
             if amount < 0.0:
-                if bool(company.out_discount_account_id):
-                    discount_aml_dict = self._get_shared_move_line_vals(self.discount, 0.0, amount_currency, move.id, False)
-                    discount_aml_dict.update({'name': 'Desconto %s' % self.name,
-                                              'account_id': company.out_discount_account_id.id,
-                                              'currency_id': currency_id,
-                                              'company_id': company.id})
-                    discount_aml = aml_obj.create(discount_aml_dict)
-                    #credit = credit - self.discount
+                discount_aml_dict = self._get_shared_move_line_vals(self.discount, 0.0, amount_currency, move.id, False)
+                discount_aml_dict.update({'name': 'Desconto %s' % self.name,
+                                          'account_id': discount_account_id.id,
+                                          'currency_id': currency_id,
+                                          'company_id': company.id})
             else:
-                if bool(company.in_discount_account_id):
-                    discount_aml_dict = self._get_shared_move_line_vals(0.0, self.discount, amount_currency, move.id, False)
-                    discount_aml_dict.update({'name': 'Desconto %s' % self.name,
-                                              'account_id': company.in_discount_account_id.id,
-                                              'currency_id': currency_id})
-                    discount_aml = aml_obj.create(discount_aml_dict)
-                    #debit = debit - self.discount
+                discount_aml_dict = self._get_shared_move_line_vals(0.0, self.discount, amount_currency, move.id, False)
+                discount_aml_dict.update({'name': 'Desconto %s' % self.name,
+                                          'account_id': discount_account_id.id,
+                                          'currency_id': currency_id})
+            aml_obj.create(discount_aml_dict)
 
-        
-        if aml_fee > 0.0:
+        if fee_interest_vl > 0.0 and bool(fee_account_id):
             if amount < 0.0:
-                if bool(company.l10n_br_interest_account_id):
-                    fee_aml_dict = self._get_shared_move_line_vals(0.0, aml_fee, amount_currency, move.id, False)
-                    fee_aml_dict.update({'name': 'Multa/Juros %s' % self.name,
-                                         'account_id': company.l10n_br_interest_account_id.id,
-                                         'currency_id': currency_id,
-                                         'company_id': company.id})
-                    fee_aml = aml_obj.create(fee_aml_dict)
+                fee_aml_dict = self._get_shared_move_line_vals(0.0, fee_interest_vl, amount_currency, move.id, False)
+                fee_aml_dict.update({'name': 'Multa/Juros %s' % self.name,
+                                     'account_id': fee_account_id.id,
+                                     'currency_id': currency_id,
+                                     'company_id': company.id})
             else:
-                if bool(company.l10n_br_payment_interest_account_id):
-                    fee_aml_dict = self._get_shared_move_line_vals(aml_fee, 0.0, amount_currency, move.id, False)
-                    fee_aml_dict.update({'name': 'Multa/Juros %s' % self.name,
-                                         'account_id': company.l10n_br_payment_interest_account_id.id,
-                                         'currency_id': currency_id,
-                                         'company_id': company.id})
-                    fee_aml = aml_obj.create(fee_aml_dict)
+                fee_aml_dict = self._get_shared_move_line_vals(fee_interest_vl, 0.0, amount_currency, move.id, False)
+                fee_aml_dict.update({'name': 'Multa/Juros %s' % self.name,
+                                     'account_id': fee_account_id.id,
+                                     'currency_id': currency_id,
+                                     'company_id': company.id})
+            aml_obj.create(fee_aml_dict)
                 
         #Write line corresponding to invoice payment
         counterpart_aml_dict = self._get_shared_move_line_vals(pdebit, pcredit, amount_currency, move.id, False)

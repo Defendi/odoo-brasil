@@ -20,6 +20,18 @@
                         </div>
                     </div>
                     <div class="o_setting_right_pane">
+                        <label for="l10n_br_discount_account_id" />
+                        <div class="text-muted">
+                            Selecione a conta usada para registrar descontos concedidos
+                        </div>
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label string="Conta" class="col-md-3 o_light_label" />
+                                <field name="l10n_br_discount_account_id" domain="[('company_id', '=', company_id)]"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="o_setting_right_pane">
                         <label for="l10n_br_bankfee_account_id" />
                         <div class="text-muted">
                             Selecione a conta usada para registrar tarifas bancárias
