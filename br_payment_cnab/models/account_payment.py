@@ -26,13 +26,13 @@ class account_payment(models.Model):
         aml_fee = self.fee + self.interest
         aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
         debit, credit, amount_currency, currency_id = aml_obj.with_context(date=self.payment_date)._compute_amount_fields(amount, self.currency_id, self.company_id.currency_id)
+
         if amount < 0.0:
             pdebit = 0.0
-            pcredit = (amount + aml_fee) * (-1)
+            pcredit = (amount + (self.discount * (-1)) + aml_fee) * (-1)
         else:
-            pdebit = (amount - aml_fee)
+            pdebit = ((amount + self.discount) - aml_fee)
             pcredit = 0.0
-
         
         move = self.env['account.move'].create(self._get_move_vals())
         
@@ -47,7 +47,7 @@ class account_payment(models.Model):
                                               'currency_id': currency_id,
                                               'company_id': company.id})
                     discount_aml = aml_obj.create(discount_aml_dict)
-                    credit = credit - self.discount
+                    #credit = credit - self.discount
             else:
                 if bool(company.in_discount_account_id):
                     discount_aml_dict = self._get_shared_move_line_vals(0.0, self.discount, amount_currency, move.id, False)
@@ -55,7 +55,7 @@ class account_payment(models.Model):
                                               'account_id': company.in_discount_account_id.id,
                                               'currency_id': currency_id})
                     discount_aml = aml_obj.create(discount_aml_dict)
-                    debit = debit - self.discount
+                    #debit = debit - self.discount
 
         
         if aml_fee > 0.0:
@@ -108,9 +108,6 @@ class account_payment(models.Model):
             liquidity_aml_dict.update({'company_id': company.id})
             aml_obj.create(liquidity_aml_dict)
 
-#         _logger.info('nome; credito; debito; saldo')
-#         for line_move in move.line_ids:
-#             _logger.info('%s; %s; %s' % (line_move.name,str(line_move.credit),str(line_move.debit)))            
         #validate the payment
         move.post()
 

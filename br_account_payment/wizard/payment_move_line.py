@@ -23,7 +23,7 @@ class PaymentAccountMoveLine(models.TransientModel):
     @api.depends('fee','interest','principal','discount')
     def _pay_amount(self):
         self.pay_sub = (self.principal + self.discount)
-        self.pay_amount = self.pay_sub + self.fee + self.interest
+        self.pay_amount = self.principal + self.fee + self.interest
             
     company_id = fields.Many2one(
         'res.company', related='journal_id.company_id',
