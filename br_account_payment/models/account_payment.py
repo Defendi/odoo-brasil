@@ -50,16 +50,15 @@ class AccountPayment(models.Model):
         return action
 
     @api.one
-    @api.depends('invoice_ids', 'amount', 'payment_date', 'currency_id')
+    @api.depends('invoice_ids', 'amount', 'payment_date', 'currency_id', 'discount')
     def _compute_payment_difference(self):
         if len(self.invoice_ids) == 0:
             return
-        if self.invoice_ids[0].type in ['in_invoice', 'out_refund']:
-            self.payment_difference = self.amount - self._compute_total_invoices_amount()
-        else:
-            self.payment_difference = self._compute_total_invoices_amount() - self.amount
         
-        self.payment_difference += (self.fee + self.interest)
+        if self.invoice_ids[0].type in ['in_invoice', 'out_refund']:
+            self.payment_difference = self.pay_sub - self._compute_total_invoices_amount()
+        else:
+            self.payment_difference = self._compute_total_invoices_amount() - self.pay_sub
     
     def _create_payment_entry(self, amount):
         """ Create a journal entry corresponding to a payment, if the payment references invoice(s) they are reconciled.
@@ -68,18 +67,21 @@ class AccountPayment(models.Model):
         fee_interest_vl = self.fee + self.interest
         aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
         company = self.company_id or self.env.user.company_id
-        debit, credit, amount_currency, currency_id = aml_obj.with_context(date=self.payment_date)._compute_amount_fields(amount, self.currency_id, self.company_id.currency_id)
 
         if amount < 0.0:
             pdebit = 0.0
-            pcredit = (amount + (self.discount * (-1)) + fee_interest_vl) * (-1)
-            discount_account_id = company.l10n_br_payment_discount_account_id
-            fee_account_id = company.l10n_br_interest_account_id
-        else:
-            pdebit = ((amount + self.discount) - fee_interest_vl)
-            pcredit = 0.0
+            pcredit = (amount * (-1)) + self.discount
             discount_account_id = company.l10n_br_discount_account_id
+            fee_account_id = company.l10n_br_interest_account_id
+            total_vl = amount + (fee_interest_vl  * (-1)) 
+        else:
+            pdebit = amount + self.discount
+            pcredit = 0.0
+            discount_account_id = company.l10n_br_payment_discount_account_id
             fee_account_id = company.l10n_br_payment_interest_account_id
+            total_vl = amount + fee_interest_vl
+
+        debit, credit, amount_currency, currency_id = aml_obj.with_context(date=self.payment_date)._compute_amount_fields(total_vl, self.currency_id, self.company_id.currency_id)
             
         move = self.env['account.move'].create(self._get_move_vals())
 
