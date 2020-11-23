@@ -1,7 +1,11 @@
 # © 2016 Alessandro Fernandes Martini, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+import logging
 
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
@@ -64,22 +68,25 @@ class AccountPayment(models.Model):
         """ Create a journal entry corresponding to a payment, if the payment references invoice(s) they are reconciled.
             Return the journal entry.
         """
+        if not bool(self.journal_id.default_credit_account_id):
+            raise UserError('Selecione a conta de Crédito no diário.')
+        if not bool(self.journal_id.default_debit_account_id):
+            raise UserError('Selecione a conta de Débito no diário.')
         fee_interest_vl = self.fee + self.interest
         aml_obj = self.env['account.move.line'].with_context(check_move_validity=False)
         company = self.company_id or self.env.user.company_id
-
         if amount < 0.0:
+            discount_account_id = company.l10n_br_discount_account_id
             pdebit = 0.0
             pcredit = (amount * (-1)) + self.discount
-            discount_account_id = company.l10n_br_discount_account_id
             fee_account_id = company.l10n_br_interest_account_id
-            total_vl = amount + (fee_interest_vl  * (-1)) 
+            total_vl = amount + (fee_interest_vl  * (-1)) if bool(discount_account_id) else amount + (fee_interest_vl * (-1)) + (self.discount * (-1))
         else:
+            discount_account_id = company.l10n_br_payment_discount_account_id
             pdebit = amount + self.discount
             pcredit = 0.0
-            discount_account_id = company.l10n_br_payment_discount_account_id
             fee_account_id = company.l10n_br_payment_interest_account_id
-            total_vl = amount + fee_interest_vl
+            total_vl = amount + fee_interest_vl if bool(discount_account_id) else amount + fee_interest_vl + self.discount
 
         debit, credit, amount_currency, currency_id = aml_obj.with_context(date=self.payment_date)._compute_amount_fields(total_vl, self.currency_id, self.company_id.currency_id)
             
@@ -97,7 +104,7 @@ class AccountPayment(models.Model):
                 discount_aml_dict.update({'name': 'Desconto %s' % self.name,
                                           'account_id': discount_account_id.id,
                                           'currency_id': currency_id})
-            aml_obj.create(discount_aml_dict)
+            aml_obj += aml_obj.create(discount_aml_dict)
 
         if fee_interest_vl > 0.0 and bool(fee_account_id):
             if amount < 0.0:
@@ -112,13 +119,14 @@ class AccountPayment(models.Model):
                                      'account_id': fee_account_id.id,
                                      'currency_id': currency_id,
                                      'company_id': company.id})
-            aml_obj.create(fee_aml_dict)
+            aml_obj += aml_obj.create(fee_aml_dict)
                 
         #Write line corresponding to invoice payment
         counterpart_aml_dict = self._get_shared_move_line_vals(pdebit, pcredit, amount_currency, move.id, False)
         counterpart_aml_dict.update(self._get_counterpart_move_line_vals(self.invoice_ids))
         counterpart_aml_dict.update({'currency_id': currency_id, 'company_id': company.id})
         counterpart_aml = aml_obj.create(counterpart_aml_dict)
+        aml_obj += counterpart_aml 
 
         #Reconcile with the invoices
         if self.payment_difference_handling == 'reconcile' and self.payment_difference:
@@ -144,8 +152,14 @@ class AccountPayment(models.Model):
             liquidity_aml_dict = self._get_shared_move_line_vals(credit, debit, -amount_currency, move.id, False)
             liquidity_aml_dict.update(self._get_liquidity_move_line_vals(-amount))
             liquidity_aml_dict.update({'company_id': company.id})
-            aml_obj.create(liquidity_aml_dict)
+            aml_obj += aml_obj.create(liquidity_aml_dict)
 
+        saldo = 0.0
+        _logger.info('Descrição; Crédito; Débito; Saldo;')
+        for line in aml_obj:
+            saldo += (line.credit - line.debit)
+            _logger.info('%s; %s; %s; %s;' % (str(line.name), str(line.credit),str(line.debit),str(saldo)))
+            
         #validate the payment
         move.post()
 

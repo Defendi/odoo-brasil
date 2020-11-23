@@ -14,10 +14,10 @@
             </xpath>
             <field name="journal_id" position="before">
                 <field name="discount"/>
-                <field name="pay_sub"/>
+                <field name="pay_sub" string="Subtotal"/>
                 <field name="interest"/>
                 <field name="fee"/>
-                <field name="pay_amount"/>
+                <field name="pay_amount" string="Recebido"/>
             </field>
         </field>
     </record>

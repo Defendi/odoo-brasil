@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <form string="Payment Move Line">
                 <sheet>
-                    <group>
+                	<group colspan="4">
 	                    <field name="company_id" invisible="1"/>
 	                    <field name="currency_id" invisible="1"/>
 	                    <field name="partner_type" invisible="1"/>
@@ -18,19 +18,31 @@
 	                    <div>
 	                        <field name="date_maturity" class="oe_inline"/>
 	                        <label string=" - " class="oe_inline" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}" style="color: red;"/>
-	                     <field name="late_payment" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}" style="color: red;" class="oe_inline"/>
+	                     	<field name="late_payment" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}" style="color: red;" class="oe_inline"/>
 	                        <label string=" - dia(s) em atraso" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}" style="color: red;" class="oe_inline"/>
 	                    </div>
-	                    <field name="payment_date"/>
-	                    <field name="invoice_id" attrs="{'invisible': [('invoice_id', '=', False)]}"/>
-	                    <field name="journal_id"/>
-	                    <field name="principal"/>
-	                    <field name="discount"/>
-	                    <field name="pay_sub"/>
-	                    <field name="interest" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}"/>
-	                    <field name="fee" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}"/>
-	                    <field name="communication"/>
-	                    <field name="pay_amount"/>
+                	</group>
+                    <group>
+                    	<group>
+		                    <field name="payment_date"/>
+		                 </group>
+		                 <group>
+	                    	<field name="journal_id"/>
+		                </group>
+                    </group>
+                    <group>
+                    	<group>
+		                    <field name="invoice_id" attrs="{'invisible': [('invoice_id', '=', False)]}"/>
+		                    <field name="principal"/>
+		                    <field name="discount"/>
+		                    <field name="pay_sub" string="Subtotal"/>
+		                 </group>
+		                 <group>
+		                    <field name="interest" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}"/>
+		                    <field name="fee" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}"/>
+		                    <field name="communication"/>
+		                    <field name="pay_amount" string="Recebido"/>
+		                </group>
                     </group>
                 </sheet>
                 <footer>
