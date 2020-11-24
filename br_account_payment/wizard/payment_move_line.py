@@ -1,6 +1,7 @@
 # © 2019 Raphael Rodrigues, Trustcode
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+from datetime import datetime
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError
 
@@ -8,12 +9,21 @@ class PaymentAccountMoveLine(models.TransientModel):
     _name = 'payment.account.move.line'
     _description = 'Assistente Para Lançamento de Pagamentos'
 
+    @api.one
     @api.depends('payment_date')
     def _late_payment(self):
-        if self.payment_date > self.move_line_id.date_maturity:
-            self.late_payment = True
+        if self.payment_date < self.move_line_id.date_maturity:
+            self.late_payment = 0
         else:
-            self.late_payment = False
+            d1 = datetime.strptime(self.move_line_id.date_maturity, "%Y-%m-%d")
+            d2 = datetime.strptime(self.payment_date, "%Y-%m-%d")
+            self.late_payment = (d2 - d1).days
+    
+    @api.one
+    @api.depends('fee','interest','principal','discount')
+    def _pay_amount(self):
+        self.pay_sub = (self.principal + self.discount)
+        self.pay_amount = self.principal + self.fee + self.interest
             
     company_id = fields.Many2one(
         'res.company', related='journal_id.company_id',
@@ -32,7 +42,7 @@ class PaymentAccountMoveLine(models.TransientModel):
     )
     journal_id = fields.Many2one(
         'account.journal', string="Diário", required=True,
-        domain=[('type', 'in', ('bank', 'cash'))]
+        domain=[('type', 'in', ('bank', 'cash', 'general'))]
     )
     communication = fields.Char(string='Anotações')
     payment_date = fields.Date(
@@ -49,29 +59,26 @@ class PaymentAccountMoveLine(models.TransientModel):
         currency_field='currency_id'
     )
 
-    amount = fields.Monetary(
-        string='Valor do Pagamento', required=True,
-    )
-    interest = fields.Monetary(
-        string='Juros', required=True, default=0.0)
-
-    penalty = fields.Monetary(
-        string='Multa', required=True, default=0.0)
-
-    late_payment = fields.Boolean(compute="_late_payment",string="Em atraso")
-
+    principal = fields.Monetary(string='Principal', required=True, oldname='amount', default=0.0, currency_field='currency_id')
+    discount = fields.Monetary(string='Desconto (-)', required=True, default=0.0, currency_field='currency_id')
+    pay_sub = fields.Monetary(compute="_pay_amount",string='Valor Pago', currency_field='currency_id', readonly=True, store=True)
+    interest = fields.Monetary(string='Juros (+)', required=True, default=0.0, currency_field='currency_id')
+    fee = fields.Monetary(string='Multa (+)', required=True, default=0.0, currency_field='currency_id')
+    
+    pay_amount = fields.Monetary(compute="_pay_amount",string='Total Pago', currency_field='currency_id', readonly=True, store=True)
+    late_payment = fields.Integer(compute="_late_payment",string="Dia(s) atraso")
 
     @api.model
     def default_get(self, fields):
         rec = super(PaymentAccountMoveLine, self).default_get(fields)
         move_line_id = rec.get('move_line_id', False)
-        amount = 0
+        principal = 0
         if not move_line_id:
             raise UserError(
                 _("Não foi selecionada nenhuma linha de cobrança."))
         move_line = self.env['account.move.line'].browse(move_line_id)
         if move_line[0].amount_residual:
-            amount = move_line[0].amount_residual if \
+            principal = move_line[0].amount_residual if \
                 rec['partner_type'] == 'customer' else \
                 move_line[0].amount_residual * -1
 #         if move_line[0].invoice_id:
@@ -79,12 +86,12 @@ class PaymentAccountMoveLine(models.TransientModel):
 #         else:
 #             raise UserError(_("A linha de cobrança selecionada não possui nenhuma fatura relacionada."))
         rec.update({
-            'amount': amount,
+            'principal': principal,
             'invoice_id': move_line[0].invoice_id.id,
         })
         return rec
 
-    @api.onchange('amount')
+    @api.onchange('principal','discount')
     def validate_amount_payment(self):
         """
         Method used to validate the payment amount to be recorded
@@ -93,10 +100,23 @@ class PaymentAccountMoveLine(models.TransientModel):
         real_amount_residual = self.amount_residual if \
             self.partner_type == 'customer' else \
             self.amount_residual * -1
-        if self.amount > real_amount_residual:
+        if self.principal + self.discount > real_amount_residual:
             raise ValidationError(_(
                 'O valor do pagamento não pode ser maior '
                 'que o valor da parcela.'))
+
+    @api.onchange('payment_date')
+    def _calc_late_fee_interest(self):
+        if len(self.move_line_id) > 0 and self.payment_date > self.move_line_id.date_maturity:
+            real_amount_residual = self.amount_residual if \
+                self.partner_type == 'customer' else \
+                self.amount_residual * -1
+            d1 = datetime.strptime(self.move_line_id.date_maturity, "%Y-%m-%d")
+            d2 = datetime.strptime(self.payment_date, "%Y-%m-%d")
+            dias = (d2 - d1).days
+            self.fee = real_amount_residual * (self.move_line_id.payment_mode_id.late_payment_fee / 100)
+            self.interest = (((real_amount_residual * self.move_line_id.payment_mode_id.late_payment_interest) / 30)* dias) /100
+
 
     def _get_payment_vals(self):
         """
@@ -113,7 +133,10 @@ class PaymentAccountMoveLine(models.TransientModel):
             'move_line_id': self.move_line_id.id,
             'journal_id': self.journal_id.id,
             'communication': self.communication,
-            'amount': self.amount,
+            'amount': self.principal,
+            'discount': self.discount,
+            'interest': self.interest,
+            'fee': self.fee,
             'payment_date': self.payment_date,
             'payment_type': payment_type,
             'payment_method_id': payment_method_id.id if bool(payment_method_id) else False,

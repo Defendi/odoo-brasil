@@ -19,6 +19,12 @@ class ResConfigSettings(models.TransientModel):
         string="Conta para desconto de pagamentos",
         help='Conta onde será registrado o desconto recebido de pagamentos'
     )
+    l10n_br_discount_account_id = fields.Many2one(
+        'account.account',
+        related='company_id.l10n_br_discount_account_id',
+        string="Conta para desconto de recebimentos",
+        help='Conta onde será registrado o desconto concedido de recebimentos'
+    )
 
     l10n_br_interest_account_id = fields.Many2one(
         'account.account',

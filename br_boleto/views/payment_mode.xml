@@ -6,6 +6,9 @@
         <field name="model">l10n_br.payment.mode</field>
         <field name="inherit_id" ref="br_account_payment.account_payment_mode_form" />
         <field name="arch" type="xml">
+			<field name="late_payment_fee" position="replace"/>
+			<field name="late_payment_interest" position="replace"/>
+        
             <field name="type" position="after">
                 <field name="boleto" attrs="{'invisible': [('type', '!=', 'receivable')]}"/>
             </field>
@@ -30,6 +33,7 @@
                             <field name="late_payment_interest"/>
                             <field name="instrucoes" />
                         </group>
+                        <!-- 
                         <div>
                             <h4>Manuais de configuração</h4>
                             <ul class="list-group">
@@ -43,6 +47,7 @@
                                 <li class="list-group-item"><a href="https://www.trustcode.com.br/my/document/configuracao-de-boletos-caixa-economica-212" target="_blank">Boleto Caixa Econômica</a></li>
                             </ul>
                         </div>
+                         -->
                         </group>
                     </page>
                 </notebook>

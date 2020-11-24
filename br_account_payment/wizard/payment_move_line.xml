@@ -8,25 +8,29 @@
             <form string="Payment Move Line">
                 <sheet>
                     <group>
-                        <group>
-                            <field name="company_id" invisible="1"/>
-                            <field name="currency_id" invisible="1"/>
-                            <field name="partner_type" invisible="1"/>
-                            <field name="amount_residual" invisible="1"/>
-                            <field name="late_payment" invisible="1"/>
-                            <field name="partner_id"/>
-                            <field name="move_line_id"/>
-                            <field name="date_maturity"/>
-                            <field name="invoice_id" attrs="{'invisible': [('invoice_id', '=', False)]}"/>
-                            <field name="journal_id"/>
-                            <field name="amount"/>
-                            <field name="payment_date"/>
-                            <!-- 
-                            <field name="interest" attrs="{'invisible': [('late_payment', '=', False)]}"/>
-                            <field name="penalty"/>
-                             -->
-                            <field name="communication"/>
-                        </group>
+	                    <field name="company_id" invisible="1"/>
+	                    <field name="currency_id" invisible="1"/>
+	                    <field name="partner_type" invisible="1"/>
+	                    <field name="amount_residual" invisible="1"/>
+	                    <field name="partner_id"/>
+	                    <field name="move_line_id"/>
+	                    <label for="date_maturity"/>
+	                    <div>
+	                        <field name="date_maturity" class="oe_inline"/>
+	                        <label string=" - " class="oe_inline" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}" style="color: red;"/>
+	                     <field name="late_payment" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}" style="color: red;" class="oe_inline"/>
+	                        <label string=" - dia(s) em atraso" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}" style="color: red;" class="oe_inline"/>
+	                    </div>
+	                    <field name="payment_date"/>
+	                    <field name="invoice_id" attrs="{'invisible': [('invoice_id', '=', False)]}"/>
+	                    <field name="journal_id"/>
+	                    <field name="principal"/>
+	                    <field name="discount"/>
+	                    <field name="pay_sub"/>
+	                    <field name="interest" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}"/>
+	                    <field name="fee" attrs="{'invisible': [('late_payment', '&lt;=', 0)]}"/>
+	                    <field name="communication"/>
+	                    <field name="pay_amount"/>
                     </group>
                 </sheet>
                 <footer>
