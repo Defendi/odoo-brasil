@@ -239,10 +239,10 @@ class ImportDeclaration(models.Model):
     invoice_count = fields.Integer(compute="_compute_invoice", string='# Faturas', copy=False, default=0, store=False)
 
     name = fields.Char('Número da DI', size=10, required=True, readonly=True, states=DI_STATES)
-    date_registration = fields.Date('Data de Registro', readonly=True, states=DI_STATES)
+    date_registration = fields.Date('Data de Registro', readonly=True, states=DI_STATES, copy=False)
     state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", readonly=True, states=DI_STATES)
     location = fields.Char('Local', size=60, readonly=True, states=DI_STATES)
-    date_release = fields.Date('Data de Liberação', readonly=True, states=DI_STATES)
+    date_release = fields.Date('Data de Liberação', readonly=True, states=DI_STATES, copy=False)
     type_transportation = fields.Selection([
         ('1', '1 - Marítima'),
         ('2', '2 - Fluvial'),
