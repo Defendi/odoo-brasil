@@ -392,6 +392,32 @@ class ImportDeclaration(models.Model):
             result['res_id'] = self.invoice_ids.id
         return result
 
+    @api.multi
+    def bill_order(self):
+        company_id = self.env.user.company_id
+        journal_id = self.env['account.journal'].search([('type','=','purchase'),('company_id', '=', company_id.id)],limit=1)
+        if len(journal_id) == 0:
+            raise UserError('Crie um diário para compras.')
+        for di in self:
+            var = {
+                'type': 'in_invoice',
+                'partner_id': di.partner_id.id,
+                'date_invoice': di.date_release,
+                'company_id': company_id.id,
+                'journal_id': journal_id.id,
+                'account_id': di.partner_id.property_account_payable_id.id,
+                'currency_id': di.currency_id.id,
+                'import_id': di.id,
+            }
+            invoice_id = self.env['account.invoice'].create(var)
+            for line in di.line_ids:
+                var = line._prepare_invoice_line()
+                var.update({
+                    'invoice_id': invoice_id.id,
+                })
+                self.env['account.invoice.line'].create(var)
+            di.state = 'done'
+        
 class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     _order = 'import_declaration_id, name, sequence_addition, id'
@@ -553,7 +579,7 @@ class ImportDeclarationLine(models.Model):
             'ajuste_part': ajuste_part,
             'ajuste_value': ajuste_value,
             'cif_value': cif_value,
-            'product_tot_value': round((cif_value + ii_valor), 2),
+            'product_tot_value': product_value,
             'subtotal': subtotal,
             'price_unit_edoc': price_unit_edoc,
             'ii_base_calculo': ii_base_calculo,
@@ -662,7 +688,7 @@ class ImportDeclarationLine(models.Model):
     ajuste_value = fields.Float(string='Ajuste', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
 
     cif_value = fields.Float(string='Valor CIF', compute='_compute_line', digits=(12,2), readonly=True, store=True)
-    product_tot_value = fields.Float(string='Valor CIF+AFRMM', compute='_compute_line', digits=(12,2), readonly=True, store=True, oldname='cif_afrmm_value')
+    product_tot_value = fields.Float(string='Valor CIF+AFRMM', compute='_compute_line', digits=(12,4), readonly=True, store=True, oldname='cif_afrmm_value')
     subtotal = fields.Float(string='SubTotal', compute='_compute_line', digits=(12,2), readonly=True, store=True)
 
     price_unit_edoc = fields.Float(string='Preço Un eDoc', compute='_compute_line', digits=dp.get_precision('Product Price'), readonly=True, store=True)
@@ -750,3 +776,165 @@ class ImportDeclarationLine(models.Model):
 #                 if line.name == self.name and line.sequence_addition == self.sequence_addition:
 #                     raise UserError('Mesmo número de sequencia para a adição.')
                     
+    def _prepare_invoice_line(self):
+        res = {}
+        invoice_line = self.env['account.invoice.line']
+        account_id = invoice_line.get_invoice_line_account('in_invoice', self.product_id, False, self.env.user.company_id)
+
+        res.update({
+            'name': self.product_id.name,
+            'product_id': self.product_id.id,
+            'account_id': account_id.id,
+            'company_id': self.env.user.company_id.id,
+            'fiscal_classification_id': self.product_id.fiscal_classification_id.id,
+            'icms_origem': '1',
+            'origin': self.import_declaration_id.name,
+            'uom_id': self.uom_id.id,
+            'price_unit': self.price_unit_edoc,
+            'quantity': self.quantity,
+            'weight': self.amount_weight,
+            'weight_net': self.amount_weight,
+            'discount': self.amount_discount,
+            'outras_despesas': self.pis_valor + self.cofins_valor + self.siscomex_value + self.afrmm_value + self.other_taxs_value,
+            'icms_base_calculo_manual': self.icms_base_calculo,
+            'tax_icms_id': self.tax_icms_id.id,
+            'icms_aliquota': self.tax_icms_id.amount,
+            'ipi_base_calculo_manual': self.ipi_base_calculo,
+            'ipi_tipo': 'percent',
+            'tax_ipi_id': self.tax_ipi_id.id,
+            'pis_base_calculo_manual': self.pis_base_calculo,
+            'pis_tipo': 'percent',
+            'tax_pis_id': self.tax_pis_id.id,
+            'cofins_base_calculo_manual': self.cofins_base_calculo,
+            'cofins_tipo': 'percent',
+            'tax_cofins_id': self.tax_cofins_id.id,
+            'ii_base_calculo': self.ii_base_calculo,
+            'tax_ii_id': self.tax_ii_id.id,
+            'ii_aliquota': self.tax_ii_id.amount,
+            'issqn_tipo': 'N',
+            'icms_tipo_base': '3',
+            'icms_st_tipo_base': '4',
+            'company_fiscal_type': self.import_declaration_id.company_id.fiscal_type,
+            'import_declaration_ids': [(4, self.import_declaration_id.id)],
+            'calculate_tax': True,
+            'icms_aliquota_diferimento': self.icms_aliq_difer if self.icms_difer else 0.0,
+            #'tem_difal': line.icms_difer,
+#             'rule_id': False,
+#             'cfop_id': False,
+#             'fiscal_classification_id': False,
+#             'product_type': 'product',
+#             'fiscal_comment': False,
+#             'icms_rule_id': False,
+#             'icms_cst': '',
+#             'icms_cst_normal': '',
+#             'icms_benef': False,
+#             'incluir_ipi_base': False,
+#             'icms_base_calculo': 0.0,
+#             'icms_valor': 0.0,
+#             'icms_aliquota': 0.0,
+#             'icms_aliquota_reducao_base': 0.0,
+#             'icms_aliquota_diferimento': 0.0,
+#             'icms_valor_diferido': 0.0,
+#             'icms_valor_diferido_dif': 0.0,
+#             'tax_icms_st_id': False,
+#             'icms_st_valor': 0.0,
+#             'icms_st_base_calculo': 0.0,
+#             'icms_st_aliquota': 0.0,
+#             'icms_st_aliquota_reducao_base': 0.0,
+#             'icms_st_aliquota_mva': 0.0,
+#             'icms_st_base_calculo_manual': 0.0,
+#             'icms_substituto': 0.0,
+#             'icms_bc_st_retido': 0.0,
+#             'icms_aliquota_st_retido': 0.0,
+#             'icms_st_retido': 0.0,
+#             'icms_bc_uf_dest': 0.0,
+#             'tax_icms_inter_id': False,
+#             'tax_icms_intra_id': False,
+#             'tax_icms_fcp_id': False,
+#             'icms_aliquota_inter_part': 0.0,
+#             'icms_fcp_uf_dest': 0.0,
+#             'icms_uf_dest': 0.0,
+#             'icms_uf_remet': 0.0,
+#             'icms_csosn_simples': False,
+#             'icms_aliquota_credito': 0.0,
+#             'icms_valor_credito': 0.0,
+#             'icms_st_aliquota_deducao': 0.0,
+#             'issqn_rule_id': False,
+#             'tax_issqn_id': False,
+#             'service_type_id': False,
+#             'issqn_base_calculo': 0.0,
+#             'issqn_aliquota': 0.0,
+#             'issqn_valor': 0.0,
+#             'l10n_br_issqn_deduction': 0.0,
+#             'ipi_rule_id': False,
+#             'ipi_base_calculo': 0.0,
+#             'ipi_reducao_bc': 0.0,
+#             'ipi_valor': 0.0,
+#             'ipi_aliquota': 0.0,
+#             'ipi_cst': False,
+#             'ipi_codigo_enquadramento': False,
+#             'ipi_classe_enquadramento': False,
+#             'pis_rule_id': False,
+#             'pis_cst': False,
+#             'pis_base_calculo': 0.0,
+#             'pis_valor': 0.0,
+#             'pis_aliquota': 0.0,
+#             'cofins_rule_id': False,
+#             'cofins_cst': False,
+#             'cofins_base_calculo': 0.0,
+#             'cofins_valor': 0.0,
+#             'cofins_aliquota': 0.0,
+#             'ii_rule_id': False,
+#             'ii_valor': 0.0,
+#             'ii_valor_iof': 0.0,
+#             'ii_valor_despesas': 0.0,
+#             'csll_rule_id': False,
+#             'tax_csll_id': False,
+#             'csll_base_calculo': 0.0,
+#             'csll_valor': 0.0,
+#             'csll_aliquota': 0.0,
+#             'irrf_rule_id': False,
+#             'tax_irrf_id': False,
+#             'irrf_base_calculo': 0.0,
+#             'irrf_valor': 0.0,
+#             'irrf_aliquota': 0.0,
+#             'inss_rule_id': False,
+#             'tax_inss_id': False,
+#             'inss_base_calculo': 0.0,
+#             'inss_valor': 0.0,
+#             'inss_aliquota': 0.0,
+#             'outros_rule_id': False,
+#             'tax_outros_id': False,
+#             'outros_base_calculo': 0.0,
+#             'outros_valor': 0.0,
+#             'outros_aliquota': 0.0,
+#             'informacao_adicional': False,
+        })
+
+        fpos = self.import_declaration_id.fiscal_position_id or \
+               self.import_declaration_id.partner_id.property_purchase_fiscal_position_id
+        if fpos: 
+            vals = fpos.map_tax_extra_values(self.product_id, self.import_declaration_id.partner_id, False, False, False, False)
+            res.update({
+                'cfop_id': vals.get('cfop_id',self.env['br_account.cfop']).id,
+                'icms_cst_normal': vals.get('icms_cst_normal',False),
+                'icms_csosn_simples': vals.get('icms_csosn_simples',False),
+                'icms_benef': vals.get('icms_benef',False),
+                'ipi_cst': vals.get('ipi_cst',False),
+                'ipi_codigo_enquadramento': vals.get('enq_ipi',False),
+                'ipi_classe_enquadramento': vals.get('cla_ipi',False),
+                'incluir_ipi_base': vals.get('incluir_ipi_base',False),
+                'pis_cst': vals.get('pis_cst',False),
+                'cofins_cst': vals.get('cofins_cst',False)
+            })
+#             data['icms_rule_id'] = vals.get('icms_rule_id',False)
+#             data['ipi_rule_id'] = vals.get('ipi_rule_id',False)
+#             data['pis_rule_id'] = vals.get('pis_rule_id',False)
+#             data['cofins_rule_id'] = vals.get('cofins_rule_id',False)
+#             data['ii_rule_id'] = vals.get('ii_rule_id',False)
+##             data['tax_icms_st_id'] = vals.get('tax_icms_st_id',False)
+#             for key, value in vals.items():
+#                 data[key] = value.id if isinstance(value, models.Model) else value
+
+
+        return res

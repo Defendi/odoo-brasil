@@ -10,7 +10,7 @@ class ImportDeclaration(models.Model):
 
     purchase_id = fields.Many2one(comodel_name='purchase.order',string='Ordem de Compra',
                                   domain="[('partner_id','=',partner_id),('state','=','purchase')]", 
-                                  readonly=True, states={'draft': [('readonly', False)]})
+                                  readonly=True, states={'draft': [('readonly', False)]}, copy=False)
 
     def _prepare_import_line_from_po_line(self, line, idx):
         if bool(line.order_id.partner_id):
@@ -73,18 +73,19 @@ class ImportDeclaration(models.Model):
 
     def adjust_order(self):
         self.ensure_one()
-        self.purchase_id.currency_id = self.currency_id
-        for line in self.line_ids:
-            if line.purchase_line_id:
-                line.purchase_line_id.write({
-                    'price_unit': line.price_cost,
-                    'valor_desconto': 0.0,
-                    'outras_despesas': 0.0,
-                    'valor_seguro': 0.0,
-                    'valor_frete': 0.0,
-                    'valor_aduana': 0.0,
-                    #'taxes_id': [(5,)],
-                })
+        if bool(self.purchase_id):
+            self.purchase_id.currency_id = self.currency_id
+            for line in self.line_ids:
+                if line.purchase_line_id:
+                    line.purchase_line_id.write({
+                        'price_unit': line.price_cost,
+                        'valor_desconto': 0.0,
+                        'outras_despesas': 0.0,
+                        'valor_seguro': 0.0,
+                        'valor_frete': 0.0,
+                        'valor_aduana': 0.0,
+                        #'taxes_id': [(5,)],
+                    })
         
     @api.multi
     def confirm(self):
@@ -95,4 +96,9 @@ class ImportDeclaration(models.Model):
 class ImportDeclarationLine(models.Model):
     _inherit = 'br_account.import.declaration.line'
     
-    purchase_line_id = fields.Many2one('purchase.order.line', 'Purchase Line')
+    purchase_line_id = fields.Many2one('purchase.order.line', 'Purchase Line', copy=False)
+    
+    def _prepare_invoice_line(self):
+        res = super(ImportDeclarationLine, self)._prepare_invoice_line()
+        res['purchase_line_id'] = self.purchase_line_id.id
+        return res

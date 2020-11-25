@@ -18,7 +18,7 @@
         <field name="inherit_id" ref="br_foreign_commerce.view_br_fc_import_declaration_form" />
         <field name="arch" type="xml">
         	<xpath expr="//button[@name='reopen']" position="after">
-        		<button string="Gerar O.C." name="create_purchase_order" type="object" attrs="{'invisible': [('state', 'not in', ('to_invoice'),('purchase_id','!=','False'))]}"/>
+        		<button string="Gerar OC" name="create_purchase_order" type="object" attrs="{'invisible': ['|',('state', 'not in', ('to_invoice')),('purchase_id','!=',False)]}"/>
         	</xpath>
 			<field name="partner_id" position="after">
 				<field name="purchase_id"/>
