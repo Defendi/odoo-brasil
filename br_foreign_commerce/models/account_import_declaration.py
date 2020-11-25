@@ -29,7 +29,7 @@ class ImportDeclaration(models.Model):
         if float_compare(qty,total,precision_rounding=4) == 0:
             return 1.0
         elif total > 0.0 and qty > 0.0:
-            return qty / total
+            return qty / total if total != 0.0 else 0.0
         else:
             return 0
 
@@ -40,7 +40,7 @@ class ImportDeclaration(models.Model):
         total_qty = sum(line.quantity for line in self.line_ids)
         total_prod = sum(((line.quantity * line.price_vucv) - line.amount_discount) * self.tax_cambial for line in self.line_ids)
         total_aduaneiro = (((self.freight_value + self.insurance_value) * self.tax_cambial) +  self.customs_value)
-        ratio = total_aduaneiro / total_qty
+        ratio = total_aduaneiro / total_qty if total_qty != 0.0 else 0.0
 
         tItens = len(self.line_ids)
         smPrWeight = 0.0
@@ -55,7 +55,7 @@ class ImportDeclaration(models.Model):
                 weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100 if line.weight_unit > 0.0 else 0.0
                 volume_part = self._calc_ratio((line.quantity * line.volume_unit), total_volume) * 100 if line.weight_unit > 0.0 else 0.0
                 value_part = self._calc_ratio(value_prod, total_prod) * 100 if value_prod > 0.0 else 0.0
-                quant_part = ((ratio * line.quantity) / total_aduaneiro) * 100 #self._calc_ratio(line.quantity, total_qty) * 100 if line.quantity > 0.0 else 0.0
+                quant_part = ((ratio * line.quantity) / total_aduaneiro) * 100  if total_aduaneiro != 0.0 else 0.0
             else:
                 weight_part = 100.0 - smPrWeight
                 volume_part = 100.0 - smVolume 
@@ -101,14 +101,14 @@ class ImportDeclaration(models.Model):
         total_produtos = 0.0
         total_aduaneiro = (((self.freight_value + self.insurance_value) * self.tax_cambial) +  self.customs_value)
         tItens = len(self.line_ids)
-        ratio = total_aduaneiro / total_produto_qty
+        ratio = total_aduaneiro / total_produto_qty if total_produto_qty != 0.0 else 0.0
         for contador, line in enumerate(self.line_ids):
             if contador+1 < tItens:
                 #value_prod = ((line.quantity * line.price_vucv) - line.amount_discount) * self.tax_cambial
                 weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100 if line.weight_unit > 0.0 else 0.0
                 value_part = self._calc_ratio(line.amount_value_cl, total_fob_lc) * 100 if line.amount_value_cl > 0.0 else 0.0
                 volume_part = self._calc_ratio((line.quantity * line.volume_unit), total_volume) * 100 if line.volume_unit > 0.0 else 0.0
-                quant_part = ((ratio * line.quantity) / total_aduaneiro) * 100 #self._calc_ratio(line.quantity, total_produto_qty) * 100 if line.quantity > 0.0 else 0.0
+                quant_part = ((ratio * line.quantity) / total_aduaneiro) * 100 if total_aduaneiro != 0.0 else 0.0#self._calc_ratio(line.quantity, total_produto_qty) * 100 if line.quantity > 0.0 else 0.0
             else:
                 weight_part = 100 - smPrWeight
                 value_part = 100 - smPrValue
@@ -486,7 +486,7 @@ class ImportDeclarationLine(models.Model):
                 icms_fator = self.icms_fator_manual
             else:
                 icms_fator = 100.0 - icms_aliquota
-            icms_base_calculo = (cif_value + siscomex_value + afrmm_value + ii_valor + ipi_valor + pis_valor + cofins_valor) / (icms_fator/100) if (icms_fator/100) != 0.0 else 0.0
+            icms_base_calculo = (cif_value + siscomex_value + afrmm_value + ii_valor + ipi_valor + pis_valor + cofins_valor) / (icms_fator/100) if icms_fator != 0.0 else 0.0
             icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
             if self.icms_difer and self.icms_aliq_difer > 0.0:
                 icms_valor = icms_valor * ((100-self.icms_aliq_difer)/100)
