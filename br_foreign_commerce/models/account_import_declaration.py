@@ -137,7 +137,7 @@ class ImportDeclaration(models.Model):
 
         total_cif_afrmm = total_cif + self.afrmm_value
         total_imposto = total_ipi + total_icms + total_icms_st
-        total_despesa = total_pis + total_cofins #+ self.siscomex_value + self.afrmm_value
+        total_despesa = total_pis + total_cofins + self.siscomex_value + self.afrmm_value + self.other_value
         total_nota = total_produtos + total_imposto + total_despesa
 
         vals = {
@@ -447,6 +447,8 @@ class ImportDeclarationLine(models.Model):
 
         price_cost = subtotal
 
+        product_value = amount_value_fob + freight_value + desp_aduan_value + insurance_value + ii_valor
+
         ipi_aliquota = self.tax_ipi_id.amount if len(self.tax_ipi_id) > 0 else 0.0
         if ipi_aliquota > 0.0:
             ipi_base_calculo = amount_value_fob + freight_value + insurance_value
@@ -513,7 +515,7 @@ class ImportDeclarationLine(models.Model):
         #price_cost = cif_afrmm_value + siscomex_value
 
         if self.quantity > 0.0:
-            price_unit_edoc = round(subtotal, 2) / self.quantity if self.quantity > 0.0 else 0.0
+            price_unit_edoc = product_value / self.quantity if self.quantity > 0.0 else 0.0
         else: 
             price_unit_edoc = 0.0
         
