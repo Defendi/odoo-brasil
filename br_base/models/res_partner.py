@@ -39,7 +39,9 @@ class ResPartner(models.Model):
     ibge_code = fields.Char(related='country_id.ibge_code')
     city_id = fields.Many2one('res.state.city', 'City', domain="[('state_id','=',state_id)]")
     district = fields.Char('District', size=32)
-    number = fields.Char(u'Number', size=10)
+    number = fields.Char('Number', size=10)
+    type = fields.Selection(selection_add=[('branch', 'Branch')])
+    branch = fields.Char(string='Branch Id', size=60)
 
     _sql_constraints = [
         ('res_partner_cnpj_cpf_uniq', 'unique (cnpj_cpf)',
@@ -60,8 +62,11 @@ class ResPartner(models.Model):
             name = partner.name
             if partner.type != 'contact':
                 name = ''
-            elif len(partner.parent_id) > 0:
-                name = partner.parent_id.legal_name if bool(partner.parent_id.legal_name) else partner.parent_id.name
+            elif bool(partner.parent_id):
+                if partner.type == 'branch':
+                    name = 'Filial %s' % (partner.branch or partner.parent_id.city_id.name or '')
+                else:
+                    name = partner.parent_id.legal_name if bool(partner.parent_id.legal_name) else partner.parent_id.name
                 if bool(name):
                     name = '['+(name or '')+'] ' + (partner.name or '')
                 else:

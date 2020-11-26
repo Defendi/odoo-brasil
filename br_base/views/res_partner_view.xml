@@ -43,6 +43,12 @@
                 <h3>
                     <field name="cnpj_cpf" placeholder="CNPJ/CPF" nolabel="1" attrs="{'required': [('ibge_code','=','1058')]}"/>
                 </h3>
+                <h3 attrs="{'invisible': [('type', '!=', 'branch')]}">
+                	<div>
+                    	<label string="Filial"/>
+                		<field name="branch"/>
+                	</div>
+                </h3>
             </xpath>
             <field name="zip" position="replace" />
             <field name="street" position="replace">
@@ -87,6 +93,9 @@
             </notebook>
 
             <!-- Contacts -->
+            <xpath expr="//div[hasclass('oe_kanban_details')]/field[@name='name']" position="before">
+				<div><field name="type"/></div>
+            </xpath>
             <xpath expr="//div[@name='div_address']/field[@name='zip']" potition="replace"></xpath>
             <xpath expr="//div[@name='div_address']/field[@name='city']" potition="replace"></xpath>
             <xpath expr="//div[@name='div_address']/field[@name='country_id']" potition="replace"></xpath>
