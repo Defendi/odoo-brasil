@@ -31,6 +31,9 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
+	    	<xpath expr="//notebook/page/field[@name='child_ids']/form/sheet/group/group[1]" position="inside">
+	    		<field name="cnpj_cpf"/>
+	    	</xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_check_sefaz" type="object" class="oe_stat_button"
                     icon="fa-search" string="Search" attrs="{'invisible': [('company_type', '=', 'person')]}">
@@ -42,12 +45,6 @@
                 </h3>
                 <h3>
                     <field name="cnpj_cpf" placeholder="CNPJ/CPF" nolabel="1" attrs="{'required': [('ibge_code','=','1058')]}"/>
-                </h3>
-                <h3 attrs="{'invisible': [('type', '!=', 'branch')]}">
-                	<div>
-                    	<label string="Filial"/>
-                		<field name="branch"/>
-                	</div>
                 </h3>
             </xpath>
             <field name="zip" position="replace" />
@@ -149,6 +146,8 @@
 	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[7]" position="replace"/>
 	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[8]" position="replace"/>
 	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[9]" position="replace"/>
+	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[9]" position="replace"/>
+	        
 	    </field>
 	</record>
 
