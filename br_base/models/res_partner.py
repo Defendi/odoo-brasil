@@ -46,7 +46,7 @@ class ResPartner(models.Model):
 
     _sql_constraints = [
         ('res_partner_cnpj_cpf_uniq', 'unique (cnpj_cpf)',
-         _(u'This CPF/CNPJ number is already being used by another partner!'))
+         _('This CPF/CNPJ number is already being used by another partner!'))
     ]
 
     @api.onchange('type')
@@ -58,7 +58,7 @@ class ResPartner(models.Model):
             self.cnpj_cpf = cnpj_cpf[:8]
             self.name = self.parent_id.name
         else:
-            self.company_type = 'personal'
+            self.company_type = 'person'
             self.is_company = False
             self.cnpj_cpf = False
 
@@ -180,7 +180,7 @@ class ResPartner(models.Model):
             uf = partner.state_id and partner.state_id.code.lower() or ''
             res = partner._validate_ie_param(uf, partner.inscr_est)
             if not res:
-                raise ValidationError(_(u'Invalid State Inscription!'))
+                raise ValidationError(_('Invalid State Inscription!'))
         return True
 
     @api.one
@@ -204,7 +204,10 @@ class ResPartner(models.Model):
         country_code = self.country_id.code or ''
         if self.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
             val = re.sub('[^0-9]', '', self.cnpj_cpf)
-            if len(val) == 14:
+            if self.type == 'branch' and len(val) == 8:
+                cnpj_cpf = "%s.%s.%s/" % (val[0:2], val[2:5], val[5:8])
+                self.cnpj_cpf = cnpj_cpf
+            elif len(val) == 14:
                 cnpj_cpf = "%s.%s.%s/%s-%s"\
                     % (val[0:2], val[2:5], val[5:8], val[8:12], val[12:14])
                 self.cnpj_cpf = cnpj_cpf
@@ -213,7 +216,7 @@ class ResPartner(models.Model):
                     % (val[0:3], val[3:6], val[6:9], val[9:11])
                 self.cnpj_cpf = cnpj_cpf
             else:
-                raise UserError(_(u'Verify CNPJ/CPF number'))
+                raise UserError(_('Verify CNPJ/CPF number'))
 
     @api.onchange('city_id')
     def _onchange_city_id(self):
@@ -245,14 +248,14 @@ class ResPartner(models.Model):
     def action_check_sefaz(self):
         if self.cnpj_cpf and self.state_id:
             if self.state_id.code == 'AL':
-                raise UserError(_(u'Alagoas doesn\'t have this service'))
+                raise UserError(_('Alagoas doesn\'t have this service'))
             if self.state_id.code == 'RJ':
                 raise UserError(_(
-                    u'Rio de Janeiro doesn\'t have this service'))
+                    'Rio de Janeiro doesn\'t have this service'))
             company = self.env.user.company_id
             if not company.nfe_a1_file and not company.nfe_a1_password:
                 raise UserError(_(
-                    u'Configure the company\'s certificate and password'))
+                    'Configure the company\'s certificate and password'))
             cert = company.with_context({'bin_size': False}).nfe_a1_file
             cert_pfx = base64.decodestring(cert)
             certificado = Certificado(cert_pfx, company.nfe_a1_password)
@@ -299,5 +302,5 @@ class ResPartner(models.Model):
                 msg = "%s - %s" % (info.cStat, info.xMotivo)
                 raise UserError(msg)
         else:
-            raise UserError(_(u'Fill the State and CNPJ fields to search'))
+            raise UserError(_('Fill the State and CNPJ fields to search'))
 

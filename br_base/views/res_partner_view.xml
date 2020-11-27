@@ -26,14 +26,19 @@
         </field>
     </record>
 
+	<!-- br_base.view_br_base_partner_form -->
     <record id="view_br_base_partner_form" model="ir.ui.view">
         <field name="name">br_base.partner.form</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
-	    	<xpath expr="//notebook/page/field[@name='child_ids']/form/sheet/group/group[1]" position="inside">
-	    		<field name="cnpj_cpf"/>
-	    	</xpath>
+			<xpath expr="//notebook/page/field[@name='child_ids']/form/sheet/group/group[2]/field[@name='name']" position="attributes">
+				<attribute name="attrs">{'required': [('type', '=', 'branch')]}</attribute>
+			</xpath>
+			<xpath expr="//notebook/page/field[@name='child_ids']/form/sheet/group/group[2]/field[@name='name']" position="after">
+				<field name="legal_name" attrs="{'invisible': [('type', '!=', 'branch')]}"/>
+				<field name="cnpj_cpf" attrs="{'invisible': [('type', '!=', 'branch')],'required': [('type', '=', 'branch')]}"/>
+			</xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_check_sefaz" type="object" class="oe_stat_button"
                     icon="fa-search" string="Search" attrs="{'invisible': [('company_type', '=', 'person')]}">
