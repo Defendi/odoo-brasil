@@ -56,6 +56,7 @@ class ResPartner(models.Model):
             self.is_company = True
             cnpj_cpf = re.sub('[^0-9]', '', self.parent_id.cnpj_cpf or '') 
             self.cnpj_cpf = cnpj_cpf[:8]
+            self.legal_name = self.parent_id.legal_name
             self.name = self.parent_id.name
         else:
             self.company_type = 'person'
@@ -77,14 +78,16 @@ class ResPartner(models.Model):
             if partner.company_type == 'company':
                 if len(partner.parent_id) > 0:
                     if partner.type == 'branch':
-                        name = '%s, Filial %s' % (partner.parent_id.legal_name or partner.parent_id.name or '', partner.name or '')
+                        name = '%s, Filial %s' % (partner.parent_id.name or partner.parent_id.legal_name or '', 
+                                                  partner.name or partner.legal_name or '')
                     else:
-                        name = '%s, %s' % (partner.parent_id.legal_name or partner.parent_id.name or '', partner.name or '')
+                        name = '%s, %s' % (partner.parent_id.name or partner.parent_id.legal_name or '', 
+                                           partner.name or partner.legal_name or '')
                 else:
                     if bool(partner.legal_name):
-                        name = '%s, %s' % (partner.name or '', partner.legal_name or '')
+                        name = '[%s], %s' % (partner.name or '', partner.legal_name or '')
                     else:
-                        name = partner.name
+                        name = partner.name or partner.legal_name or ''
             else:
                 if not partner.parent_id:
                     if partner.type in ['invoice', 'delivery', 'other']:
@@ -92,7 +95,7 @@ class ResPartner(models.Model):
                     else:
                         name = partner.name
                 else:
-                    name = "%s, %s" % (partner.commercial_company_name or partner.parent_id.name, partner.name)
+                    name = "%s, %s" % (partner.parent_id.name or partner.parent_id.legal_name, partner.name)
             if self._context.get('show_address_only'):
                 name = partner._display_address(without_company=True)
             elif self._context.get('show_address'):
@@ -148,7 +151,7 @@ class ResPartner(models.Model):
             country_code = partner.country_id.code or ''
             if partner.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
                 if partner.is_company:
-                    if partner.type != 'branch' and re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000000" and not fiscal.validate_cnpj(partner.cnpj_cpf):
+                    if re.sub('[^0-9]', '', partner.cnpj_cpf) != "00000000000000" and not fiscal.validate_cnpj(partner.cnpj_cpf):
                         raise ValidationError(_('Invalid CNPJ Number!'))
                 elif re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000" and not fiscal.validate_cpf(partner.cnpj_cpf):
                     raise ValidationError(_('Invalid CPF Number!'))
