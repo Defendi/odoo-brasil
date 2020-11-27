@@ -26,11 +26,21 @@
         </field>
     </record>
 
+	<!-- br_base.view_br_base_partner_form -->
     <record id="view_br_base_partner_form" model="ir.ui.view">
         <field name="name">br_base.partner.form</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
+			<xpath expr="//notebook/page/field[@name='child_ids']/form/sheet/group/group[2]/field[@name='name']" position="attributes">
+				<attribute name="attrs">{'required': [('type', '=', 'branch')]}</attribute>
+			</xpath>
+			<xpath expr="//notebook/page/field[@name='child_ids']/form/sheet/group/group[2]/field[@name='name']" position="after">
+				<field name="legal_name" attrs="{'invisible': [('type', '!=', 'branch')]}"/>
+				<field name="cnpj_cpf" attrs="{'invisible': [('type', '!=', 'branch')],'required': [('type', '=', 'branch')]}"/>
+				<field name="is_company" invisible="1"/>
+				<field name="company_type" invisible="1"/>
+			</xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_check_sefaz" type="object" class="oe_stat_button"
                     icon="fa-search" string="Search" attrs="{'invisible': [('company_type', '=', 'person')]}">
@@ -41,7 +51,7 @@
                     <field name="legal_name" placeholder="Legal Name" nolabel="1" />
                 </h3>
                 <h3>
-                    <field name="cnpj_cpf" placeholder="CNPJ/CPF" nolabel="1" attrs="{'required': [('ibge_code','=','1058')]}"/>
+                    <field name="cnpj_cpf" placeholder="CNPJ/CPF" nolabel="1" attrs="{'required': [('ibge_code','=','1058'),('parent_id','=',False)]}"/>
                 </h3>
             </xpath>
             <field name="zip" position="replace" />
@@ -87,6 +97,9 @@
             </notebook>
 
             <!-- Contacts -->
+            <xpath expr="//div[hasclass('oe_kanban_details')]/field[@name='name']" position="before">
+				<div><field name="type"/></div>
+            </xpath>
             <xpath expr="//div[@name='div_address']/field[@name='zip']" potition="replace"></xpath>
             <xpath expr="//div[@name='div_address']/field[@name='city']" potition="replace"></xpath>
             <xpath expr="//div[@name='div_address']/field[@name='country_id']" potition="replace"></xpath>
@@ -140,6 +153,8 @@
 	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[7]" position="replace"/>
 	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[8]" position="replace"/>
 	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[9]" position="replace"/>
+	        <xpath expr="//div[hasclass('oe_kanban_details')]/ul/li[9]" position="replace"/>
+	        
 	    </field>
 	</record>
 

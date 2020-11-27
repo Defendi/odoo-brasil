@@ -25,7 +25,8 @@ except ImportError:
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
-
+    _rec_name = 'display_name'
+    
     def _default_country(self):
         return self.env['res.country'].search([('ibge_code', '=', '1058')],limit=1).id
 
@@ -39,15 +40,31 @@ class ResPartner(models.Model):
     ibge_code = fields.Char(related='country_id.ibge_code')
     city_id = fields.Many2one('res.state.city', 'City', domain="[('state_id','=',state_id)]")
     district = fields.Char('District', size=32)
-    number = fields.Char(u'Number', size=10)
+    number = fields.Char('Number', size=10)
+    type = fields.Selection(selection_add=[('branch', 'Branch')])
+    display_name = fields.Char(compute='_compute_nw_display_name', store=True, index=True)
 
     _sql_constraints = [
         ('res_partner_cnpj_cpf_uniq', 'unique (cnpj_cpf)',
-         _(u'This CPF/CNPJ number is already being used by another partner!'))
+         _('This CPF/CNPJ number is already being used by another partner!'))
     ]
 
+    @api.onchange('type')
+    def onchange_type(self):
+        if self.type == 'branch':
+            self.company_type = 'company'
+            self.is_company = True
+            cnpj_cpf = re.sub('[^0-9]', '', self.parent_id.cnpj_cpf or '') 
+            self.cnpj_cpf = cnpj_cpf[:8]
+            self.legal_name = self.parent_id.legal_name
+            self.name = self.parent_id.name
+        else:
+            self.company_type = 'person'
+            self.is_company = False
+            self.cnpj_cpf = False
+
     @api.depends('is_company', 'name', 'parent_id.name', 'type', 'company_name', 'legal_name')
-    def _compute_display_name(self):
+    def _compute_nw_display_name(self):
         diff = dict(show_address=None, show_address_only=None, show_email=None)
         names = dict(self.with_context(**diff).name_get())
         for partner in self:
@@ -57,31 +74,36 @@ class ResPartner(models.Model):
     def name_get(self):
         res = []
         for partner in self:
-            name = partner.name
-            if partner.type != 'contact':
-                name = ''
-            elif len(partner.parent_id) > 0:
-                name = partner.parent_id.legal_name if bool(partner.parent_id.legal_name) else partner.parent_id.name
-                if bool(name):
-                    name = '['+(name or '')+'] ' + (partner.name or '')
+            name = ''
+            if partner.company_type == 'company':
+                if len(partner.parent_id) > 0:
+                    if partner.type == 'branch':
+                        name = '%s, Filial %s' % (partner.parent_id.name or partner.parent_id.legal_name or '', 
+                                                  partner.name or partner.legal_name or '')
+                    else:
+                        name = '%s, %s' % (partner.parent_id.name or partner.parent_id.legal_name or '', 
+                                           partner.name or partner.legal_name or '')
                 else:
-                    name = partner.name or ''
-            elif partner.company_type == 'company' and bool(partner.legal_name):
-                name = '['+(partner.name or '')+'] '+(partner.legal_name or '')
-
-            if partner.company_name or partner.parent_id:
-                if not name and partner.type in ['invoice', 'delivery', 'other']:
-                    name = dict(self.fields_get(['type'])['type']['selection'])[partner.type]
-                if not partner.is_company:
-                    name = "%s, %s" % (partner.commercial_company_name or partner.parent_id.name, name)
+                    if bool(partner.legal_name):
+                        name = '[%s], %s' % (partner.name or '', partner.legal_name or '')
+                    else:
+                        name = partner.name or partner.legal_name or ''
+            else:
+                if not partner.parent_id:
+                    if partner.type in ['invoice', 'delivery', 'other']:
+                        name = dict(self.fields_get(['type'])['type']['selection'])[partner.type]
+                    else:
+                        name = partner.name
+                else:
+                    name = "%s, %s" % (partner.parent_id.name or partner.parent_id.legal_name, partner.name)
             if self._context.get('show_address_only'):
                 name = partner._display_address(without_company=True)
-            if self._context.get('show_address'):
+            elif self._context.get('show_address'):
                 name = name + "\n" + partner._display_address(without_company=True)
-            name = name.replace('\n\n', '\n')
-            name = name.replace('\n\n', '\n')
-            if self._context.get('show_email') and partner.email:
+            elif self._context.get('show_email') and partner.email:
                 name = "%s <%s>" % (name, partner.email)
+            name = name.replace('\n\n', '\n')
+            name = name.replace('\n\n', '\n')
             if self._context.get('html_format'):
                 name = name.replace('\n', '<br/>')
             res.append((partner.id, name))
@@ -125,14 +147,14 @@ class ResPartner(models.Model):
     @api.multi
     @api.constrains('cnpj_cpf', 'country_id', 'is_company')
     def _check_cnpj_cpf(self):
-        for item in self:
-            country_code = item.country_id.code or ''
-            if item.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
-                if item.is_company:
-                    if re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000000" and not fiscal.validate_cnpj(item.cnpj_cpf):
-                        raise ValidationError(_(u'Invalid CNPJ Number!'))
-                elif re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000" and not fiscal.validate_cpf(item.cnpj_cpf):
-                    raise ValidationError(_(u'Invalid CPF Number!'))
+        for partner in self:
+            country_code = partner.country_id.code or ''
+            if partner.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
+                if partner.is_company:
+                    if re.sub('[^0-9]', '', partner.cnpj_cpf) != "00000000000000" and not fiscal.validate_cnpj(partner.cnpj_cpf):
+                        raise ValidationError(_('Invalid CNPJ Number!'))
+                elif re.sub('[^0-9]', '', self.cnpj_cpf) != "00000000000" and not fiscal.validate_cpf(partner.cnpj_cpf):
+                    raise ValidationError(_('Invalid CPF Number!'))
         return True
 
     def _validate_ie_param(self, uf, inscr_est):
@@ -161,7 +183,7 @@ class ResPartner(models.Model):
             uf = partner.state_id and partner.state_id.code.lower() or ''
             res = partner._validate_ie_param(uf, partner.inscr_est)
             if not res:
-                raise ValidationError(_(u'Invalid State Inscription!'))
+                raise ValidationError(_('Invalid State Inscription!'))
         return True
 
     @api.one
@@ -185,7 +207,10 @@ class ResPartner(models.Model):
         country_code = self.country_id.code or ''
         if self.cnpj_cpf and (country_code.upper() == 'BR' or len(country_code) == 0):
             val = re.sub('[^0-9]', '', self.cnpj_cpf)
-            if len(val) == 14:
+            if self.type == 'branch' and len(val) == 8:
+                cnpj_cpf = "%s.%s.%s/" % (val[0:2], val[2:5], val[5:8])
+                self.cnpj_cpf = cnpj_cpf
+            elif len(val) == 14:
                 cnpj_cpf = "%s.%s.%s/%s-%s"\
                     % (val[0:2], val[2:5], val[5:8], val[8:12], val[12:14])
                 self.cnpj_cpf = cnpj_cpf
@@ -194,7 +219,7 @@ class ResPartner(models.Model):
                     % (val[0:3], val[3:6], val[6:9], val[9:11])
                 self.cnpj_cpf = cnpj_cpf
             else:
-                raise UserError(_(u'Verify CNPJ/CPF number'))
+                raise UserError(_('Verify CNPJ/CPF number'))
 
     @api.onchange('city_id')
     def _onchange_city_id(self):
@@ -226,14 +251,14 @@ class ResPartner(models.Model):
     def action_check_sefaz(self):
         if self.cnpj_cpf and self.state_id:
             if self.state_id.code == 'AL':
-                raise UserError(_(u'Alagoas doesn\'t have this service'))
+                raise UserError(_('Alagoas doesn\'t have this service'))
             if self.state_id.code == 'RJ':
                 raise UserError(_(
-                    u'Rio de Janeiro doesn\'t have this service'))
+                    'Rio de Janeiro doesn\'t have this service'))
             company = self.env.user.company_id
             if not company.nfe_a1_file and not company.nfe_a1_password:
                 raise UserError(_(
-                    u'Configure the company\'s certificate and password'))
+                    'Configure the company\'s certificate and password'))
             cert = company.with_context({'bin_size': False}).nfe_a1_file
             cert_pfx = base64.decodestring(cert)
             certificado = Certificado(cert_pfx, company.nfe_a1_password)
@@ -280,4 +305,5 @@ class ResPartner(models.Model):
                 msg = "%s - %s" % (info.cStat, info.xMotivo)
                 raise UserError(msg)
         else:
-            raise UserError(_(u'Fill the State and CNPJ fields to search'))
+            raise UserError(_('Fill the State and CNPJ fields to search'))
+

@@ -471,3 +471,9 @@ msgstr "You can enter here the format as    the bank accounts are referenced in 
 #: model:ir.model,name:br_base.model_res_region
 msgid "res.region"
 msgstr "res.region"
+
+#. module: br_base
+#: selection:res.partner,type:5
+msgid "Branch"
+msgstr "Filial"
+
