@@ -490,7 +490,6 @@ class AccountTax(models.Model):
         taxes += self._compute_issqn(price_base)
         taxes += self._compute_ii(price_base)
         taxes += self._compute_retention(price_base)
-        taxes += self._compute_others(price_base)
         return taxes
 
     @api.multi
