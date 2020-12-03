@@ -420,12 +420,10 @@ class AccountInvoice(models.Model):
             self.journal_id = self.fiscal_position_id.journal_id
 
         self.product_serie_id = self.fiscal_position_id.product_serie_id.id
-        self.product_document_id = \
-            self.fiscal_position_id.product_document_id.id
+        self.product_document_id = self.fiscal_position_id.product_document_id.id
 
         self.service_serie_id = self.fiscal_position_id.service_serie_id.id
-        self.service_document_id = \
-            self.fiscal_position_id.service_document_id.id
+        self.service_document_id = self.fiscal_position_id.service_document_id.id
 
         ob_ids = [x.id for x in self.fiscal_position_id.fiscal_observation_ids]
         self.fiscal_observation_ids = [(6, False, ob_ids)]

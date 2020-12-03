@@ -583,6 +583,8 @@ class AccountInvoiceLine(models.Model):
         for line in self:
             line._update_tax_from_ncm()
             line._set_taxes_from_fiscal_pos()
+            if line.tem_difal:
+                line.icms_aliquota_inter_part = 100.0
             other_taxes = line.invoice_line_tax_ids.filtered(lambda x: not x.domain)
             line.invoice_line_tax_ids = line.tax_icms_id | line.tax_icms_st_id | \
                 line.tax_icms_inter_id | line.tax_icms_intra_id | \
