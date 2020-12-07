@@ -54,7 +54,7 @@ class IrActionsReport(models.Model):
                     else:
                         _logger.error("O XML da carta de correção está zerado ou é inválido.", exc_info=True)
             else:
-                cce_xml_element.append('')
+                cce_xml_element = None
                 
         logo = False
         if nfe.invoice_id.company_id.logo:
