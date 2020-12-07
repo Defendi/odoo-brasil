@@ -39,6 +39,7 @@ class SaleOrder(models.Model):
             res['product_serie_id'] = fpos.product_serie_id.id
             res['service_document_id'] = fpos.service_document_id.id
             res['service_serie_id'] = fpos.service_serie_id.id
+        res['shipping_mode'] = self.shipping_mode
         return res
 
     total_bruto = fields.Float(

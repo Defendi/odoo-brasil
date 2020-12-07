@@ -83,6 +83,12 @@ class SaleOrder(models.Model):
                                          'purchase': [('readonly', False)]})
 
     #transporte
+    shipping_mode = fields.Selection([
+        ('0', 'Entregar Mesmo Endereço'), 
+        ('1', 'Entregar Outro Endereço'), 
+        ('2','Retirar Outro Endereço')], 'Entregar/Retirar',
+        default='0', readonly=True, states={'draft': [('readonly', False)]})
+
     shipping_supplier_id = fields.Many2one('res.partner', 'Transportadora', readonly=True, states=EDITONLY_STATES, oldname='transp_id')
     freight_responsibility = fields.Selection([
          ('0', '0 - Contratação do Frete por conta do Remetente (CIF)'),

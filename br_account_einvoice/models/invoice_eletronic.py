@@ -96,6 +96,7 @@ class InvoiceEletronic(models.Model):
     partner_id = fields.Many2one('res.partner', string='Parceiro', readonly=True, states=STATE)
     commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity',related='partner_id.commercial_partner_id', store=True)
     partner_shipping_id = fields.Many2one('res.partner', string='Entrega', readonly=True, states=STATE)
+    shipping_mode = fields.Selection([('0', 'Entregar Mesmo Endereço'), ('1', 'Entregar Outro Endereço'), ('2','Retirar Outro Endereço')], 'Entregar/Retirar', default='0', readonly=True, states={'draft': [('readonly', False)]})
     payment_term_id = fields.Many2one('account.payment.term', string='Condição pagamento',readonly=True, states=STATE)
     fiscal_position_id = fields.Many2one(
         'account.fiscal.position', string='Posição Fiscal',

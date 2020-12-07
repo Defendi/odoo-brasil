@@ -952,6 +952,8 @@ class InvoiceEletronic(models.Model):
             'ide': ide,
             'emit': emit,
             'dest': dest,
+            'retirada': self._prepare_local_retirada() if self.shipping_mode == '2' else False,
+            'entrega': self._prepare_local_entrega() if self.shipping_mode == '1' else False,
             'autXML': autorizados,
             'detalhes': eletronic_items,
             'total': total,
@@ -1009,6 +1011,54 @@ class InvoiceEletronic(models.Model):
             }],
             'modelo': self.model,
         }
+
+    @api.multi
+    def _prepare_local_retirada(self):
+        if self.partner_shipping_id:
+            res = {
+                'tipo': self.partner_shipping_id.company_type,
+                'cnpj_cpf': re.sub('[^0-9]', '', self.partner_shipping_id.cnpj_cpf or ''),
+                'xNome': self.partner_shipping_id.legal_name or self.partner_shipping_id.name,
+                'xLgr': str(self.partner_shipping_id.street or '')[:60],
+                'nro': str(self.partner_shipping_id.number or '')[:60],
+                'xCpl': str(self.partner_shipping_id.street2 or '')[:60],
+                'xBairro': str(self.partner_shipping_id.district or '')[:60],
+                'cMun':  '%s%s' % (self.partner_shipping_id.state_id.ibge_code,self.partner_shipping_id.city_id.ibge_code),
+                'xMun': str(self.partner_shipping_id.city_id.name or '')[:60],
+                'UF': str(self.partner_shipping_id.state_id.code or ''),
+                'CEP': re.sub('[^0-9]', '', self.partner_shipping_id.zip or ''),
+                'cPais': (self.partner_shipping_id.country_id.bc_code or '')[-4:],
+                'xPais': self.partner_shipping_id.country_id.name,
+                'fone': re.sub('[^0-9]', '', self.partner_shipping_id.phone or ''),
+                'IE': re.sub('[^0-9]', '', self.partner_shipping_id.inscr_est or ''),
+            }
+        else:
+            res = False
+        return res
+
+    @api.multi
+    def _prepare_local_entrega(self):
+        if self.partner_shipping_id:
+            res = {
+                'tipo': self.partner_shipping_id.company_type,
+                'cnpj_cpf': re.sub('[^0-9]', '', self.partner_shipping_id.cnpj_cpf or ''),
+                'xNome': self.partner_shipping_id.legal_name or self.partner_shipping_id.name,
+                'xLgr': str(self.partner_shipping_id.street or '')[:60],
+                'nro': str(self.partner_shipping_id.number or '')[:60],
+                'xCpl': str(self.partner_shipping_id.street2 or '')[:60],
+                'xBairro': str(self.partner_shipping_id.district or '')[:60],
+                'cMun':  '%s%s' % (self.partner_shipping_id.state_id.ibge_code,self.partner_shipping_id.city_id.ibge_code),
+                'xMun': str(self.partner_shipping_id.city_id.name or '')[:60],
+                'UF': str(self.partner_shipping_id.state_id.code or ''),
+                'CEP': re.sub('[^0-9]', '', self.partner_shipping_id.zip or ''),
+                'cPais': (self.partner_shipping_id.country_id.bc_code or '')[-4:],
+                'xPais': self.partner_shipping_id.country_id.name,
+                'fone': re.sub('[^0-9]', '', self.partner_shipping_id.phone or ''),
+                'IE': re.sub('[^0-9]', '', self.partner_shipping_id.inscr_est or ''),
+            }
+        else:
+            res = False
+        return res
 
     def _find_attachment_ids_email(self):
         atts = super(InvoiceEletronic, self)._find_attachment_ids_email()

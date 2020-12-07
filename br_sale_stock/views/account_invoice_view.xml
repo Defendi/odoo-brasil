@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+	<record model="ir.ui.view" id="inherit_sale_account_invoice_form">
+	    <field name="name">inherit.sale.account.invoice</field>
+	    <field name="model">account.invoice</field>
+	    <field name="inherit_id" ref="account.invoice_form"/>
+	    <field name="arch" type="xml">
+			<xpath expr="//field[@name='partner_shipping_id']" position="replace"/>
+			<xpath expr="//field[@name='shipping_mode']" position="after">
+				<field name="partner_shipping_id" attrs="{'invisible':[('shipping_mode','=', '0')]}" groups="sale.group_delivery_invoice_address"/>
+			</xpath>
+	    </field>
+	</record>
+</odoo>

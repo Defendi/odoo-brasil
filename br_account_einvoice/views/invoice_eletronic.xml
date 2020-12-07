@@ -198,7 +198,8 @@
                                 <field name="model"/>
                                 <field name="invoice_id" options="{'no_create': True}" attrs="{'readonly': [('model', '=', False)]}"/>
                                 <field name="partner_id" options="{'no_quick_create': True}"/>
-                                <field name="partner_shipping_id"/>
+                                <field name="shipping_mode"/>
+                                <field name="partner_shipping_id" attrs="{'invisible': [('shipping_mode', '=', '0')]}"/>
                                 <field name="data_agendada"/>
                                 <field name="schedule_user_id"/>
                             </group>

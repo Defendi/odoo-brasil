@@ -126,6 +126,10 @@ class AccountInvoice(models.Model):
         'account.move.line', string='Payable Move Lines',
         compute='_compute_payables')
 
+    shipping_mode = fields.Selection(
+        [('0', 'Entregar Mesmo Endereço'), ('1', 'Entregar Outro Endereço'), ('2','Retirar Outro Endereço')], 'Entregar/Retirar',
+        default='0', readonly=True, states={'draft': [('readonly', False)]})
+
     issuer = fields.Selection(
         [('0', 'Terceiros'), ('1', 'Emissão própria')], 'Emitente',
         default='1', readonly=True, states={'draft': [('readonly', False)]})
