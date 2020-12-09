@@ -8,8 +8,7 @@
             </xpath>
         </template>
 
-        <template id="br_website_sale_address" inherit_id="website_sale.address"
-            name="Website Sale Address">
+        <template id="br_website_sale_address" inherit_id="website_sale.checkout" name="Website Sale Address">
 
             <form action="/shop/address" position="replace">
                 <form action="/shop/address" method="post" class="checkout_autoformat">
