@@ -43,6 +43,7 @@ class AccountInvoice(models.Model):
             automatically when the invoice is created.""")
 
     document_number = fields.Integer(related='invoice_eletronic_ids.numero', string='E-Doc Número')
+    partner_shipping_id = fields.Many2one('res.partner',string='Delivery Address', readonly=True,states={'draft': [('readonly', False)]},help="Delivery address for current invoice.")
 
 
     @api.multi
