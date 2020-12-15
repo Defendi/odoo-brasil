@@ -353,12 +353,16 @@ class AccountInvoice(models.Model):
     def _check_vendor_number(self):
         # Verificação se já existe a fatura cadastrada
         for inv in self:
-            if inv.type == 'in_invoice' and inv.issuer == '0' and bool(inv.partner_id) and bool(inv.vendor_serie) and bool(inv.vendor_number): 
-                if inv.env['account.invoice'].search([('id','!=',inv.id),
-                                                      ('partner_id','=',inv.partner_id.id),
-                                                      ('vendor_serie','=',inv.vendor_serie),
-                                                      ('vendor_number','=',inv.vendor_number)]):
-                        raise UserError('Não é possível ter mais que uma fatura com o mesmo número de um único fornecedor.')
+            if inv.type == 'in_invoice' and inv.issuer == '0':
+                if self.product_document_nr != 0:
+                    raise UserError('Essa fatura foi validada como emitente prório e gerou um número de eDoc\n  1) Volte para emissão própria.\n   \
+                    2) Sete o número como 0\n 3) Não esqueça de inutilizar o número %s de eDoc' % self.product_document_nr)
+                if bool(inv.partner_id) and bool(inv.vendor_serie) and bool(inv.vendor_number): 
+                    if inv.env['account.invoice'].search([('id','!=',inv.id),
+                                                          ('partner_id','=',inv.partner_id.id),
+                                                          ('vendor_serie','=',inv.vendor_serie),
+                                                          ('vendor_number','=',inv.vendor_number)]):
+                            raise UserError('Não é possível ter mais que uma fatura com o mesmo número de um único fornecedor.')
         return True
 
     @api.onchange('account_analytic_id')
@@ -403,8 +407,9 @@ class AccountInvoice(models.Model):
     @api.onchange('issuer')
     def _onchange_issuer(self):
         if self.issuer == '0' and self.type in ('in_invoice', 'in_refund'):
-            self.fiscal_document_id = None
-            self.document_serie_id = None
+            if self.product_document_nr == 0:
+                self.product_document_id = None
+                self.product_serie_id = None
 
     def button_recalculate(self):
         for inv in self:
