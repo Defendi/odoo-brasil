@@ -252,13 +252,6 @@
 											                    <field name="subtotal" string="[=] CMV" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 											                </group>
 											            </group>
-										                <group>
-										                	<group>
-											                </group>
-										                	<group>
-											                    
-											                </group>
-											            </group>
 										            </page>
 							                        <page string="Impostos">
 									                    <notebook>
@@ -266,6 +259,7 @@
 												                <group>
 												                	<group string="ICMS">
 												                		<field name="tax_icms_id"/>
+												                		<field name="icms_base_calculo_ant" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
 												                		<field name="icms_fator_manual" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
 												                		<field name="icms_fator" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
 												                		<field name="icms_base_calculo" attrs="{'invisible': [('tax_icms_id','=',False)]}"/>
@@ -359,8 +353,6 @@
 	                        	<group>
 	                        		<group string="Somatórios">
 	                        			<field name='total_produto_qty'/>
-	                        			<field name='total_weight'/>
-	                        			<field name='total_volume'/>
 	                        			<field name="total_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 	                        		</group>
 	                        		<group>
@@ -390,21 +382,40 @@
 	                        </page>
 	                        <page string="Espelho eDoc">
 	                        	<group>
-	                        		<group>
+	                        		<group string="Base de Cáculo - BC">
+										<field name="espelho_bc_ii" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_bc_ipi" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_bc_pis" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_bc_cofins" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="espelho_bc_icms" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="espelho_vl_icms" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="espelho_vl_ii" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="espelho_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_bc_icms_st" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 	                        		</group>
-	                        		<group>
-										<field name="espelho_frete" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+	                        		<group string="Valor Imposto">
+										<field name="espelho_vl_ii" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="espelho_vl_ipi" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-										<field name="espelho_vl_other" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_vl_pis" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_vl_cofins" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_vl_icms" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 										<field name="espelho_vl_icms_st" widget='monetary' options="{'currency_field': 'currency_id'}"/>
 	                        		</group>
 	                        	</group>
-	                        	<group colspan="4">
-									<field name="espelho_total_nfe" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+	                        	<group>
+	                        		<group string="Valores">
+										<field name="espelho_produtos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_impostos" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_frete" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_vl_other" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+										<field name="espelho_total_nfe" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+	                        		</group>
+	                        		<group string="Volume">
+	                        			<field name='espelho_weight'/>
+	                        			<field name='espelho_volume_cub'/>
+	                        			<field name='espelho_weight_net'/>
+	                        			<field name='espelho_number_packages'/>
+	                        			<field name='espelho_kind_packages'/>
+	                        			<field name='espelho_brand_packages'/>
+	                        			<field name='espelho_notation_packages'/>
+	                        		</group>
 	                        	</group>
 	                        </page>
 	                        <page string="Informações Adicionais">

@@ -78,26 +78,26 @@ class ImportDeclaration(models.Model):
         total_desembaraco_vl = (freight_converted_vl + insurance_converted_vl + self.afrmm_value + self.siscomex_value + self.customs_value)
         total_fob_vl = sum(line.amount_vucv for line in self.line_ids)
         total_fob_lc = sum(line.amount_value_cl for line in self.line_ids)
-        total_weight = sum((line.weight_unit * line.quantity) for line in self.line_ids)
-        total_volume = sum((line.volume_unit * line.quantity) for line in self.line_ids)
+        espelho_weight = sum((line.weight_unit * line.quantity) for line in self.line_ids)
+        espelho_volume_cub = sum((line.volume_unit * line.quantity) for line in self.line_ids)
         total_produto_qty = sum(line.quantity for line in self.line_ids)
         smPrWeight = 0.0
         smPrValue = 0.0
         smQuantity = 0.0
         smVolume = 0.0
         total_cif = 0.0
-        total_bc_ii = 0.0
-        total_ii = 0.0
-        total_bc_ipi = 0.0
-        total_ipi = 0.0
-        total_bc_pis = 0.0
-        total_pis = 0.0
-        total_bc_cofins = 0.0
-        total_cofins = 0.0
-        total_bc_icms = 0.0
+        bc_icms = 0.0
         total_icms = 0.0
-        total_bc_icms_st = 0.0
+        bc_icms_st = 0.0
         total_icms_st = 0.0
+        bc_ii = 0.0
+        total_ii = 0.0
+        bc_ipi = 0.0
+        total_ipi = 0.0
+        bc_pis = 0.0
+        total_pis = 0.0
+        bc_cofins = 0.0
+        total_cofins = 0.0
         total_produtos = 0.0
         total_aduaneiro = (((self.freight_value + self.insurance_value) * self.tax_cambial) +  self.customs_value)
         tItens = len(self.line_ids)
@@ -105,9 +105,9 @@ class ImportDeclaration(models.Model):
         for contador, line in enumerate(self.line_ids):
             if contador+1 < tItens:
                 #value_prod = ((line.quantity * line.price_vucv) - line.amount_discount) * self.tax_cambial
-                weight_part = self._calc_ratio((line.quantity * line.weight_unit), total_weight) * 100 if line.weight_unit > 0.0 else 0.0
+                weight_part = self._calc_ratio((line.quantity * line.weight_unit), espelho_weight) * 100 if line.weight_unit > 0.0 else 0.0
                 value_part = self._calc_ratio(line.amount_value_cl, total_fob_lc) * 100 if line.amount_value_cl > 0.0 else 0.0
-                volume_part = self._calc_ratio((line.quantity * line.volume_unit), total_volume) * 100 if line.volume_unit > 0.0 else 0.0
+                volume_part = self._calc_ratio((line.quantity * line.volume_unit), espelho_volume_cub) * 100 if line.volume_unit > 0.0 else 0.0
                 quant_part = ((ratio * line.quantity) / total_aduaneiro) * 100 if total_aduaneiro != 0.0 else 0.0#self._calc_ratio(line.quantity, total_produto_qty) * 100 if line.quantity > 0.0 else 0.0
             else:
                 weight_part = 100 - smPrWeight
@@ -120,18 +120,18 @@ class ImportDeclaration(models.Model):
             smQuantity += quant_part
             smVolume += volume_part
             total_cif += val_line['cif_value']
-            total_bc_ii += val_line['ii_base_calculo'] 
+            bc_ii += val_line['ii_base_calculo'] 
             total_ii += val_line['ii_valor'] 
             total_produtos += val_line['price_unit_edoc'] * line.quantity
-            total_bc_ipi += val_line['ipi_base_calculo'] 
+            bc_ipi += val_line['ipi_base_calculo'] 
             total_ipi += val_line['ipi_valor'] 
-            total_bc_pis += val_line['pis_base_calculo']
+            bc_pis += val_line['pis_base_calculo']
             total_pis += val_line['pis_valor']
-            total_bc_cofins += val_line['cofins_base_calculo']
+            bc_cofins += val_line['cofins_base_calculo']
             total_cofins += val_line['cofins_valor']
-            total_bc_icms += val_line['icms_base_calculo']
+            bc_icms += val_line['icms_base_calculo']
             total_icms += val_line['icms_valor']
-            total_bc_icms_st += val_line['icms_st_base_calculo']
+            bc_icms_st += val_line['icms_st_base_calculo']
             total_icms_st += val_line['icms_st_valor']
             line.write(val_line)
 
@@ -143,68 +143,59 @@ class ImportDeclaration(models.Model):
         vals = {
             'total_produtos': total_produtos,
             'total_produto_qty': total_produto_qty,
-            'total_weight': total_weight,
-            'total_volume': total_volume,
+            'espelho_weight': espelho_weight,
+            'espelho_volume_cub': espelho_volume_cub,
             'total_desembaraco_vl': total_desembaraco_vl,
             'total_fob_vl': total_fob_vl,
             'total_fob_lc': total_fob_lc,
             'total_cif': total_cif,
             'total_cif_afrmm': total_cif_afrmm,
-            'total_bc_ii': total_bc_ii,
+            'total_bc_ii': bc_ii,
             'total_ii': total_ii,
-            'total_bc_ipi': total_bc_ipi,
+            'total_bc_ipi': bc_ipi,
             'total_ipi': total_ipi,
-            'total_bc_pis': total_bc_pis,
+            'total_bc_pis': bc_pis,
             'total_pis': total_pis,
-            'total_bc_cofins': total_bc_cofins,
+            'total_bc_cofins': bc_cofins,
             'total_cofins': total_cofins,
-            'total_bc_icms': total_bc_icms,
+            'total_bc_icms': bc_icms,
             'total_icms': total_icms,
-            'total_bc_icms_st': total_bc_icms_st,
+            'total_bc_icms_st': bc_icms_st,
             'total_icms_st': total_icms_st,
             'total_imposto': total_imposto,
             'total_depesa': total_despesa,
             'total_nota': total_nota,
-            'espelho_bc_icms': total_bc_icms,
+            'espelho_bc_icms': bc_icms,
             'espelho_vl_icms': total_icms,
+            'espelho_bc_icms_st': bc_icms_st,
             'espelho_vl_icms_st': total_icms_st,
+            'espelho_bc_ii': bc_ii,
             'espelho_vl_ii': total_ii,
+            'espelho_bc_ipi': bc_ipi,
             'espelho_vl_ipi': total_ipi,
+            'espelho_bc_pis': bc_pis, 
+            'espelho_vl_pis': total_pis, 
+            'espelho_bc_cofins': bc_cofins, 
+            'espelho_vl_cofins': total_cofins,
             'espelho_vl_other': total_despesa,
             'espelho_produtos': total_produtos,
+            'espelho_impostos': total_icms + total_ipi + total_icms_st,
             'espelho_total_nfe': total_nota,
             #'line_ids': inlines,
         }
         return vals
-
-#     @api.depends('line_ids.amount_weight')
-#     def _get_total_weight(self):
-#         for record in self:
-#             weight = 0.0
-#             for line in record.line_ids:
-#                 weight += line.amount_weight
-#             record.total_weight = weight
-# 
-#     @api.onchange('total_weight')
-#     def _set_total_weight(self):
-#         for DI in self:
-#             DI.freight_converted_vl = DI.freight_value * DI.tax_cambial
-#             smPercent = 0.0
-#             smFreight = 0.0
-#             tItens = len(DI.line_ids)
-#             for contador, line in enumerate(DI.line_ids):
-#                 line.freight_total = DI.freight_value * DI.tax_cambial
-#                 vlWeightBruto = line.quantity * line.weight_unit
-#                 percentual = self._calc_ratio(vlWeightBruto, DI.total_weight) * 100
-#                 if contador+1 < tItens:
-#                     line.freight_part = percentual
-#                     freight_value = DI.freight_converted_vl * (percentual / 100)
-#                     line.freight_value = freight_value
-#                 else:
-#                     line.freight_part = 100 - smPercent
-#                     line.freight_value = vlWeightBruto - smFreight
-#                 smPercent += percentual
-#                 smFreight += freight_value
+#     espelho_bc_icms = fields.Float(string='BC ICMS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_vl_icms = fields.Float(string='Valor ICMS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_bc_icms_st = fields.Float(string='BC ICMS ST', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_vl_icms_st = fields.Float(string='Valor ICMS ST', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_bc_ii = fields.Float(string='BC II', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_vl_ii = fields.Float(string='Valor II', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_bc_ipi = fields.Float(string='BC IPI', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_vl_ipi = fields.Float(string='Valor IPI', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_bc_pis = fields.Float(string='BC PIS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_vl_pis = fields.Float(string='Valor PIS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_bc_cofins = fields.Float(string='BC COFINS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+#     espelho_vl_cofins = fields.Float(string='Valor COFINS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
 
     @api.depends('line_ids','other_value','siscomex_value','freight_mode', 'tax_cambial',
                  'customs_value', 'afrmm_value', 'freight_value', 'insurance_value', 'adjust_cb')
@@ -235,14 +226,14 @@ class ImportDeclaration(models.Model):
     tax_cambial = fields.Float('Tx. Cambial', digits=(12,6), default=0.00)#, readonly=True, states=DI_STATES)
     
 #     invoice_id = fields.Many2one('account.invoice', 'Fatura', ondelete='cascade', index=True, readonly=True, states=DI_STATES)
-    invoice_ids = fields.Many2many('account.invoice', compute="_compute_invoice", string='Bills', store=False)
+    invoice_ids = fields.Many2many('account.invoice', compute="_compute_invoice", string='Bills', store=False, copy=False)
     invoice_count = fields.Integer(compute="_compute_invoice", string='# Faturas', copy=False, default=0, store=False)
 
     name = fields.Char('Número da DI', size=10, required=True, readonly=True, states=DI_STATES)
-    date_registration = fields.Date('Data de Registro', readonly=True, states=DI_STATES, copy=False)
+    date_registration = fields.Date('Data de Registro', readonly=True, states=DI_STATES)
     state_id = fields.Many2one('res.country.state', 'Estado',domain="[('country_id.code', '=', 'BR')]", readonly=True, states=DI_STATES)
     location = fields.Char('Local', size=60, readonly=True, states=DI_STATES)
-    date_release = fields.Date('Data de Liberação', readonly=True, states=DI_STATES, copy=False)
+    date_release = fields.Date('Data de Liberação', readonly=True, states=DI_STATES)
     type_transportation = fields.Selection([
         ('1', '1 - Marítima'),
         ('2', '2 - Fluvial'),
@@ -284,9 +275,6 @@ class ImportDeclaration(models.Model):
     # Campos Calculados
     total_produtos = fields.Float(string='Total Produtos', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     total_produto_qty = fields.Float(string='Total Qtde. Produto', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
-    total_weight = fields.Float('Peso Liq.', compute='_compute_di', digits=(12,4), readonly=True, store=True)
-    total_volume = fields.Float('Volume', compute='_compute_di', digits=(18,6), readonly=True, store=True)
-    
     
     freight_converted_vl = fields.Float('Frete', compute='_compute_di', digits=(12,4), readonly=True, store=True)
     insurance_converted_vl = fields.Float('Seguro', compute='_compute_di', digits=dp.get_precision('Account'), readonly=True, store=True)
@@ -318,13 +306,44 @@ class ImportDeclaration(models.Model):
     # Espelhos da NFe
     espelho_bc_icms = fields.Float(string='BC ICMS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_vl_icms = fields.Float(string='Valor ICMS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    espelho_bc_icms_st = fields.Float(string='BC ICMS ST', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_vl_icms_st = fields.Float(string='Valor ICMS ST', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    espelho_bc_ii = fields.Float(string='BC II', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_vl_ii = fields.Float(string='Valor II', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    espelho_bc_ipi = fields.Float(string='BC IPI', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_vl_ipi = fields.Float(string='Valor IPI', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    espelho_bc_pis = fields.Float(string='BC PIS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    espelho_vl_pis = fields.Float(string='Valor PIS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    espelho_bc_cofins = fields.Float(string='BC COFINS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    espelho_vl_cofins = fields.Float(string='Valor COFINS', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+
     espelho_vl_other = fields.Float(string='Outras Despesas', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_produtos = fields.Float(string='Valor Produtos', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_frete = fields.Float(string='Valor Frete', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+    espelho_impostos = fields.Float(string='Valor Impostos', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
     espelho_total_nfe = fields.Float(string='Total NFe', compute='_compute_di', digits=dp.get_precision('Account'), store=True)
+
+    # =========================================================================
+    # Dados para fretes
+    # =========================================================================
+    espelho_weight = fields.Float(string='Peso Bruto', help="O peso bruto em Kg.", digits=(12,3), compute='_compute_di', inverse='_set_weight', store=True, oldname='total_weight', readonly=True, states=DI_STATES)
+    espelho_weight_net = fields.Float('Peso Líquido', help="O peso líquido em Kg.", digits=(12,3), readonly=True, states=DI_STATES)
+    espelho_volume_cub = fields.Float('Volume m3', help="Volume em m3", compute='_compute_di', inverse='_set_volume', digits=(12,6), store=True, oldname='total_volume',readonly=True, states=DI_STATES)
+    espelho_number_packages = fields.Integer('Nº Volumes', readonly=True, states=DI_STATES)
+    espelho_kind_packages = fields.Char('Espécie', size=60, readonly=True, states=DI_STATES)
+    espelho_brand_packages = fields.Char('Marca', size=60, readonly=True, states=DI_STATES)
+    espelho_notation_packages = fields.Char('Numeração', size=60, readonly=True, states=DI_STATES)
+
+#     total_weight = fields.Float('Peso Liq.', compute='_compute_di', digits=(12,4), readonly=True, store=True)oldname='nat_operacao'
+#     total_volume = fields.Float('Volume', compute='_compute_di', digits=(18,6), readonly=True, store=True)
+    
+    @api.onchange('_set_weight')
+    def _set_weight(self):
+        pass
+
+    @api.onchange('_set_volume')
+    def _set_volume(self):
+        pass
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
@@ -477,7 +496,7 @@ class ImportDeclarationLine(models.Model):
 
         ipi_aliquota = self.tax_ipi_id.amount if len(self.tax_ipi_id) > 0 else 0.0
         if ipi_aliquota > 0.0:
-            ipi_base_calculo = amount_value_fob + freight_value + insurance_value
+            ipi_base_calculo = amount_value_fob + freight_value + desp_aduan_value + insurance_value
             if self.ipi_inclui_ii_base:
                 ipi_base_calculo += ii_valor
             ipi_valor = ipi_base_calculo * (ipi_aliquota/100) if ipi_aliquota != 0.0 else 0.0
@@ -514,7 +533,8 @@ class ImportDeclarationLine(models.Model):
                 icms_fator = self.icms_fator_manual
             else:
                 icms_fator = 100.0 - icms_aliquota
-            icms_base_calculo = (cif_value + siscomex_value + afrmm_value + ii_valor + ipi_valor + pis_valor + cofins_valor) / (icms_fator/100) if icms_fator != 0.0 else 0.0
+            icms_base_calculo_ant = (cif_value + siscomex_value + afrmm_value + ii_valor + ipi_valor + pis_valor + cofins_valor)
+            icms_base_calculo = icms_base_calculo_ant / (icms_fator/100) if icms_fator != 0.0 else 0.0
             icms_valor = icms_base_calculo * (icms_aliquota/100) if icms_aliquota != 0.0 else 0.0
             if self.icms_difer and self.icms_aliq_difer > 0.0:
                 icms_valor = icms_valor * ((100-self.icms_aliq_difer)/100)
@@ -522,6 +542,7 @@ class ImportDeclarationLine(models.Model):
 #             if self.tax_icms_id.price_include:
             price_cost += icms_valor
         else:
+            icms_base_calculo_ant = 0.0
             icms_base_calculo = 0.0
             icms_fator = 0.0
             icms_valor = 0.0
@@ -594,6 +615,7 @@ class ImportDeclarationLine(models.Model):
             'cofins_base_calculo': cofins_base_calculo,
             'cofins_aliquota': cofins_aliquota,
             'cofins_valor': cofins_valor,
+            'icms_base_calculo_ant': icms_base_calculo_ant,
             'icms_base_calculo': icms_base_calculo,
             'icms_fator': icms_fator,
             'icms_aliquota': icms_aliquota,
@@ -723,7 +745,8 @@ class ImportDeclarationLine(models.Model):
 
     # ICMS
     tax_icms_id = fields.Many2one('account.tax', string="Alíquota ICMS", domain=[('domain', '=', 'icms'),('type_tax_use','=','purchase')])
-    icms_base_calculo = fields.Float('Base ICMS', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
+    icms_base_calculo_ant = fields.Float('BC ICMS', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
+    icms_base_calculo = fields.Float('BC ICMS Fator', compute='_compute_line', digits=dp.get_precision('Account'), default=0.00, store=True)
     icms_fator = fields.Float('ICMS Fator', compute='_compute_line', digits=(12,4), default=0.00, store=True)
     icms_fator_manual = fields.Float('ICMS Fator Manual', digits=(12,4), default=0.00)
     icms_aliquota = fields.Float('ICMS %', compute='_compute_line', digits=(12,4), default=0.00, store=True)
