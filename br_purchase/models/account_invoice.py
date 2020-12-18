@@ -166,6 +166,11 @@ class AccountInvoiceLine(models.Model):
     @api.onchange('product_id')
     def _br_account_onchange_product_id(self):
         self.product_type = self.product_id.fiscal_type
+        if self.product_type == 'service':
+            if self.invoice_id.partner_id.city_id == self.invoice_id.company_id.city_id:
+                self.issqn_tipo = 'N'
+            else:
+                self.issqn_tipo = 'R'
         self.icms_origem = self.product_id.origin
         ncm = self.product_id.fiscal_classification_id
         service = self.product_id.service_type_id

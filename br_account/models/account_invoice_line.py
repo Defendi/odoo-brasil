@@ -21,6 +21,12 @@ class AccountInvoiceLine(models.Model):
         company = self.env['res.company'].browse(self.env.user.company_id.id)
         return company.fiscal_type
 
+    @api.model
+    def _default_issqn_tipo(self):
+        if self.invoice_id and bool(self.invoice_id.partner_id.city_id) and self.invoice_id.partner_id.city_id.id == self.invoice_id.company_id.city_id.id:
+            return 'R'
+        return 'N'
+
     def _prepare_tax_context(self):
         return {
             'incluir_ipi_base': self.incluir_ipi_base,
@@ -225,8 +231,7 @@ class AccountInvoiceLine(models.Model):
         })
 
     @api.multi
-    @api.depends('icms_cst_normal', 'icms_csosn_simples',
-                 'company_fiscal_type')
+    @api.depends('icms_cst_normal', 'icms_csosn_simples', 'company_fiscal_type')
     def _compute_cst_icms(self):
         for item in self:
             item.icms_cst = item.icms_cst_normal \
@@ -381,7 +386,7 @@ class AccountInvoiceLine(models.Model):
                                    ('S', 'Substituta'),
                                    ('I', 'Isenta')],
                                   string='Tipo do ISSQN',
-                                  required=True, default='N')
+                                  required=True, default=_default_issqn_tipo)
     service_type_id = fields.Many2one('br_account.service.type', 'Tipo de Serviço')
     issqn_base_calculo = fields.Float('Base ISSQN', digits=dp.get_precision('Account'),compute='_compute_price', store=True)
     issqn_aliquota = fields.Float('ISSQN %', required=True, digits=(12,4),default=0.00,compute='_compute_price', store=True)
@@ -663,7 +668,11 @@ class AccountInvoiceLine(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
-        self.issqn_tipo = 'N'
+        if self.product_id.fiscal_type == 'service':
+            if self.invoice_id.partner_id.city_id == self.invoice_id.company_id.city_id:
+                self.issqn_tipo = 'N'
+            else:
+                self.issqn_tipo = 'R'
         domain = super(AccountInvoiceLine,self)._onchange_product_id()
         return domain
         
