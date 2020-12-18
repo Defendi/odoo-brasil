@@ -1,6 +1,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-
+from odoo.addons import decimal_precision as dp
 class PaymentOrderLine(models.Model):
     _name = 'payment.order.line'
     _order = 'id desc'
@@ -114,8 +114,7 @@ class PaymentOrder(models.Model):
     line_ids = fields.One2many('payment.order.line', 'payment_order_id',
                                required=True, string=u'Linhas de Cobrança')
     currency_id = fields.Many2one('res.currency', string='Moeda')
-    amount_total = fields.Float(string="Total",
-                                compute='_compute_amount_total')
+    amount_total = fields.Float(string="Total",compute='_compute_amount_total',digits=dp.get_precision('Account'))
     cnab_file = fields.Binary('CNAB File', readonly=True)
     file_number = fields.Integer(u'Número sequencial do arquivo', readonly=1)
     data_emissao_cnab = fields.Datetime('Data de Emissão do CNAB')

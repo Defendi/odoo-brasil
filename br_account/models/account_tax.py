@@ -1,6 +1,7 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.tools import float_round, float_repr
 
 _logger = logging.getLogger(__name__)
 
@@ -397,15 +398,14 @@ class AccountTax(models.Model):
 
     def _compute_retention(self, price_base):
         precision = self.env['decimal.precision'].precision_get('Account')
-        retention_tax = self.filtered(
-            lambda x: x.domain in ('csll', 'irrf', 'inss', 'outros'))
+        retention_tax = self.filtered(lambda x: x.domain in ('csll', 'irrf', 'inss', 'outros'))
         if not retention_tax:
             return []
         taxes = []
         for tax in retention_tax:
             vals = self._tax_vals(tax)
             vals['domain'] = tax.domain
-            vals['amount'] = round(tax._compute_amount(price_base, 1.0),precision)
+            vals['amount'] = float(float_repr(tax._compute_amount(price_base, 1.0), precision))
             vals['base'] = price_base
             taxes.append(vals)
         return taxes
@@ -445,7 +445,7 @@ class AccountTax(models.Model):
             return []
         vals = self._tax_vals(others)
         vals['domain'] = 'outros'
-        vals['amount'] = round(others._compute_amount(price_base, 1.0),precision)
+        vals['amount'] = float(float_repr(others._compute_amount(price_base, 1.0),precision))
         vals['base'] = price_base
         return [vals]
 
@@ -504,7 +504,7 @@ class AccountTax(models.Model):
             res['price_without_tax'] = round(price_unit * quantity, precision)
             return res
 
-        price_base = price_unit * quantity
+        price_base = float(float_repr(price_unit * quantity,2))
         taxes = self.sum_taxes(price_base, product, quantity, factor_uom, partner)
         total_included = total_excluded = price_base
 
@@ -512,14 +512,14 @@ class AccountTax(models.Model):
             tax_id = self.filtered(lambda x: x.id == tax['id'])
             amount = tax['amount'] if bool(tax.get('amount',None)) else 0.0
             if not tax_id.price_include:
-                total_included += round(amount, precision)
+                total_included = float_round(total_included+amount, precision)
 
         # retorna o valor dos impostos que permitem utilização de crédito
         total_allow_credit = 0
         for tax in taxes:
             tax_id = self.filtered(lambda x: x.id == tax['id'])
             if tax_id.allow_credit_utilization:
-                total_allow_credit += round(tax['amount'], 2)
+                total_allow_credit += float_round(tax['amount'], precision)
 
         return {
             'taxes': sorted(taxes, key=lambda k: k['sequence']),
