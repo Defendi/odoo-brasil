@@ -30,7 +30,7 @@
         <field name="inherit_id" ref="account.view_partner_property_form"/>
         <field name="arch" type="xml">
             <field name="property_payment_term_id" position="after">
-            	<field name="sacador_id"/>
+            	<field name="sacador_id" options="{'no_create': True, 'no_create_edit': True}"/>
             </field>
         </field>
     </record>

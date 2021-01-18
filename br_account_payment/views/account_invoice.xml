@@ -10,7 +10,7 @@
                 <button name="action_register_payment_move_line" type="object" string="QUITAR" groups="account.group_account_invoice" attrs="{'invisible': [('reconciled', '!=', False)]}" class="btn btn-success btn-xs" />
             </tree>
             <field name="payment_term_id" position="after">
-                <field name="payment_mode_id" />
+                <field name="payment_mode_id" options="{'no_create': True, 'no_create_edit': True}"/>
             </field>
             <xpath expr="//field[@name='receivable_move_line_ids']/tree/field[@name='reconciled']" position="after">
             	<field name="payment_date" />
