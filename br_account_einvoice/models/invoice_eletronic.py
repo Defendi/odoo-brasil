@@ -12,6 +12,7 @@ from odoo.addons.br_account.models.cst import CSOSN_SIMPLES
 from odoo.addons.br_account.models.cst import CST_IPI
 from odoo.addons.br_account.models.cst import CST_PIS_COFINS
 from odoo.addons.br_account.models.cst import ORIGEM_PROD
+from odoo.addons.br_base.tools.fiscal import validate_cnpj, validate_cpf
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from odoo.tools import float_is_zero, float_compare, pycompat
 
@@ -389,7 +390,14 @@ class InvoiceEletronic(models.Model):
 
         if partner.country_id.id == company.partner_id.country_id.id:
             if not partner.cnpj_cpf:
-                errors.append('Destinatário - CNPJ/CPF')
+                errors.append('Destinatário - Sem CNPJ/CPF')
+            cnpj_cpf = re.sub('[^0-9]', '', partner.cnpj_cpf)
+            if partner.is_company:
+                if len(cnpj_cpf) != 14 or not validate_cnpj(cnpj_cpf):
+                    errors.append('Destinatário - CNPJ Inválido!')
+            else:
+                if len(cnpj_cpf) != 11 or not validate_cpf(cnpj_cpf):
+                    errors.append('Destinatário - CPF Inválido!')
 
         if not partner.street:
             errors.append('Destinatário / Endereço - Logradouro')
